@@ -131,6 +131,11 @@ target/**/*
 # rustc will dump stack traces when hitting an internal compiler error to PWD
 rustc-ice-*.txt
 
+# Local Japanese guidelines for students (ignored from VCS)
+/GUIDELINES_JA.md
+GUIDELINES_JA.md
+
+
 # RustRover
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
