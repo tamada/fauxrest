@@ -1,0 +1,1 @@
+{"serializers":[{"serializer":"json","layout":"index","dest":"dist/json"},{"serializer":"json","layout":"file","dest":"dist/file"}]}
