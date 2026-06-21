@@ -1,5 +1,1 @@
-   0.025412791s  INFO prepare_target{force=false package_id=prest v0.1.0 (/Users/tamada/products/prest) target="test_generator"}: cargo::core::compiler::fingerprint: dependency on `prest` is newer than we are 1782039128.304064946s > 1782038817.134731493s "/Users/tamada/products/prest"
-   0.025620750s  INFO prepare_target{force=false package_id=prest v0.1.0 (/Users/tamada/products/prest) target="test_generator"}: cargo::core::compiler::fingerprint: fingerprint dirty for prest v0.1.0 (/Users/tamada/products/prest)/Check { test: true }/TargetInner { kind: "test", name: "test_generator", benched: false, ..: with_path("/Users/tamada/products/prest/tests/test_generator.rs", Edition2021) }
-   0.025638166s  INFO prepare_target{force=false package_id=prest v0.1.0 (/Users/tamada/products/prest) target="test_generator"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleDependency { unit: UnitIndex(27), dep_mtime: FileTime { seconds: 1782039128, nanos: 304064946 }, max_mtime: FileTime { seconds: 1782038817, nanos: 134731493 } })
-    Checking prest v0.1.0 (/Users/tamada/products/prest)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.09s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.03s
