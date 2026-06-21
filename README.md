@@ -11,15 +11,15 @@
 
 ## 🚀 Features
 
-*   **Three Configuration Tiers:** From zero-config auto-inference (Tier 1) to shorthand YAML routes (Tier 2), all the way to native JavaScript/TypeScript config-via-code transformations (Tier 3).
-*   **Flexible Routing Patterns:** Supports Single Object, Collections (Lists), Item Details (via URL parameters), and Grouping transformations out of the box.
-*   **Advanced Data Cleaning:** Deep JSONPath extraction, along with robust sanitization using `pick` (allowlist) and `omit` (denylist).
-*   **Multi-Platform Target Formats:** Outputs formats tailored for all static hosting environments, supporting trailing slashes, directory index resolutions, extensionless files, or fully bundled files.
-*   **Asset Bundling & Path Rewriting:** Scans compilation output for local asset references (e.g., images), copies them to the distribution folder, and rewrites path links safely.
-*   **Out-of-the-Box CORS Support:** Generates native hosting headers (`_headers` for Cloudflare, `vercel.json` for Vercel) and handles CORS headers in local development.
-*   **TypeScript Type Generation:** Auto-generates fully accurate `.d.ts` declaration files for your endpoints to provide instant client-side type-safety.
-*   **Lightweight Development Server (`serve`):** Run a fast local server that live-rebuilds and reloads as your raw source data changes.
-*   **Incremental Builds:** Employs precise source file hashing caching (`.static-api-cache.json`) to rebuild only what changed, slashing CI/CD build times.
+* **Three Configuration Tiers:** From zero-config auto-inference (Tier 1) to shorthand YAML routes (Tier 2), all the way to native JavaScript/TypeScript config-via-code transformations (Tier 3).
+* **Flexible Routing Patterns:** Supports Single Object, Collections (Lists), Item Details (via URL parameters), and Grouping transformations out of the box.
+* **Advanced Data Cleaning:** Deep JSONPath extraction, along with robust sanitization using `pick` (allowlist) and `omit` (denylist).
+* **Multi-Platform Target Formats:** Outputs formats tailored for all static hosting environments, supporting trailing slashes, directory index resolutions, extensionless files, or fully bundled files.
+* **Asset Bundling & Path Rewriting:** Scans compilation output for local asset references (e.g., images), copies them to the distribution folder, and rewrites path links safely.
+* **Out-of-the-Box CORS Support:** Generates native hosting headers (`_headers` for Cloudflare, `vercel.json` for Vercel) and handles CORS headers in local development.
+* **TypeScript Type Generation:** Auto-generates fully accurate `.d.ts` declaration files for your endpoints to provide instant client-side type-safety.
+* **Lightweight Development Server (`serve`):** Run a fast local server that live-rebuilds and reloads as your raw source data changes.
+* **Incremental Builds:** Employs precise source file hashing caching (`.static-api-cache.json`) to rebuild only what changed, slashing CI/CD build times.
 
 ---
 

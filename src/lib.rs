@@ -1,155 +1,83 @@
-use std::fs;
-use std::path::{Path, PathBuf};
-use serde_json::Value;
+//! `prest` library: Static API generator core logic
+//!
+//! This crate provides serializers, delivery layouts, and orchestration logic
+//! for compiling raw JSON datasets into structured static API endpoints.
 
-/// A Static API Generator that compiles raw JSON datasets into structured directories of static files.
-///
-/// # Examples
-///
-/// ```
-/// use prest::Generator;
-/// use std::path::Path;
-///
-/// let generator = Generator::new("testdata", "dist_temp");
-/// assert!(true);
-/// ```
-pub struct Generator {
-    inputs: PathBuf,
-    dest: PathBuf,
+use thiserror::Error;
+use std::path::{Path, PathBuf};
+
+/// Error type for prest
+#[derive(Error, Debug)]
+pub enum Error {
+    /// IO error
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+
+    /// JSON serialization error
+    #[error("JSON serialization error: {0}")]
+    SerdeJson(#[from] serde_json::Error),
+
+    /// SQLite error
+    #[error("SQLite error: {0}")]
+    Rusqlite(#[from] rusqlite::Error),
+
+    /// Configuration error
+    #[error("Configuration error: {0}")]
+    Config(String),
 }
 
-impl Generator {
-    /// Creates a new `Generator` with source inputs and destination path.
+pub mod serializers;
+pub mod orchestrator;
+
+pub use serializers::{Serializer, JSONSerializer, TypescriptSerializer, SqliteSerializer};
+pub use orchestrator::{run, Config, SerializerConfig};
+
+/// Trait for physical data serialization
+pub trait Layout {
+    /// Determines the physical path based on endpoint, file extension, and collection status
     ///
     /// # Examples
     ///
     /// ```
-    /// use prest::Generator;
-    /// let generator = Generator::new("testdata", "dist_temp");
-    /// ```
-    pub fn new<P1: AsRef<Path>, P2: AsRef<Path>>(inputs: P1, dest: P2) -> Self {
-        Self {
-            inputs: inputs.as_ref().to_path_buf(),
-            dest: dest.as_ref().to_path_buf(),
-        }
-    }
-
-    /// Compiles inputs into the static destination directory.
+    /// use prest::{IndexLayout, Layout};
+    /// use std::path::Path;
     ///
-    /// # Examples
-    ///
+    /// let layout = IndexLayout;
+    /// let path = layout.determine_path("api/test", "json", false);
+    /// assert_eq!(path, std::path::Path::new("api/test/index.json"));
     /// ```
-    /// use prest::Generator;
-    /// let generator = Generator::new("testdata", "dist_temp");
-    /// // generator.generate().unwrap();
-    /// ```
-    pub fn generate(&self) -> Result<(), Box<dyn std::error::Error>> {
-        self.validate_inputs()?;
-        self.ensure_dest_exists()?;
-        self.process_all_sources()?;
-        Ok(())
-    }
+    fn determine_path(&self, endpoint: &str, file_ext: &str, is_coll: bool) -> PathBuf;
+}
 
-    /// Validates that the inputs path actually exists.
-    fn validate_inputs(&self) -> Result<(), Box<dyn std::error::Error>> {
-        if !self.inputs.exists() {
-            return Err(format!("Inputs path does not exist: {:?}", self.inputs).into());
-        }
-        Ok(())
+/// Layout that places files in `index.[ext]`
+pub struct IndexLayout;
+impl Layout for IndexLayout {
+    fn determine_path(&self, endpoint: &str, ext: &str, _: bool) -> PathBuf {
+        Path::new(endpoint).join(format!("index.{}", ext))
     }
+}
 
-    /// Ensures that the destination directory exists.
-    fn ensure_dest_exists(&self) -> Result<(), Box<dyn std::error::Error>> {
-        fs::create_dir_all(&self.dest)?;
-        Ok(())
+/// Layout that appends the extension directly
+pub struct ExtensionLayout;
+impl Layout for ExtensionLayout {
+    fn determine_path(&self, endpoint: &str, ext: &str, _: bool) -> PathBuf {
+        PathBuf::from(format!("{}.{}", endpoint, ext))
     }
+}
 
-    /// Dispatches processing depending on whether inputs is a file or directory.
-    fn process_all_sources(&self) -> Result<(), Box<dyn std::error::Error>> {
-        if self.inputs.is_file() {
-            self.process_file(&self.inputs)
+/// Layout that avoids extensions where possible (supports smart fallback)
+pub struct FileLayout;
+impl FileLayout {
+    fn is_coll_path(&self, endpoint: &str, is_coll: bool) -> bool {
+        is_coll && !endpoint.is_empty()
+    }
+}
+impl Layout for FileLayout {
+    fn determine_path(&self, endpoint: &str, ext: &str, is_coll: bool) -> PathBuf {
+        if self.is_coll_path(endpoint, is_coll) {
+            Path::new(endpoint).join(format!("index.{}", ext))
         } else {
-            self.process_directory()
+            PathBuf::from(endpoint)
         }
-    }
-
-    /// Processes all JSON files in the inputs directory.
-    fn process_directory(&self) -> Result<(), Box<dyn std::error::Error>> {
-        for entry in fs::read_dir(&self.inputs)? {
-            let path = entry?.path();
-            if self.is_json_file(&path) {
-                self.process_file(&path)?;
-            }
-        }
-        Ok(())
-    }
-
-    /// Checks if a given path is a valid JSON file.
-    fn is_json_file(&self, path: &Path) -> bool {
-        path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("json")
-    }
-
-    /// Processes a single JSON file and determines the routing transformation.
-    fn process_file(&self, file_path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-        let name = self.extract_file_stem(file_path)?;
-        let content = fs::read_to_string(file_path)?;
-        let json: Value = serde_json::from_str(&content)?;
-        self.route_json(&name, &json)
-    }
-
-    /// Extracts the file stem as a string.
-    fn extract_file_stem(&self, path: &Path) -> Result<String, Box<dyn std::error::Error>> {
-        path.file_stem()
-            .and_then(|s| s.to_str())
-            .map(String::from)
-            .ok_or_else(|| "Invalid file name".into())
-    }
-
-    /// Routes JSON data based on its shape (Object or Array).
-    fn route_json(&self, name: &str, json: &Value) -> Result<(), Box<dyn std::error::Error>> {
-        match json {
-            Value::Object(map) => self.write_endpoint(name, &Value::Object(map.clone())),
-            Value::Array(arr) => self.route_array(name, arr),
-            _ => self.write_endpoint(name, json),
-        }
-    }
-
-    /// Routes a JSON array as a list and processes individual items for detail view.
-    fn route_array(&self, name: &str, arr: &[Value]) -> Result<(), Box<dyn std::error::Error>> {
-        self.write_endpoint(name, &Value::Array(arr.to_vec()))?;
-        for item in arr {
-            self.route_array_item(name, item)?;
-        }
-        Ok(())
-    }
-
-    /// Processes a single item in an array, extracting ID if present to write detail.
-    fn route_array_item(&self, parent_name: &str, item: &Value) -> Result<(), Box<dyn std::error::Error>> {
-        if let Some(id_str) = self.extract_id(item) {
-            let item_path = format!("{}/{}", parent_name, id_str);
-            self.write_endpoint(&item_path, item)?;
-        }
-        Ok(())
-    }
-
-    /// Extracts an "id" field as string from a JSON Value if it exists.
-    fn extract_id(&self, value: &Value) -> Option<String> {
-        let map = value.as_object()?;
-        let id_val = map.get("id")?;
-        match id_val {
-            Value::Number(n) => Some(n.to_string()),
-            Value::String(s) => Some(s.clone()),
-            _ => None,
-        }
-    }
-
-    /// Writes a JSON value to a designated index.json endpoint.
-    fn write_endpoint(&self, relative_path: &str, value: &Value) -> Result<(), Box<dyn std::error::Error>> {
-        let endpoint_dir = self.dest.join(relative_path);
-        fs::create_dir_all(&endpoint_dir)?;
-        let index_file = endpoint_dir.join("index.json");
-        let serialized = serde_json::to_string_pretty(value)?;
-        fs::write(index_file, serialized)?;
-        Ok(())
     }
 }
