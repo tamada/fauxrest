@@ -110,15 +110,12 @@ fn materialize_node(
     }
 
     let is_private = node.and_then(|n| n.private).unwrap_or(false);
-    if !is_private {
-        write_data(endpoint, &endpoint_data, s, l, dest)?;
+    if is_private {
+        return Ok(vec![]);
     }
+    write_data(endpoint, &endpoint_data, s, l, dest)?;
 
-    let mut endpoints = if is_private {
-        vec![]
-    } else {
-        vec![format!("/{}", endpoint)]
-    };
+    let mut endpoints = vec![format!("/{}", endpoint)];
 
     if let Value::Array(arr) = &endpoint_data {
         for item in arr {

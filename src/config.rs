@@ -130,43 +130,11 @@ impl Config {
     }
 
     /// Loads configuration from a specific file path
-    pub fn load(path: &Path) -> Result<Self> {
+    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
         let content = fs::read_to_string(path).map_err(Error::Io)?;
         let config: Self = serde_json::from_str(&content).map_err(Error::SerdeJson)?;
         config.validate()?;
         Ok(config)
-    }
-
-    /// Discovers and loads a configuration file from a directory.
-    /// It searches for '_config.json', '_prest.json', '.config.json', and '.prest.json' in order.
-    pub fn discover(dir: &Path) -> Option<PathBuf> {
-        let configs = [ "_config.json", "_prest.json", ".config.json", ".prest.json" ];
-        configs.iter()
-            .map(|c| dir.join(c))
-            .find(|path| path.exists())
-    }
-
-    /// Loads the configuration based on provided options.
-    /// If an explicit config path is provided, it attempts to load it.
-    /// If an explicit layout is provided, it creates a new Config.
-    /// Otherwise, it attempts to discover the config in the inputs directory,
-    /// or falls back to the default configuration.
-    pub fn load_or_default(
-        explicit_config: Option<&PathBuf>,
-        inputs_dir: &Path,
-        explicit_layout: Option<&Layout>,
-        serializer: String,
-        dest: PathBuf,
-    ) -> Result<Self> {
-        if let Some(config_path) = explicit_config {
-            Self::load(config_path)
-        } else if let Some(discovered_path) = Self::discover(inputs_dir) {
-            Self::load(&discovered_path)
-        } else if let Some(layout) = explicit_layout {
-            Ok(Self::new(serializer, layout.clone(), dest))
-        } else {
-            Ok(Self::default())
-        }
     }
 }
 

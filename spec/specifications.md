@@ -126,9 +126,8 @@ To prevent the leakage of sensitive data (passwords, tokens, internal notes) to 
 
 ## 6. Endpoint Visibility Control (`$private`)
 
-Nodes configured with `$private: true` **do not emit the endpoint itself**. For example, if configured on `users`, `/users` is not generated and is omitted from discovery (`/index.json`).
+Nodes configured with `$private: true` **do not emit the endpoint itself or its descendants**. For example, if configured on `users`, `/users` and `/users/...` are not generated and are omitted from discovery (`/index.json`).
 
-- Child endpoints (e.g., `/users/1`) still follow normal routing behavior.
 - Use `$pick` / `$omit` for field-level data sanitization.
 
 **Example:**

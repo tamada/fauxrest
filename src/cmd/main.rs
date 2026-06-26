@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use prest::{Config, Result, Layout};
+use prest::{Config, Layout, Result};
 use std::path::{Path, PathBuf};
 
 #[derive(Parser, Debug)]
@@ -47,14 +47,54 @@ enum Commands {
 }
 
 impl Args {
+    /// Loads the configuration based on the command line options.
+    /// If an explicit config path is provided, it attempts to load it.
+    /// If an explicit layout is provided, it creates a new Config.
+    /// Otherwise, it attempts to discover the config in the inputs directory,
+    /// or falls back to the default configuration.
     pub(crate) fn load_config(&self) -> Result<Config> {
-        Config::load_or_default(
-            self.config.as_ref(),
-            Path::new(&self.inputs),
-            self.layout.as_ref(),
-            self.serializer.clone(),
-            self.dest.clone(),
-        )
+        let config = if let Some(config) = &self.config {
+            prest::Config::load(config)
+        } else if let Some(discovered_path) = Self::discover(Path::new(&self.inputs)) {
+            prest::Config::load(&discovered_path)
+        } else {
+            Ok(prest::Config::default())
+        };
+        match config {
+            Ok(config) => {
+                if config.serializers.len() == 0 {
+                    Ok(prest::Config {
+                        serializers: vec![ self.serializer_config() ],
+                        api: config.api,
+                    })
+                } else {
+                    Ok(config)
+                }
+            },
+            Err(e) => Err(e),
+        }
+    }
+
+    fn serializer_config(&self) -> prest::SerializerConfig {
+        let layout = if let Some(l) = &self.layout {
+            l.clone()
+        } else {
+            Layout::Index
+        };
+        prest::SerializerConfig {
+            layout,
+            serializer: self.serializer.clone(),
+            dest: self.dest.clone()
+        }
+    }
+
+    /// Discovers and loads a configuration file from a directory.
+    /// It searches for '_config.json', '_prest.json', '.config.json', and '.prest.json' in order.
+    fn discover(dir: &Path) -> Option<PathBuf> {
+        let configs = [ "_config.json", "_prest.json", ".config.json", ".prest.json" ];
+        configs.iter()
+            .map(|c| dir.join(c))
+            .find(|path| path.exists())
     }
 }
 

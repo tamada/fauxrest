@@ -125,11 +125,11 @@ fn test_private_directive_hides_collection_endpoint() {
     assert!(prest::run(config, data_dir).is_ok());
 
     assert!(!dest_dir.join("users/index.json").exists());
-    assert_file(&dest_dir, "users/1/index.json");
+    assert!(!dest_dir.join("users/1/index.json").exists());
 
     let discovery = fs::read_to_string(dest_dir.join("index.json")).unwrap();
     assert!(!discovery.contains("\"/users\""));
-    assert!(discovery.contains("\"/users/1\""));
+    assert!(!discovery.contains("\"/users/1\""));
 }
 
 #[test]
