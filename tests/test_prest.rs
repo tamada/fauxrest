@@ -131,3 +131,80 @@ fn test_private_directive_hides_collection_endpoint() {
     assert!(!discovery.contains("\"/users\""));
     assert!(discovery.contains("\"/users/1\""));
 }
+
+#[test]
+fn test_template_subpath_expansion_with_filter_override() {
+        let tmp = tempfile::tempdir().unwrap();
+        let data_dir = tmp.path().join("data");
+        let dest_dir = tmp.path().join("dist");
+        let config_file = tmp.path().join("prest.json");
+
+        fs::create_dir(&data_dir).unwrap();
+        fs::write(
+                data_dir.join("activities.json"),
+                r#"[
+    {"id": 1, "from": "2024-01-01", "public": false, "label": "private-2024"},
+    {"id": 2, "from": "2024-05-10", "public": true, "label": "public-2024"},
+    {"id": 3, "from": "2025-03-03", "public": true, "label": "public-2025"}
+]"#,
+        )
+        .unwrap();
+
+        let config_json = format!(
+                r#"{{
+    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "activities": {{
+        "$filter": [{{"field": "public", "op": "eq", "value": true}}],
+        "${{year}}": {{
+            "$values": ["2024", "2025"],
+            "$filter": [{{"field": "from", "op": "contains", "value": "{{year}}"}}]
+        }}
+    }}
+}}"#,
+                dest_dir.display()
+        );
+        fs::write(&config_file, &config_json).unwrap();
+
+        let config: Config = Config::load(Path::new(&config_file)).unwrap();
+        assert!(prest::run(config, data_dir).is_ok());
+
+        assert_file(&dest_dir, "activities/index.json");
+        assert_file(&dest_dir, "activities/2024/index.json");
+        assert_file(&dest_dir, "activities/2025/index.json");
+
+        // Root applies parent filter.
+        let root = fs::read_to_string(dest_dir.join("activities/index.json")).unwrap();
+        assert!(!root.contains("private-2024"));
+        assert!(root.contains("public-2024"));
+        assert!(root.contains("public-2025"));
+
+        // Child filter overrides parent filter and includes non-public entries matching year.
+        let by_2024 = fs::read_to_string(dest_dir.join("activities/2024/index.json")).unwrap();
+        assert!(by_2024.contains("private-2024"));
+        assert!(by_2024.contains("public-2024"));
+
+        let discovery = fs::read_to_string(dest_dir.join("index.json")).unwrap();
+        assert!(discovery.contains("\"/activities/2024\""));
+        assert!(discovery.contains("\"/activities/2025\""));
+}
+
+#[test]
+fn test_invalid_template_without_values_fails_to_load() {
+        let tmp = tempfile::tempdir().unwrap();
+        let config_file = tmp.path().join("prest.json");
+        let config_json = r#"{
+    "serializers": [{"serializer": "json", "layout": "index", "dest": "dist"}],
+    "activities": {
+        "${year}": {
+            "$filter": [{"field": "from", "op": "contains", "value": "{year}"}]
+        }
+    }
+}"#;
+        fs::write(&config_file, config_json).unwrap();
+
+        let err = match Config::load(Path::new(&config_file)) {
+            Ok(_) => panic!("config should be rejected"),
+            Err(e) => e,
+        };
+        assert!(format!("{}", err).contains("template sub-path requires $values"));
+}

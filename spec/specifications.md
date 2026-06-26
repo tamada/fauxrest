@@ -51,6 +51,8 @@ To adhere strictly to the "Convention over Configuration" philosophy, advanced c
 
 Keys prefixed with `$` are interpreted as **directives** modifying the data at that level. Keys without the `$` prefix define **sub-paths**.
 
+When using template-style sub-path keys such as `"${year}"`, provide `$values` in the child node so endpoints can be expanded statically at build time.
+
 ```json
 {
   "api": {
@@ -64,6 +66,15 @@ Keys prefixed with `$` are interpreted as **directives** modifying the data at t
       // Defines a new sub-path: /api/job-histories/current
       "current": {
         "$filter": { "field": "to", "op": "eq", "value": "Present" }
+      }
+    },
+    "activities": {
+      // Statically expands to /api/activities/2026, /api/activities/2025, ...
+      "${year}": {
+        "$values": ["2026", "2025"],
+        "$filter": [
+          { "field": "from", "op": "contains", "value": "{year}" }
+        ]
       }
     },
     "profile": {
@@ -98,6 +109,10 @@ The `$filter` directive allows extracting specific items from a collection. To e
   { "field": "status", "op": "eq", "value": "active" }
 ]
 ```
+
+### Parent/Child `$filter` Precedence
+
+If a child node defines `$filter`, the parent node's `$filter` is not inherited and the child filter **overrides** it. Parent filter inheritance only applies when the child does not define `$filter`.
 
 ---
 

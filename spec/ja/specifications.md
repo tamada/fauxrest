@@ -51,6 +51,8 @@
 
 先頭に `$` が付くキーは、その階層のデータを加工する **ディレクティブ（指示）** として解釈されます。`$` が付かないキーは **サブパス** を定義します。
 
+`"${year}"` のようなテンプレート形式のサブパスを使う場合は、子ノードに `$values` を指定して静的に展開します。
+
 ```json
 {
   "api": {
@@ -64,6 +66,15 @@
       // 新しいサブパス /api/job-histories/current を定義
       "current": {
         "$filter": { "field": "to", "op": "eq", "value": "Present" }
+      }
+    },
+    "activities": {
+      // /api/activities/2026, /api/activities/2025 のように静的展開
+      "${year}": {
+        "$values": ["2026", "2025"],
+        "$filter": [
+          { "field": "from", "op": "contains", "value": "{year}" }
+        ]
       }
     },
     "profile": {
@@ -99,6 +110,10 @@
   { "field": "status", "op": "eq", "value": "active" }
 ]
 ```
+
+### 親子ノードの `$filter` 優先順位
+
+子ノードに `$filter` が定義されている場合、親ノードの `$filter` は継承されず、**子ノードの `$filter` で上書き**されます。子ノードに `$filter` がない場合のみ、親ノードの `$filter` が継承されます。
 
 ---
 
