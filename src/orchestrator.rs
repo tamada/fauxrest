@@ -3,11 +3,14 @@
 //! Orchestrates the multi-serializer execution loop based on configuration,
 //! reading raw JSON and generating static files according to specified layouts.
 
+use regex::Regex;
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
-use serde_json::{Value, json};
-use crate::{Serializer, JSONSerializer, TypescriptSerializer, SqliteSerializer, Error, Layout, Result, Config, SerializerConfig};
-use crate::config::ApiNode;
+use serde_json::{json, Map, Value};
+
+use crate::config::{ApiNode, FilterCondition, FilterOp};
+use crate::{Config, Error, JSONSerializer, Layout, Result, Serializer, SerializerConfig, SqliteSerializer, TypescriptSerializer};
 
 /// Executes the API build process
 pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
@@ -22,70 +25,376 @@ pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
 fn run_serializer(
     conf: &SerializerConfig,
     data_dir: &Path,
-    api_overlay: &std::collections::HashMap<String, ApiNode>,
+    api_overlay: &HashMap<String, ApiNode>,
 ) -> Result<Vec<String>> {
     let serializer = get_serializer(&conf.serializer)?;
     let layout = get_layout(&conf.layout);
-    let data_dir = fs::read_dir(data_dir).map_err(Error::Io)?;
+    let datasets = collect_datasets(data_dir)?;
+    let mut names = datasets.keys().cloned().collect::<Vec<_>>();
+    names.sort();
     let mut endpoints = Vec::new();
 
-    for entry in data_dir {
+    for name in names {
+        let data = datasets
+            .get(&name)
+            .ok_or_else(|| Error::Config(format!("missing dataset for endpoint '{}'", name)))?;
+        let node = api_overlay.get(&name);
+        endpoints.extend(materialize_node(
+            &name,
+            data,
+            node,
+            None,
+            &datasets,
+            serializer.as_ref(),
+            layout.as_ref(),
+            &conf.dest,
+        )?);
+    }
+    endpoints.sort();
+    endpoints.dedup();
+    Ok(endpoints)
+}
+
+fn collect_datasets(data_dir: &Path) -> Result<HashMap<String, Value>> {
+    let mut datasets = HashMap::new();
+    let entries = fs::read_dir(data_dir).map_err(Error::Io)?;
+    for entry in entries {
         let entry = entry.map_err(Error::Io)?;
+        let path = entry.path();
         let file_name = entry.file_name();
         let file_name_str = file_name.to_string_lossy();
         if file_name_str.starts_with('_') || file_name_str.starts_with('.') {
             continue;
         }
-        let endpoint_name = file_name_str
+        if path.extension().and_then(|s| s.to_str()) != Some("json") {
+            continue;
+        }
+        let content = fs::read_to_string(&path).map_err(Error::Io)?;
+        let json: Value = serde_json::from_str(&content).map_err(Error::SerdeJson)?;
+        let name = file_name_str
             .strip_suffix(".json")
             .unwrap_or(&file_name_str)
             .to_string();
-        let node = api_overlay.get(&endpoint_name);
-        endpoints.extend(process_entry(
-            &entry,
-            serializer.as_ref(),
-            layout.as_ref(),
-            &conf.dest,
-            node,
-        )?);
+        datasets.insert(name, json);
     }
-    Ok(endpoints)
+    Ok(datasets)
 }
 
-
-fn process_entry(
-    entry: &fs::DirEntry,
+#[allow(clippy::too_many_arguments)]
+fn materialize_node(
+    endpoint: &str,
+    source_data: &Value,
+    node: Option<&ApiNode>,
+    inherited_filter: Option<&Vec<FilterCondition>>,
+    datasets: &HashMap<String, Value>,
     s: &dyn Serializer,
     l: &dyn LayoutTrait,
     dest: &Path,
-    node: Option<&ApiNode>,
 ) -> Result<Vec<String>> {
-    let path = entry.path();
-    if path.extension().and_then(|s| s.to_str()) != Some("json") { return Ok(vec![]); }
-    
-    let content = fs::read_to_string(path).map_err(Error::Io)?;
-    let json: Value = serde_json::from_str(&content).map_err(Error::SerdeJson)?;
-    let name = entry.file_name().to_str().unwrap().strip_suffix(".json").unwrap().to_string();
+    let mut endpoint_base = source_data.clone();
+    if let Some(agg) = node.and_then(|n| n.aggregate.as_ref()) {
+        endpoint_base = aggregate_values(agg, datasets)?;
+    }
+
+    let effective_filter = node
+        .and_then(|n| n.filter.as_ref())
+        .or(inherited_filter);
+    let mut endpoint_data = if let Some(filters) = effective_filter {
+        apply_filters(&endpoint_base, filters)?
+    } else {
+        endpoint_base.clone()
+    };
+
+    if let Some(n) = node {
+        endpoint_data = apply_pick_omit(endpoint_data, n);
+    }
+
     let is_private = node.and_then(|n| n.private).unwrap_or(false);
     if !is_private {
-        write_data(&name, &json, s, l, dest)?;
+        write_data(endpoint, &endpoint_data, s, l, dest)?;
     }
-    
+
     let mut endpoints = if is_private {
         vec![]
     } else {
-        vec![format!("/{}", name)]
+        vec![format!("/{}", endpoint)]
     };
-    if let Value::Array(arr) = json {
+
+    if let Value::Array(arr) = &endpoint_data {
         for item in arr {
             if let Some(id) = item.get("id") {
                 let id_str = id.as_str().map(|s| s.to_string()).unwrap_or_else(|| id.to_string());
-                write_data(&format!("{}/{}", name, id_str), &item, s, l, dest)?;
-                endpoints.push(format!("/{}/{}", name, id_str));
+                let item_path = format!("{}/{}", endpoint, id_str);
+                write_data(&item_path, item, s, l, dest)?;
+                endpoints.push(format!("/{}", item_path));
             }
         }
     }
+
+    if let Some(current) = node {
+        let mut keys = current.sub_paths.keys().cloned().collect::<Vec<_>>();
+        keys.sort();
+        for key in keys {
+            let child = current
+                .sub_paths
+                .get(&key)
+                .ok_or_else(|| Error::Config(format!("missing sub-path node '{}'", key)))?;
+            if let Some(var) = template_var_from_key(&key) {
+                let values = child.values.as_ref().ok_or_else(|| {
+                    Error::Config(format!("{}/{}: template key requires $values", endpoint, key))
+                })?;
+                for value in values {
+                    let segment = scalar_to_path_segment(value)?;
+                    let child_endpoint = format!("{}/{}", endpoint, segment);
+                    let expanded_child = expand_template_node(child, var, value);
+                    endpoints.extend(materialize_node(
+                        &child_endpoint,
+                        &endpoint_base,
+                        Some(&expanded_child),
+                        effective_filter,
+                        datasets,
+                        s,
+                        l,
+                        dest,
+                    )?);
+                }
+            } else {
+                let child_endpoint = format!("{}/{}", endpoint, key);
+                endpoints.extend(materialize_node(
+                    &child_endpoint,
+                    &endpoint_base,
+                    Some(child),
+                    effective_filter,
+                    datasets,
+                    s,
+                    l,
+                    dest,
+                )?);
+            }
+        }
+    }
+
     Ok(endpoints)
+}
+
+fn aggregate_values(paths: &[String], datasets: &HashMap<String, Value>) -> Result<Value> {
+    let mut merged = Vec::new();
+    for path in paths {
+        let data = datasets
+            .get(path)
+            .ok_or_else(|| Error::Config(format!("$aggregate references unknown dataset '{}'", path)))?;
+        if let Value::Array(arr) = data {
+            merged.extend(arr.iter().cloned());
+        } else {
+            merged.push(data.clone());
+        }
+    }
+    Ok(Value::Array(merged))
+}
+
+fn apply_filters(data: &Value, filters: &[FilterCondition]) -> Result<Value> {
+    match data {
+        Value::Array(arr) => {
+            let mut out = Vec::new();
+            for item in arr {
+                if matches_all_conditions(item, filters)? {
+                    out.push(item.clone());
+                }
+            }
+            Ok(Value::Array(out))
+        }
+        _ => {
+            if matches_all_conditions(data, filters)? {
+                Ok(data.clone())
+            } else {
+                Ok(Value::Null)
+            }
+        }
+    }
+}
+
+fn matches_all_conditions(item: &Value, filters: &[FilterCondition]) -> Result<bool> {
+    for cond in filters {
+        if !matches_condition(item, cond)? {
+            return Ok(false);
+        }
+    }
+    Ok(true)
+}
+
+fn matches_condition(item: &Value, cond: &FilterCondition) -> Result<bool> {
+    let target = item.get(&cond.field);
+    let result = match cond.op {
+        FilterOp::Eq => target == Some(&cond.value),
+        FilterOp::Neq => target != Some(&cond.value),
+        FilterOp::Gt => compare_ord(target, &cond.value, |lhs, rhs| lhs > rhs),
+        FilterOp::Gte => compare_ord(target, &cond.value, |lhs, rhs| lhs >= rhs),
+        FilterOp::Lt => compare_ord(target, &cond.value, |lhs, rhs| lhs < rhs),
+        FilterOp::Lte => compare_ord(target, &cond.value, |lhs, rhs| lhs <= rhs),
+        FilterOp::Contains => contains_value(target, &cond.value),
+        FilterOp::Exists => {
+            let expected = cond.value.as_bool().unwrap_or(false);
+            target.is_some() == expected
+        }
+        FilterOp::RegEq => regex_match(target, &cond.value, true)?,
+        FilterOp::RegNeq => regex_match(target, &cond.value, false)?,
+    };
+    Ok(result)
+}
+
+fn compare_ord<F>(target: Option<&Value>, rhs: &Value, cmp: F) -> bool
+where
+    F: Fn(f64, f64) -> bool,
+{
+    let Some(lhs) = target.and_then(Value::as_f64) else {
+        return false;
+    };
+    let Some(rhs_num) = rhs.as_f64() else {
+        return false;
+    };
+    cmp(lhs, rhs_num)
+}
+
+fn contains_value(target: Option<&Value>, rhs: &Value) -> bool {
+    let Some(target) = target else {
+        return false;
+    };
+    match target {
+        Value::String(s) => rhs.as_str().map(|needle| s.contains(needle)).unwrap_or(false),
+        Value::Array(arr) => arr.iter().any(|v| v == rhs),
+        _ => false,
+    }
+}
+
+fn regex_match(target: Option<&Value>, rhs: &Value, positive: bool) -> Result<bool> {
+    let Some(value) = target.and_then(Value::as_str) else {
+        return Ok(!positive);
+    };
+    let pattern = rhs
+        .as_str()
+        .ok_or_else(|| Error::Config("regex filter value must be a string".to_string()))?;
+    let re = Regex::new(pattern)
+        .map_err(|e| Error::Config(format!("invalid regex '{}': {}", pattern, e)))?;
+    let matched = re.is_match(value);
+    Ok(if positive { matched } else { !matched })
+}
+
+fn apply_pick_omit(mut value: Value, node: &ApiNode) -> Value {
+    if let Some(pick) = &node.pick {
+        value = match value {
+            Value::Object(obj) => Value::Object(apply_pick_map(obj, pick)),
+            Value::Array(arr) => Value::Array(
+                arr.into_iter()
+                    .map(|item| match item {
+                        Value::Object(obj) => Value::Object(apply_pick_map(obj, pick)),
+                        _ => item,
+                    })
+                    .collect(),
+            ),
+            other => other,
+        };
+    }
+    if let Some(omit) = &node.omit {
+        value = match value {
+            Value::Object(obj) => Value::Object(apply_omit_map(obj, omit)),
+            Value::Array(arr) => Value::Array(
+                arr.into_iter()
+                    .map(|item| match item {
+                        Value::Object(obj) => Value::Object(apply_omit_map(obj, omit)),
+                        _ => item,
+                    })
+                    .collect(),
+            ),
+            other => other,
+        };
+    }
+    value
+}
+
+fn apply_pick_map(mut obj: Map<String, Value>, pick: &[String]) -> Map<String, Value> {
+    obj.retain(|k, _| pick.contains(k));
+    obj
+}
+
+fn apply_omit_map(mut obj: Map<String, Value>, omit: &[String]) -> Map<String, Value> {
+    for key in omit {
+        obj.remove(key);
+    }
+    obj
+}
+
+fn template_var_from_key(key: &str) -> Option<&str> {
+    if key.starts_with("${") && key.ends_with('}') && key.len() > 3 {
+        Some(&key[2..key.len() - 1])
+    } else {
+        None
+    }
+}
+
+fn expand_template_node(node: &ApiNode, var: &str, value: &Value) -> ApiNode {
+    let mut out = node.clone();
+    out.values = None;
+    if let Some(filters) = &node.filter {
+        let token = format!("{{{}}}", var);
+        out.filter = Some(
+            filters
+                .iter()
+                .map(|cond| FilterCondition {
+                    field: cond.field.clone(),
+                    op: cond.op.clone(),
+                    value: replace_template_token(&cond.value, &token, value),
+                })
+                .collect(),
+        );
+    }
+    out
+}
+
+fn replace_template_token(input: &Value, token: &str, replacement: &Value) -> Value {
+    match input {
+        Value::String(s) => {
+            if s == token {
+                replacement.clone()
+            } else if s.contains(token) {
+                Value::String(s.replace(token, &scalar_to_string(replacement)))
+            } else {
+                Value::String(s.clone())
+            }
+        }
+        Value::Array(arr) => Value::Array(
+            arr.iter()
+                .map(|v| replace_template_token(v, token, replacement))
+                .collect(),
+        ),
+        Value::Object(map) => {
+            let mut out = Map::new();
+            for (k, v) in map {
+                out.insert(k.clone(), replace_template_token(v, token, replacement));
+            }
+            Value::Object(out)
+        }
+        other => other.clone(),
+    }
+}
+
+fn scalar_to_path_segment(value: &Value) -> Result<String> {
+    let segment = scalar_to_string(value);
+    if segment.is_empty() || segment.contains('/') {
+        return Err(Error::Config(format!(
+            "template value '{}' cannot be used as a path segment",
+            segment
+        )));
+    }
+    Ok(segment)
+}
+
+fn scalar_to_string(value: &Value) -> String {
+    match value {
+        Value::String(s) => s.clone(),
+        Value::Number(n) => n.to_string(),
+        Value::Bool(b) => b.to_string(),
+        _ => value.to_string(),
+    }
 }
 
 fn write_data(

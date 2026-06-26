@@ -56,6 +56,9 @@ pub struct ApiNode {
     #[serde(rename = "$private")]
     pub private: Option<bool>,
 
+    #[serde(rename = "$values")]
+    pub values: Option<Vec<Value>>,
+
     #[serde(flatten)]
     pub sub_paths: HashMap<String, ApiNode>,
 }
@@ -129,7 +132,9 @@ impl Config {
     /// Loads configuration from a specific file path
     pub fn load(path: &Path) -> Result<Self> {
         let content = fs::read_to_string(path).map_err(Error::Io)?;
-        serde_json::from_str(&content).map_err(Error::SerdeJson)
+        let config: Self = serde_json::from_str(&content).map_err(Error::SerdeJson)?;
+        config.validate()?;
+        Ok(config)
     }
 
     /// Discovers and loads a configuration file from a directory.
@@ -165,6 +170,72 @@ impl Config {
     }
 }
 
+impl Config {
+    fn validate(&self) -> Result<()> {
+        let mut keys = self.api.keys().cloned().collect::<Vec<_>>();
+        keys.sort();
+        for key in keys {
+            if let Some(node) = self.api.get(&key) {
+                validate_node(&key, node)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
+    let mut keys = node.sub_paths.keys().cloned().collect::<Vec<_>>();
+    keys.sort();
+    for key in keys {
+        let child = node.sub_paths.get(&key)
+            .ok_or_else(|| Error::Config(format!("{}: missing child node {}", path, key)))?;
+        let child_path = format!("{}/{}", path, key);
+        if template_var_from_key(&key).is_some() {
+            let values = child.values.as_ref().ok_or_else(|| {
+                Error::Config(format!("{}: template sub-path requires $values", child_path))
+            })?;
+            if values.is_empty() {
+                return Err(Error::Config(format!("{}: $values must not be empty", child_path)));
+            }
+            for value in values {
+                if !is_scalar(value) {
+                    return Err(Error::Config(format!(
+                        "{}: $values entries must be scalar (string/number/bool)",
+                        child_path
+                    )));
+                }
+                if let Value::String(s) = value {
+                    if s.contains('/') {
+                        return Err(Error::Config(format!(
+                            "{}: $values string must not contain '/'",
+                            child_path
+                        )));
+                    }
+                }
+            }
+        } else if child.values.is_some() {
+            return Err(Error::Config(format!(
+                "{}: $values is only allowed for template sub-path keys like ${{name}}",
+                child_path
+            )));
+        }
+        validate_node(&child_path, child)?;
+    }
+    Ok(())
+}
+
+fn template_var_from_key(key: &str) -> Option<&str> {
+    if key.starts_with("${") && key.ends_with('}') && key.len() > 3 {
+        Some(&key[2..key.len() - 1])
+    } else {
+        None
+    }
+}
+
+fn is_scalar(value: &Value) -> bool {
+    matches!(value, Value::String(_) | Value::Number(_) | Value::Bool(_))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -190,6 +261,16 @@ mod tests {
         assert_eq!(filter2[0].field, "public");
         assert_eq!(filter2[0].op, FilterOp::Eq);
         assert_eq!(filter2[0].value, Value::Bool(true));
+        let by_year = activities
+            .sub_paths
+            .get("${year}")
+            .expect("Missing ${year} sub-path");
+        let values = by_year.values.as_ref().expect("Missing template values");
+        assert_eq!(values, &vec![
+            Value::String("2026".to_string()),
+            Value::String("2025".to_string()),
+            Value::String("2024".to_string()),
+        ]);
 
         // Verify parsing of profile/$aggregate
         let profile = config.api.get("profile").expect("Missing profile node");

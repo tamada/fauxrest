@@ -11,6 +11,7 @@
             { "field": "public", "op": "eq", "value": true }
         ],
         "${year}": {
+            "$values": ["2026", "2025", "2024"],
             "$filter": [
                 { "field": "from", "op": "contains", "value": "{year}" }
             ]
