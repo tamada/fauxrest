@@ -62,6 +62,10 @@ If a collection contains objects with an `"id"` key, individual resource endpoin
 The top-level hierarchy of the API automatically returns a discovery document listing all available endpoints.
 - **Default**: `GET /api` returns a document describing the entire API structure.
 
+### Convention 4: Ignored Files
+Files and directories whose names begin with an underscore (`_`) or a dot (`.`) are explicitly ignored during the build process.
+- **Benefit**: This allows you to safely store configuration files (e.g., `_config.json`), internal components, or drafts directly within the `data/` directory without exposing them as API endpoints.
+
 ---
 
 ## 4. Exception Handling via Configuration

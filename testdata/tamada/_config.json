@@ -1,0 +1,22 @@
+{
+    "job-histories": {
+        "current": {
+            "$filter": [
+                { "field": "to", "op": "eq", "value": "Present" }
+            ]
+        }
+    },
+    "activities": {
+        "$filter": [
+            { "field": "public", "op": "eq", "value": true }
+        ]
+    },
+    "profile": {
+        "$aggregate": [
+            "job-histories",
+            "activities",
+            "degrees",
+            "skills"
+        ]
+    }
+}

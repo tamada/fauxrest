@@ -8,24 +8,14 @@
 
 `prest` supports three configuration tiers depending on the development phase and flexibility required:
 
-- **Tier 1: Zero-Config**: If no configuration file exists, `prest` automatically builds an API from the structure in `./data` using the default serializer (`json`) and delivery layout (`index`).
-- **Tier 2: Simple Routing (`routes.yml`)**: Allows route customization, path overrides, and partial data extraction via JSONPath.
+- **Tier 1: Zero-Config**: If no configuration file exists, `prest` automatically infers and builds an API from the structure in `./data` using convention-over-configuration.
+- **Tier 2: Convention Overlay (`_config.json`)**: Allows patching the automatically inferred API tree using a structured JSON configuration that mirrors the API routes. 
+  - **Auto-Discovery**: `prest` automatically searches for the configuration file in the following order: `_config.json`, `_prest.json`, `.config.json`, `.prest.json`.
 - **Tier 3: Programmatic Configuration (`api.config.js`)**: Allows writing complex data transformation functions using JavaScript/TypeScript.
 
 ---
 
-## 2. Core REST Transformation Patterns
-
-When using custom routing, `prest` processes input data using four structural transformation patterns:
-
-1. **Single Object (`type: single`)**: Copies a target JSON object directly to the path.
-2. **Collection (`type: list`)**: Compiles a JSON array directly as a list endpoint.
-3. **Item Detail (`type: detail`)**: Traverses an array, generating individual physical files for each item based on dynamic segments (e.g., `:id`).
-4. **Grouping (`type: group`)**: Groups objects by a specified field and outputs separate resource lists for each group.
-
----
-
-## 3. Serializer and Layout Specifications
+## 2. Serializer and Layout Specifications
 
 `prest`'s compilation system is defined by two orthogonal concepts: the **"Serializer"** (which determines the physical data structure) and the **"Layout"** (which determines the file system placement).
 
@@ -38,56 +28,102 @@ Each serializer renders input data (JSON) into a specific physical format.
 2. **`typescript` (or `js`) Serializer**
    - **Spec**: Converts data into ESM (ECMAScript Modules) code (e.g., `export const data = [...]`).
    - **Extension**: `.ts` (or `.js`)
-   - **Use case**: Ideal for frontend projects using SSG tools (Astro, Next.js, SvelteKit) to import data as modules during the build process.
+   - **Use case**: Ideal for frontend projects using SSG tools to import data as modules during the build process.
 3. **`sqlite` Serializer**
    - **Spec**: Compiles data into a portable binary relational database format (SQLite).
    - **Extension**: `.db` (or `.sqlite`)
-   - **Use case**: Perfect for client-side applications (using SQL.js or WASM-SQLite) that need to perform complex relational queries locally.
+   - **Use case**: Perfect for client-side applications that need to perform complex relational queries locally.
 
 ### B. Three Delivery Layouts
 The `layout` determines the relationship between endpoint URL resolution and physical file placement.
 
 - **`index` Layout (Default)**: Outputs endpoints as `/endpoint/index.[ext]`. Highly compatible with all static web servers, maintaining clean URLs.
 - **`file` Layout**: Outputs endpoints as extensionless files (`/endpoint`). 
-  - **Smart Fallback Specification**: To avoid physical file-directory collisions, **collections that contain sub-paths (like individual resource items) are automatically replaced (fallback) by `.../index.[ext]` files during compilation.**
+  - **Smart Fallback Specification**: To avoid physical file-directory collisions, collections that contain sub-paths are automatically replaced (fallback) by `.../index.[ext]` files during compilation.
 - **`extension` Layout**: Outputs endpoints with explicit extensions (`/endpoint.[ext]`). 100% web server compatible.
 
 ---
 
-## 4. Data Aggregation & Bundle Pattern
+## 3. Convention Overlay Schema (Tier 2 Routing)
 
-"Bundling"—the process of merging multiple endpoints or an entire database into a single `/db.json` (or any single path)—is implemented via **Aggregation Settings**, not by switching engine output modes.
+To adhere strictly to the "Convention over Configuration" philosophy, advanced configurations in `_config.json` use an **Overlay Schema**. Instead of explicitly defining every route, the configuration mirrors the inferred API tree. 
 
-### Realization via Aggregation (`aggregate`)
-By using the `$index: { "aggregate": [...] }` meta-key, you can configure an endpoint to merge multiple collections into a single array.
+Keys prefixed with `$` are interpreted as **directives** modifying the data at that level. Keys without the `$` prefix define **sub-paths**.
 
-- **Example: Bundling to `/db.json` (`routes.yml`)**
-  ```yaml
-  "/db.json":
-    $index:
-      aggregate:
-        - "data/users.json"
-        - "data/profile.json"
-        - "data/papers.json"
-  ```
-
----
-
-## 5. Advanced JSONPath Extraction
-
-To extract only specific sub-trees from large monolithic datasets (e.g., local CMS outputs), you can use standard JSONPath queries directly in the `source` parameter:
-```yaml
-# Extracts only the 'activities' array from db.json
-"/activities": "data/db.json$.activities"
+```json
+{
+  "api": {
+    "activities": {
+      // Applies to the root /api/activities collection
+      "$filter": [
+        { "field": "is_public", "op": "eq", "value": true }
+      ]
+    },
+    "job-histories": {
+      // Defines a new sub-path: /api/job-histories/current
+      "current": {
+        "$filter": { "field": "to", "op": "eq", "value": "Present" }
+      }
+    },
+    "profile": {
+      "$aggregate": ["job-histories", "activities", "degrees", "skills"]
+    }
+  }
+}
 ```
 
 ---
 
-## 6. Data Sanitization (`pick` & `omit`)
+## 4. Advanced Filtering (`$filter`)
 
-To prevent the leakage of sensitive data (passwords, tokens, drafts) to public CDNs, filtering can be applied during compilation:
-- **`pick` (Allowlist)**: Keep only the specified keys.
-- **`omit` (Denylist)**: Explicitly remove specified keys.
+The `$filter` directive allows extracting specific items from a collection. To ensure type safety, ease of implementation, and debuggability, filters utilize a strict `field`, `op`, and `value` object structure.
+
+### Supported Operators (`op`)
+- `eq` (Equal)
+- `neq` (Not Equal)
+- `gt` (Greater Than)
+- `gte` (Greater Than or Equal)
+- `lt` (Less Than)
+- `lte` (Less Than or Equal)
+- `contains` (String or Array contains)
+- `exists` (Field exists, `value` is boolean)
+- `regeq` (Regular expression match)
+- `regneq` (Regular expression does not match)
+
+**Example:**
+```json
+"$filter": [
+  { "field": "age", "op": "gte", "value": 18 },
+  { "field": "status", "op": "eq", "value": "active" }
+]
+```
+
+---
+
+## 5. Data Sanitization (`$pick` & `$omit`)
+
+To prevent the leakage of sensitive data (passwords, tokens, internal notes) to public CDNs, filtering can be applied during compilation at any node in the API tree:
+- **`$pick` (Allowlist)**: Keep only the specified keys.
+- **`$omit` (Denylist)**: Explicitly remove specified keys.
+
+---
+
+## 6. Data Aggregation & Bundle Pattern (`$aggregate`)
+
+"Bundling" merges multiple endpoints or entire datasets into a single endpoint, ideal for client-side applications that fetch the entire database on load. 
+
+By using the `$aggregate` directive, you can merge multiple collections into a single array at an arbitrary path.
+
+**Example: Bundling to `/api/db`**
+```json
+{
+  "api": {
+    "db": {
+      "$aggregate": ["users", "profile", "papers"]
+    }
+  }
+}
+```
 
 ---
 

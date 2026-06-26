@@ -4,7 +4,6 @@
 //! for compiling raw JSON datasets into structured static API endpoints.
 
 use thiserror::Error;
-use serde::{Deserialize, Serialize};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -32,17 +31,10 @@ pub enum Error {
     UnknownSerializer(String),
 }
 
+pub mod config;
 pub mod serializers;
 pub mod orchestrator;
 
+pub use config::{Config, Layout, SerializerConfig};
 pub use serializers::{Serializer, JSONSerializer, TypescriptSerializer, SqliteSerializer};
-pub use orchestrator::{run, Config, SerializerConfig};
-
-/// Layout configuration
-#[derive(Deserialize, Serialize, Debug, Clone, clap::ValueEnum)]
-#[serde(rename_all = "lowercase")]
-pub enum Layout {
-    Index,
-    File,
-    Extension,
-}
+pub use orchestrator::{run};
