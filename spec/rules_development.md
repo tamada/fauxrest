@@ -51,6 +51,7 @@ Tests must be completely deterministic, running flawlessly in offline environmen
 This project uses the **Jujutsu (`jj`)** version control system.
 
 ### Workflow Procedures
+
 1. **Create a bookmark**: `jj bookmark create feat-my-feature`
 2. **Automatic tracking**: Jujutsu automatically tracks working copy changes; manual `git add`/`commit` is unnecessary.
 3. **Set Revision Description**: Provide a clear, detailed commit message.
@@ -65,5 +66,6 @@ This project uses the **Jujutsu (`jj`)** version control system.
 5. **Check status**: `jj status`
 
 ### Commit Rules
+
 - **Atomic Commits**: Each revision (commit) must contain exactly one logical change. Never mix bug fixes, documentation updates, and core logic modifications.
 - **Detailed Description**: Provide thorough explanations of the "WHY" (rationale), impact, and technical approach in multi-line commit messages. One-line messages are not accepted.
