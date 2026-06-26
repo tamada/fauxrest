@@ -14,22 +14,34 @@ pub trait Serializer {
 }
 
 /// Serializes data in JSON format
-pub struct JSONSerializer;
+pub struct JSONSerializer {
+    pub minify: bool,
+}
 impl Serializer for JSONSerializer {
     /// Serializes data to JSON bytes
     fn serialize(&self, d: &Value) -> Result<Vec<u8>, Error> {
-        serde_json::to_vec_pretty(d).map_err(|e| e.into())
+        if self.minify {
+            serde_json::to_vec(d).map_err(|e| e.into())
+        } else {
+            serde_json::to_vec_pretty(d).map_err(|e| e.into())
+        }
     }
     /// Returns the extension 'json'
     fn extension(&self) -> &str { "json" }
 }
 
 /// Serializes data in TypeScript/JavaScript (ESM) format
-pub struct TypescriptSerializer;
+pub struct TypescriptSerializer {
+    pub minify: bool,
+}
 impl Serializer for TypescriptSerializer {
     /// Serializes data to 'export const data = ...' format
     fn serialize(&self, d: &Value) -> Result<Vec<u8>, Error> {
-        let json = serde_json::to_string_pretty(d)?;
+        let json = if self.minify {
+            serde_json::to_string(d)?
+        } else {
+            serde_json::to_string_pretty(d)?
+        };
         Ok(format!("export const data = {};", json).into_bytes())
     }
     /// Returns the extension 'ts'

@@ -25,14 +25,18 @@ Each serializer renders input data (JSON) into a specific physical format.
 1. **`json` Serializer (Default)**
    - **Spec**: Serializes data as plain JSON text.
    - **Extension**: `.json`
+  - **Option**: With `minify: true`, emits compact (non-pretty) JSON.
 2. **`typescript` (or `js`) Serializer**
    - **Spec**: Converts data into ESM (ECMAScript Modules) code (e.g., `export const data = [...]`).
    - **Extension**: `.ts` (or `.js`)
    - **Use case**: Ideal for frontend projects using SSG tools to import data as modules during the build process.
+  - **Option**: With `minify: true`, embeds compact JSON in the generated module.
 3. **`sqlite` Serializer**
    - **Spec**: Compiles data into a portable binary relational database format (SQLite).
    - **Extension**: `.db` (or `.sqlite`)
    - **Use case**: Perfect for client-side applications that need to perform complex relational queries locally.
+
+`minify` is configured per serializer. In multi-serializer setups, each serializer can enable or disable it independently.
 
 ### B. Three Delivery Layouts
 

@@ -27,7 +27,7 @@ fn run_serializer(
     data_dir: &Path,
     api_overlay: &HashMap<String, ApiNode>,
 ) -> Result<Vec<String>> {
-    let serializer = get_serializer(&conf.serializer)?;
+    let serializer = get_serializer(&conf.serializer, conf.minify)?;
     let layout = get_layout(&conf.layout);
     let datasets = collect_datasets(data_dir)?;
     let mut names = datasets.keys().cloned().collect::<Vec<_>>();
@@ -414,7 +414,7 @@ fn write_data(
 fn generate_discovery(config: &Config, endpoints: &[String]) -> Result<()> {
     let discovery = json!({ "endpoints": endpoints });
     for s_conf in &config.serializers {
-        let s = get_serializer(&s_conf.serializer)?;
+        let s = get_serializer(&s_conf.serializer, s_conf.minify)?;
         let path = s_conf.dest.join(format!("index.{}", s.extension()));
         fs::create_dir_all(path.parent().unwrap()).map_err(Error::Io)?;
         fs::write(path, s.serialize(&discovery)?).map_err(Error::Io)?;
@@ -422,11 +422,11 @@ fn generate_discovery(config: &Config, endpoints: &[String]) -> Result<()> {
     Ok(())
 }
 
-fn get_serializer(s: &str) -> Result<Box<dyn Serializer>> {
+fn get_serializer(s: &str, minify: bool) -> Result<Box<dyn Serializer>> {
     match s {
-        "typescript" | "javascript" | "ts" | "js" => Ok(Box::new(TypescriptSerializer)),
+        "typescript" | "javascript" | "ts" | "js" => Ok(Box::new(TypescriptSerializer { minify })),
         "sqlite" | "sql" => Ok(Box::new(SqliteSerializer)),
-        "json" => Ok(Box::new(JSONSerializer)),
+        "json" => Ok(Box::new(JSONSerializer { minify })),
         _ => Err(Error::UnknownSerializer(s.into())),
     }
 }
