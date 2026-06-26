@@ -29,6 +29,9 @@ pub struct Args {
 
     #[clap(short, long, default_value_t = String::from("json"))] 
     serializer: String,
+
+    #[clap(long, default_value_t = false)]
+    minify: bool,
 }
 
 #[derive(Subcommand, Debug)]
@@ -84,7 +87,8 @@ impl Args {
         prest::SerializerConfig {
             layout,
             serializer: self.serializer.clone(),
-            dest: self.dest.clone()
+            dest: self.dest.clone(),
+            minify: self.minify,
         }
     }
 

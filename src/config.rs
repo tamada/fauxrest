@@ -87,6 +87,9 @@ pub struct SerializerConfig {
     pub layout: Layout,
     /// Destination directory
     pub dest: PathBuf,
+    /// Whether output should be compact (minified)
+    #[serde(default)]
+    pub minify: bool,
 }
 
 /// Global configuration
@@ -108,7 +111,8 @@ impl Default for Config {
                 SerializerConfig { 
                     serializer: "json".into(),
                     layout: Layout::Index,
-                    dest: "dist".into()
+                    dest: "dist".into(),
+                    minify: false,
                 }
             ],
             api: HashMap::new(),
@@ -122,7 +126,10 @@ impl Config {
         Self { 
             serializers: vec![
                 SerializerConfig{
-                    serializer, layout, dest
+                    serializer,
+                    layout,
+                    dest,
+                    minify: false,
                 }
             ],
             api: HashMap::new(),
