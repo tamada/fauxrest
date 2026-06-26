@@ -9,7 +9,12 @@
     "activities": {
         "$filter": [
             { "field": "public", "op": "eq", "value": true }
-        ]
+        ],
+        "${year}": {
+            "$filter": [
+                { "field": "from", "op": "contains", "value": "{year}" }
+            ]
+        }
     },
     "profile": {
         "$aggregate": [
@@ -18,5 +23,8 @@
             "degrees",
             "skills"
         ]
+    },
+    "secret": {
+        "$private": true
     }
 }
