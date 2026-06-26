@@ -40,7 +40,8 @@ impl Default for Config {
 }
 
 impl Config {
-    pub fn new(serializer: String, layout: Layout, dest: PathBuf) -> Self {
+    pub fn new<P: AsRef<Path>>(serializer: String, layout: Layout, dest: P) -> Self {
+        let dest = dest.as_ref().to_path_buf();
         Self { serializers: vec![
             SerializerConfig{
                 serializer, layout, dest
@@ -56,10 +57,10 @@ impl Config {
 }
 
 /// Executes the API build process
-pub fn run(config: Config, data_dir: PathBuf) -> Result<()> {
+pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
     let mut endpoints = Vec::new();
     for s_conf in &config.serializers {
-        endpoints.extend(run_serializer(s_conf, &data_dir)?);
+        endpoints.extend(run_serializer(s_conf, data_dir.as_ref())?);
     }
     generate_discovery(&config, &endpoints)?;
     Ok(())

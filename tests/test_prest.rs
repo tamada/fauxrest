@@ -2,7 +2,7 @@
 
 use std::fs;
 use std::path::Path;
-use prest::{Config};
+use prest::{Config, Layout};
 
 /// Helper to assert that a file exists and has content containing a substring.
 fn assert_contains(dest: &Path, rel_path: &str, expected: &str) {
@@ -10,6 +10,62 @@ fn assert_contains(dest: &Path, rel_path: &str, expected: &str) {
     assert!(file.exists(), "File {:?} should exist", file);
     let content = fs::read_to_string(file).expect("Failed to read file");
     assert!(content.contains(expected), "Content of {:?} should contain {:?}", rel_path, expected);
+}
+
+fn assert_file(dest: &Path, rel_path: &str) {
+    let file = dest.join(rel_path);
+    assert!(file.exists(), "File {:?} should exist", file);
+    let metadata = file.metadata()
+        .expect("{:?} failed to read file info");
+    assert!(metadata.is_file(), "{:?} should be regular file", file);
+}
+
+#[test]
+fn test_json_ser_file_layout() {
+    let tmp = tempfile::tempdir().unwrap();
+    let dist_dir = tmp.path().join("dist");
+    let config = Config::new("json".into(), Layout::File, &dist_dir);
+
+    fs::create_dir(&dist_dir).unwrap();
+    prest::run(config, "testdata/example1")
+        .expect("Failed to run prest");
+    assert_file(&dist_dir, "index.json");
+    assert_file(&dist_dir, "profile");
+    assert_file(&dist_dir, "users/1");
+    assert_file(&dist_dir, "users/2");
+    assert_file(&dist_dir, "users/index.json");
+}
+
+#[test]
+fn test_json_ser_index_layout() {
+    let tmp = tempfile::tempdir().unwrap();
+    let dist_dir = tmp.path().join("dist");
+    let config = Config::new("json".into(), Layout::Index, &dist_dir);
+
+    fs::create_dir(&dist_dir).unwrap();
+    prest::run(config, "testdata/example1")
+        .expect("Failed to run prest");
+    assert_file(&dist_dir, "index.json");
+    assert_file(&dist_dir, "profile/index.json");
+    assert_file(&dist_dir, "users/1/index.json");
+    assert_file(&dist_dir, "users/2/index.json");
+    assert_file(&dist_dir, "users/index.json");
+}
+
+#[test]
+fn test_json_ser_extension_layout() {
+    let tmp = tempfile::tempdir().unwrap();
+    let dist_dir = tmp.path().join("dist");
+    let config = Config::new("json".into(), Layout::Extension, &dist_dir);
+
+    fs::create_dir(&dist_dir).unwrap();
+    prest::run(config, "testdata/example1")
+        .expect("Failed to run prest");
+    assert_file(&dist_dir, "index.json");
+    assert_file(&dist_dir, "profile.json");
+    assert_file(&dist_dir, "users/1.json");
+    assert_file(&dist_dir, "users/2.json");
+    assert_file(&dist_dir, "users.json");
 }
 
 #[test]

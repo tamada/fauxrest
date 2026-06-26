@@ -47,7 +47,7 @@
 ### 各設定パラメータの役割
 
 1. **`serializer` (物理フォーマット)**
-   - **値**: `"json"` | `"typescript"` (または `"js"`) | `"sqlite"`
+   - **値**: `"json"` | `"typescript"` (または `"javascript"`) | `"sqlite"`
    - データの物理的な書き出し形式を定義します。
 2. **`layout` (配置・配信レイアウト - オプショナル)**
    - **値**: `"index"` | `"file"` | `"extension"`
