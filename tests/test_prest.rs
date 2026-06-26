@@ -101,3 +101,33 @@ fn test_integration_typescript_file_layout() {
     assert!(prest::run(config, data_dir).is_ok());
     assert_contains(&dest_dir, "users/index.ts", "export const data");
 }
+
+#[test]
+fn test_private_directive_hides_collection_endpoint() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("prest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(data_dir.join("users.json"), r#"[{"id": 1, "name": "Bob"}]"#).unwrap();
+
+    let config_json = format!(
+        r#"{{
+  "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+  "users": {{"$private": true}}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load(Path::new(&config_file)).unwrap();
+    assert!(prest::run(config, data_dir).is_ok());
+
+    assert!(!dest_dir.join("users/index.json").exists());
+    assert_file(&dest_dir, "users/1/index.json");
+
+    let discovery = fs::read_to_string(dest_dir.join("index.json")).unwrap();
+    assert!(!discovery.contains("\"/users\""));
+    assert!(discovery.contains("\"/users/1\""));
+}

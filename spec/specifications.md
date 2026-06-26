@@ -35,6 +35,7 @@ Each serializer renders input data (JSON) into a specific physical format.
    - **Use case**: Perfect for client-side applications that need to perform complex relational queries locally.
 
 ### B. Three Delivery Layouts
+
 The `layout` determines the relationship between endpoint URL resolution and physical file placement.
 
 - **`index` Layout (Default)**: Outputs endpoints as `/endpoint/index.[ext]`. Highly compatible with all static web servers, maintaining clean URLs.
@@ -108,7 +109,25 @@ To prevent the leakage of sensitive data (passwords, tokens, internal notes) to 
 
 ---
 
-## 6. Data Aggregation & Bundle Pattern (`$aggregate`)
+## 6. Endpoint Visibility Control (`$private`)
+
+Nodes configured with `$private: true` **do not emit the endpoint itself**. For example, if configured on `users`, `/users` is not generated and is omitted from discovery (`/index.json`).
+
+- Child endpoints (e.g., `/users/1`) still follow normal routing behavior.
+- Use `$pick` / `$omit` for field-level data sanitization.
+
+**Example:**
+```json
+{
+  "users": {
+    "$private": true
+  }
+}
+```
+
+---
+
+## 7. Data Aggregation & Bundle Pattern (`$aggregate`)
 
 "Bundling" merges multiple endpoints or entire datasets into a single endpoint, ideal for client-side applications that fetch the entire database on load. 
 
@@ -127,7 +146,7 @@ By using the `$aggregate` directive, you can merge multiple collections into a s
 
 ---
 
-## 7. Automated CORS and Platform Headers
+## 8. Automated CORS and Platform Headers
 
 `prest` automatically generates server configuration files during build time to resolve CORS constraints:
 - **Cloudflare Pages / Netlify**: Generates a `_headers` file with wildcard CORS rules.
@@ -135,14 +154,14 @@ By using the `$aggregate` directive, you can merge multiple collections into a s
 
 ---
 
-## 8. Automated TypeScript Type Generation (`.d.ts`)
+## 9. Automated TypeScript Type Generation (`.d.ts`)
 
 To ensure type safety, `prest` parses JSON data structures during build time and automatically generates accurate TypeScript definition files.
 - **Output**: `dist/types/` (e.g., `profile.d.ts`, `users.d.ts`).
 
 ---
 
-## 9. Caching & Incremental Builds
+## 10. Caching & Incremental Builds
 
 To optimize build times for large datasets, `prest` incorporates differential building:
 - During build, SHA-256 hashes of all input files are calculated and stored in `.static-api-cache.json`.
@@ -150,6 +169,6 @@ To optimize build times for large datasets, `prest` incorporates differential bu
 
 ---
 
-## 10. Media Asset Bundling & Path Rewriting
+## 11. Media Asset Bundling & Path Rewriting
 
 `prest` automatically detects relative file paths in JSON values, copies the referenced assets to `/dist/api/assets/`, and rewrites the paths in the generated JSON to the public relative URL.

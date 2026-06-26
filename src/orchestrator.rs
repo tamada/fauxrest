@@ -7,18 +7,23 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use serde_json::{Value, json};
 use crate::{Serializer, JSONSerializer, TypescriptSerializer, SqliteSerializer, Error, Layout, Result, Config, SerializerConfig};
+use crate::config::ApiNode;
 
 /// Executes the API build process
 pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
     let mut endpoints = Vec::new();
     for s_conf in &config.serializers {
-        endpoints.extend(run_serializer(s_conf, data_dir.as_ref())?);
+        endpoints.extend(run_serializer(s_conf, data_dir.as_ref(), &config.api)?);
     }
     generate_discovery(&config, &endpoints)?;
     Ok(())
 }
 
-fn run_serializer(conf: &SerializerConfig, data_dir: &Path) -> Result<Vec<String>> {
+fn run_serializer(
+    conf: &SerializerConfig,
+    data_dir: &Path,
+    api_overlay: &std::collections::HashMap<String, ApiNode>,
+) -> Result<Vec<String>> {
     let serializer = get_serializer(&conf.serializer)?;
     let layout = get_layout(&conf.layout);
     let data_dir = fs::read_dir(data_dir).map_err(Error::Io)?;
@@ -31,7 +36,18 @@ fn run_serializer(conf: &SerializerConfig, data_dir: &Path) -> Result<Vec<String
         if file_name_str.starts_with('_') || file_name_str.starts_with('.') {
             continue;
         }
-        endpoints.extend(process_entry(&entry, serializer.as_ref(), layout.as_ref(), &conf.dest)?);
+        let endpoint_name = file_name_str
+            .strip_suffix(".json")
+            .unwrap_or(&file_name_str)
+            .to_string();
+        let node = api_overlay.get(&endpoint_name);
+        endpoints.extend(process_entry(
+            &entry,
+            serializer.as_ref(),
+            layout.as_ref(),
+            &conf.dest,
+            node,
+        )?);
     }
     Ok(endpoints)
 }
@@ -41,7 +57,8 @@ fn process_entry(
     entry: &fs::DirEntry,
     s: &dyn Serializer,
     l: &dyn LayoutTrait,
-    dest: &Path
+    dest: &Path,
+    node: Option<&ApiNode>,
 ) -> Result<Vec<String>> {
     let path = entry.path();
     if path.extension().and_then(|s| s.to_str()) != Some("json") { return Ok(vec![]); }
@@ -49,9 +66,16 @@ fn process_entry(
     let content = fs::read_to_string(path).map_err(Error::Io)?;
     let json: Value = serde_json::from_str(&content).map_err(Error::SerdeJson)?;
     let name = entry.file_name().to_str().unwrap().strip_suffix(".json").unwrap().to_string();
-    write_data(&name, &json, s, l, dest)?;
+    let is_private = node.and_then(|n| n.private).unwrap_or(false);
+    if !is_private {
+        write_data(&name, &json, s, l, dest)?;
+    }
     
-    let mut endpoints = vec![format!("/{}", name)];
+    let mut endpoints = if is_private {
+        vec![]
+    } else {
+        vec![format!("/{}", name)]
+    };
     if let Value::Array(arr) = json {
         for item in arr {
             if let Some(id) = item.get("id") {

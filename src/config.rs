@@ -5,10 +5,31 @@ use std::collections::HashMap;
 use serde_json::Value;
 use crate::{Error, Result};
 
+/// This operation targets the `$filter` directive.
+/// All operations use `op` to process the value of `field` and the given `value`.
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum FilterOp {
-    Eq, Neq, Gt, Gte, Lt, Lte, Contains, Exists, Regeq, Regneq,
+    /// `field` equals to `value`
+    Eq,
+    /// `field` not equals to `value`
+    Neq,
+    /// `field` is greater than `value`
+    Gt,
+    /// `field` is greater than or equals to `value`
+    Gte,
+    /// `field` is less than `value`
+    Lt,
+    /// `field` is less than or equals to `value`
+    Lte,
+    /// `field` contains `value`.
+    Contains,
+    /// `field` is exists or not (`value` should be `true` or `false`, `true` means exists)
+    Exists,
+    /// `field` is matched by `value`.
+    RegEq,
+    /// `field` is not matched by `value`.
+    RegNeq,
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq)]
@@ -32,16 +53,25 @@ pub struct ApiNode {
     #[serde(rename = "$omit")]
     pub omit: Option<Vec<String>>,
 
+    #[serde(rename = "$private")]
+    pub private: Option<bool>,
+
     #[serde(flatten)]
     pub sub_paths: HashMap<String, ApiNode>,
 }
 
-/// Layout configuration
+/// Represents the relationship between endpoint URL resolution and
+/// physical file placement.
 #[derive(Deserialize, Serialize, Debug, Clone, clap::ValueEnum)]
 #[serde(rename_all = "lowercase")]
 pub enum Layout {
+    /// Outputs endpoints as `/endpoint/index.[ext]`. Highly compatible with all static web servers, maintaining clean URLs.
     Index,
+    /// Outputs endpoints as extensionless files (`/endpoint`). 
+    /// **Smart Fallback Specification**: To avoid physical file-directory collisions,
+    /// collections that contain sub-paths are automatically replaced (fallback) by `.../index.[ext]` files during compilation.
     File,
+    /// Outputs endpoints with explicit extensions (`/endpoint.[ext]`). 100% web server compatible.
     Extension,
 }
 
@@ -142,7 +172,8 @@ mod tests {
     #[test]
     fn test_parse_advanced_routing_config() {
         let config_path = Path::new("testdata/tamada/_config.json");
-        let config = Config::load(config_path).expect("Failed to load complex configuration");
+        let config = Config::load(config_path)
+            .expect("Failed to load complex configuration");
 
         // Verify parsing of job-histories/current/$filter
         let job_hist = config.api.get("job-histories").expect("Missing job-histories node");
@@ -164,5 +195,9 @@ mod tests {
         let profile = config.api.get("profile").expect("Missing profile node");
         let agg = profile.aggregate.as_ref().expect("Missing aggregate array");
         assert_eq!(agg, &vec!["job-histories".to_string(), "activities".to_string(), "degrees".to_string(), "skills".to_string()]);
+
+        // Verify parsing of secret/$private
+        let secret = config.api.get("secret").expect("Missing secret node");
+        assert_eq!(secret.private, Some(true));
     }
 }
