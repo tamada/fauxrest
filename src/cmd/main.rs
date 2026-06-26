@@ -48,13 +48,13 @@ enum Commands {
 
 impl Args {
     pub(crate) fn load_config(&self) -> Result<Config> {
-        if let Some(config) = &self.config {
-            Config::load(Path::new(config))
-        } else if let Some(l) = &self.layout {
-            Ok(Config::new(self.serializer.clone(), l.clone(), self.dest.clone()))
-        } else {
-            Ok(Config::default())
-        }
+        Config::load_or_default(
+            self.config.as_ref(),
+            Path::new(&self.inputs),
+            self.layout.as_ref(),
+            self.serializer.clone(),
+            self.dest.clone(),
+        )
     }
 }
 

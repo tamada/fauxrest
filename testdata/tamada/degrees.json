@@ -1,0 +1,25 @@
+[
+  {
+    "id": "doctor",
+    "title": "Doctor (Engineering)",
+    "school": "Graduate School of Information Science, Nara Institute of Science and Technology (NAIST)",
+    "dissertation": "Software Protection by Birthmark and Dynamic Name Resolution. (:jp:)",
+    "href": "https://library.naist.jp/mylimedio/search/av1.do?target=local&bibid=40417&oldid=89527",
+    "from": "April 2003",
+    "to": "March 2006"
+  },
+  {
+    "id": "master",
+    "title": "Master (Information and Communication Engineering)",
+    "school": "Graduate School of Kyoto Sangyo University.",
+    "from": "April 1999",
+    "to": "March 2001"
+  },
+  {
+    "id": "bachelor",
+    "title": "Bachelor (Information and Communication Engineering)",
+    "school": "Faculty of Information and Communication Engineering, Kyoto Sangyo University.",
+    "from": "April 1995",
+    "to": "March 1999"
+  }
+]

@@ -3,58 +3,10 @@
 //! Orchestrates the multi-serializer execution loop based on configuration,
 //! reading raw JSON and generating static files according to specified layouts.
 
-use serde::Deserialize;
 use std::fs;
 use std::path::{Path, PathBuf};
 use serde_json::{Value, json};
-use crate::{Serializer, JSONSerializer, TypescriptSerializer, SqliteSerializer, Error, Layout, Result};
-
-/// Serializer configuration
-#[derive(Deserialize)]
-pub struct SerializerConfig {
-    /// Serializer type (json, typescript, sqlite)
-    pub serializer: String,
-    /// Delivery layout (index, file, extension)
-    pub layout: Layout,
-    /// Destination directory
-    pub dest: PathBuf,
-}
-
-/// Global configuration
-#[derive(Deserialize)]
-pub struct Config {
-    /// List of serializer configurations
-    pub serializers: Vec<SerializerConfig>,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self { serializers: vec![
-            SerializerConfig { 
-                serializer: "json".into(),
-                layout: Layout::Index,
-                dest: "dist".into()
-            }
-        ] }
-    }
-}
-
-impl Config {
-    pub fn new<P: AsRef<Path>>(serializer: String, layout: Layout, dest: P) -> Self {
-        let dest = dest.as_ref().to_path_buf();
-        Self { serializers: vec![
-            SerializerConfig{
-                serializer, layout, dest
-            }
-        ]}
-    }
-
-    /// Loads configuration from a file
-    pub fn load(path: &Path) -> Result<Self> {
-        let content = fs::read_to_string(path).map_err(Error::Io)?;
-        serde_json::from_str(&content).map_err(Error::SerdeJson)
-    }
-}
+use crate::{Serializer, JSONSerializer, TypescriptSerializer, SqliteSerializer, Error, Layout, Result, Config, SerializerConfig};
 
 /// Executes the API build process
 pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
@@ -74,10 +26,16 @@ fn run_serializer(conf: &SerializerConfig, data_dir: &Path) -> Result<Vec<String
 
     for entry in data_dir {
         let entry = entry.map_err(Error::Io)?;
+        let file_name = entry.file_name();
+        let file_name_str = file_name.to_string_lossy();
+        if file_name_str.starts_with('_') || file_name_str.starts_with('.') {
+            continue;
+        }
         endpoints.extend(process_entry(&entry, serializer.as_ref(), layout.as_ref(), &conf.dest)?);
     }
     Ok(endpoints)
 }
+
 
 fn process_entry(
     entry: &fs::DirEntry,

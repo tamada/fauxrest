@@ -1,0 +1,128 @@
+[
+  {
+    "skill": "Japanese",
+    "icon": ":jp:",
+    "description": "Native!",
+    "level": 90
+  },
+  {
+    "skill": "English",
+    "icon": ":us:",
+    "description": "Fine, thank you!",
+    "level": 70
+  },
+  {
+    "skill": "bash",
+    "icon": "bash.svg",
+    "description": "I live on bash!, zsh?, fish? I don't know!",
+    "level": 70
+  },
+  {
+    "skill": "LaTeX",
+    "icon": "latex.svg",
+    "description": "Writing papers, theses, and books, LaTeX is the best tool for me.",
+    "level": 70
+  },
+  {
+    "skill": "Go lang",
+    "icon": "go.svg",
+    "description": "Using as the main language for development.",
+    "level": 70
+  },
+  {
+    "skill": "Java",
+    "icon": "java.svg",
+    "description": "Before using the Go language, this is the main language for development.",
+    "level": 80
+  },
+  {
+    "skill": "JavaScript",
+    "icon": "javascript.svg",
+    "description": "Writing the web applications, JavaScript is the key language. Recently, interested in TypeScript.",
+    "level": 70
+  },
+  {
+    "skill": "Docker",
+    "icon": "docker.svg",
+    "description": "Providing the most of my products as dockerized containers.",
+    "level": 60
+  },
+  {
+    "skill": "git",
+    "icon": "git.svg",
+    "description": "Of course, I can use it, because I usually use GitHub.",
+    "level": 70
+  },
+  {
+    "skill": "TypeScript",
+    "icon": "typescript.svg",
+    "description": "I want to learn it, but not yet.",
+    "level": 10
+  },
+  {
+    "skill": "WASM",
+    "icon": "wasm.svg",
+    "description": "The next main target in my research topics.",
+    "level": 20
+  },
+  {
+    "skill": "LLVM",
+    "icon": "llvm.svg",
+    "description": "I want to learn it for more deep understands of Rust and WASM.",
+    "level": 20
+  },
+  {
+    "skill": "GitHub",
+    "icon": "github.svg",
+    "description": "Completely depends on GitHub for my products and papers.",
+    "level": 80
+  },
+  {
+    "skill": "C",
+    "icon": "c.svg",
+    "description": "My first acquired programming language. However, not use in profession.",
+    "level": 70
+  },
+  {
+    "skill": "macOS",
+    "icon": "apple.svg",
+    "description": "Using as the main operating system.",
+    "level": 80
+  },
+  {
+    "skill": "Hugo",
+    "icon": "hugo.svg",
+    "description": "Using for personal, and official web sites, and product web sites.",
+    "level": 60
+  },
+  {
+    "skill": "Rust",
+    "icon": "rust.svg",
+    "description": "My favorite programming language in the these days!",
+    "level": 70
+  },
+  {
+    "skill": "VSCode",
+    "icon": "vscode.svg",
+    "description": "The de-facto standard editor, everyone use it. Of course I use it.",
+    "level": 50
+  },
+  {
+    "skill": "Windows",
+    "icon": "windows.svg",
+    "description": "Now, I do not use as the main OS, however, Windows PC is prepared.",
+    "level": 50
+  },
+  {
+    "skill": "Kubernetes",
+    "icon": "kubernetes.svg",
+    "description": "Studying now!",
+    "level": 30
+  },
+  {
+    "skill": "Jujutsu",
+    "icon": "jj-logo.svg",
+    "description": "Try to use instead of git!",
+    "level": 10
+  }
+]

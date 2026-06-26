@@ -85,6 +85,7 @@
 - **規約1**: `data/papers.json` が存在 ➔ `GET /api/papers` (コレクション API)
 - **規約2**: `id` フィールドが存在 ➔ `GET /api/papers/{id}` (個別リソース API)
 - **規約3**: API の最上位階層 ➔ `GET /api` (目次 API / Discovery Document)
+- **規約4**: `_` または `.` で始まるファイル/ディレクトリは除外 ➔ `_config.json` や `.drafts` などは API 生成の対象外となります。これにより、データフォルダ内に設定ファイルや非公開データを安全に配置できます。
 
 ---
 
