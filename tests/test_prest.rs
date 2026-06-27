@@ -189,7 +189,7 @@ fn test_template_subpath_expansion_with_filter_override() {
 }
 
 #[test]
-fn test_invalid_template_without_values_fails_to_load() {
+fn test_invalid_template_without_values_or_derive_fails_to_load() {
         let tmp = tempfile::tempdir().unwrap();
         let config_file = tmp.path().join("prest.json");
         let config_json = r#"{
@@ -206,7 +206,72 @@ fn test_invalid_template_without_values_fails_to_load() {
             Ok(_) => panic!("config should be rejected"),
             Err(e) => e,
         };
-        assert!(format!("{}", err).contains("template sub-path requires $values"));
+        assert!(format!("{}", err).contains("template sub-path requires $values or $derive"));
+}
+
+#[test]
+fn test_template_subpath_expansion_with_derive() {
+        let tmp = tempfile::tempdir().unwrap();
+        let data_dir = tmp.path().join("data");
+        let dest_dir = tmp.path().join("dist");
+        let config_file = tmp.path().join("prest.json");
+
+        fs::create_dir(&data_dir).unwrap();
+        fs::write(
+                data_dir.join("activities.json"),
+                r#"[
+    {"id": 1, "from": "2024-01-01", "public": false, "label": "private-2024"},
+    {"id": 2, "from": "2024-05-10", "public": true, "label": "public-2024"},
+    {"id": 3, "from": "2025-03-03", "public": true, "label": "public-2025"}
+]"#,
+        )
+        .unwrap();
+
+        let config_json = format!(
+                r#"{{
+    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "activities": {{
+        "${{year}}": {{
+            "$derive": {{ "field": "from", "pattern": "^(\\d{{4}})" }},
+            "$filter": [{{"field": "from", "op": "contains", "value": "{{year}}"}}]
+        }}
+    }}
+}}"#,
+                dest_dir.display()
+        );
+        fs::write(&config_file, &config_json).unwrap();
+
+        let config: Config = Config::load(Path::new(&config_file)).unwrap();
+        assert!(prest::run(config, data_dir).is_ok());
+
+        assert_file(&dest_dir, "activities/2024/index.json");
+        assert_file(&dest_dir, "activities/2025/index.json");
+
+        let discovery = fs::read_to_string(dest_dir.join("index.json")).unwrap();
+        assert!(discovery.contains("\"/activities/2024\""));
+        assert!(discovery.contains("\"/activities/2025\""));
+}
+
+#[test]
+fn test_template_with_values_and_derive_is_rejected() {
+        let tmp = tempfile::tempdir().unwrap();
+        let config_file = tmp.path().join("prest.json");
+        let config_json = r#"{
+    "serializers": [{"serializer": "json", "layout": "index", "dest": "dist"}],
+    "activities": {
+        "${year}": {
+            "$values": ["2024"],
+            "$derive": "from"
+        }
+    }
+}"#;
+        fs::write(&config_file, config_json).unwrap();
+
+        let err = match Config::load(Path::new(&config_file)) {
+            Ok(_) => panic!("config should be rejected"),
+            Err(e) => e,
+        };
+        assert!(format!("{}", err).contains("$values and $derive cannot be used together"));
 }
 
 #[test]

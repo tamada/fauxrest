@@ -3,6 +3,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 use serde_json::Value;
+use regex::Regex;
 use crate::{Error, Result};
 
 /// This operation targets the `$filter` directive.
@@ -59,8 +60,24 @@ pub struct ApiNode {
     #[serde(rename = "$values")]
     pub values: Option<Vec<Value>>,
 
+    #[serde(rename = "$derive")]
+    pub derive: Option<DeriveSource>,
+
     #[serde(flatten)]
     pub sub_paths: HashMap<String, ApiNode>,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[serde(untagged)]
+pub enum DeriveSource {
+    Field(String),
+    Config(DeriveConfig),
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+pub struct DeriveConfig {
+    pub field: String,
+    pub pattern: Option<String>,
 }
 
 /// Represents the relationship between endpoint URL resolution and
@@ -166,31 +183,47 @@ fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
             .ok_or_else(|| Error::Config(format!("{}: missing child node {}", path, key)))?;
         let child_path = format!("{}/{}", path, key);
         if template_var_from_key(&key).is_some() {
-            let values = child.values.as_ref().ok_or_else(|| {
-                Error::Config(format!("{}: template sub-path requires $values", child_path))
-            })?;
-            if values.is_empty() {
-                return Err(Error::Config(format!("{}: $values must not be empty", child_path)));
+            if child.values.is_some() && child.derive.is_some() {
+                return Err(Error::Config(format!(
+                    "{}: $values and $derive cannot be used together",
+                    child_path
+                )));
             }
-            for value in values {
-                if !is_scalar(value) {
-                    return Err(Error::Config(format!(
-                        "{}: $values entries must be scalar (string/number/bool)",
-                        child_path
-                    )));
+            if child.values.is_none() && child.derive.is_none() {
+                return Err(Error::Config(format!(
+                    "{}: template sub-path requires $values or $derive",
+                    child_path
+                )));
+            }
+
+            if let Some(values) = child.values.as_ref() {
+                if values.is_empty() {
+                    return Err(Error::Config(format!("{}: $values must not be empty", child_path)));
                 }
-                if let Value::String(s) = value {
-                    if s.contains('/') {
+                for value in values {
+                    if !is_scalar(value) {
                         return Err(Error::Config(format!(
-                            "{}: $values string must not contain '/'",
+                            "{}: $values entries must be scalar (string/number/bool)",
                             child_path
                         )));
                     }
+                    if let Value::String(s) = value {
+                        if s.contains('/') {
+                            return Err(Error::Config(format!(
+                                "{}: $values string must not contain '/'",
+                                child_path
+                            )));
+                        }
+                    }
                 }
             }
-        } else if child.values.is_some() {
+
+            if let Some(derive) = child.derive.as_ref() {
+                validate_derive(&child_path, derive)?;
+            }
+        } else if child.values.is_some() || child.derive.is_some() {
             return Err(Error::Config(format!(
-                "{}: $values is only allowed for template sub-path keys like ${{name}}",
+                "{}: $values/$derive are only allowed for template sub-path keys like ${{name}}",
                 child_path
             )));
         }
@@ -211,9 +244,35 @@ fn is_scalar(value: &Value) -> bool {
     matches!(value, Value::String(_) | Value::Number(_) | Value::Bool(_))
 }
 
+fn validate_derive(path: &str, derive: &DeriveSource) -> Result<()> {
+    let cfg = derive.to_config();
+    if cfg.field.trim().is_empty() {
+        return Err(Error::Config(format!("{}: $derive.field must not be empty", path)));
+    }
+    if let Some(pattern) = cfg.pattern.as_ref() {
+        Regex::new(pattern).map_err(|e| {
+            Error::Config(format!("{}: invalid $derive.pattern '{}': {}", path, pattern, e))
+        })?;
+    }
+    Ok(())
+}
+
+impl DeriveSource {
+    pub fn to_config(&self) -> DeriveConfig {
+        match self {
+            DeriveSource::Field(field) => DeriveConfig {
+                field: field.clone(),
+                pattern: None,
+            },
+            DeriveSource::Config(c) => c.clone(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Write;
 
     #[test]
     fn test_parse_advanced_routing_config() {
@@ -256,4 +315,51 @@ mod tests {
         let secret = config.api.get("secret").expect("Missing secret node");
         assert_eq!(secret.private, Some(true));
     }
+
+        #[test]
+        fn test_parse_template_derive_config() {
+                let mut tmp = tempfile::NamedTempFile::new().unwrap();
+                write!(
+                        tmp,
+                        r#"{{
+    "serializers": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "activities": {{
+        "${{year}}": {{
+            "$derive": {{"field":"from", "pattern":"^(\\d{{4}})"}}
+        }}
+    }}
+}}"#
+                )
+                .unwrap();
+
+                let config = Config::load(tmp.path()).expect("Failed to load derive configuration");
+                let activities = config.api.get("activities").expect("Missing activities node");
+                let by_year = activities.sub_paths.get("${year}").expect("Missing template node");
+                let derive = by_year.derive.as_ref().expect("Missing derive").to_config();
+                assert_eq!(derive.field, "from");
+                assert_eq!(derive.pattern, Some("^(\\d{4})".to_string()));
+        }
+
+        #[test]
+        fn test_non_template_derive_is_rejected() {
+                let mut tmp = tempfile::NamedTempFile::new().unwrap();
+                write!(
+                        tmp,
+                        r#"{{
+    "serializers": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "activities": {{
+        "by-year": {{
+            "$derive": "from"
+        }}
+    }}
+}}"#
+                )
+                .unwrap();
+
+                let err = match Config::load(tmp.path()) {
+                    Ok(_) => panic!("config should be rejected"),
+                    Err(e) => e,
+                };
+                assert!(format!("{}", err).contains("$values/$derive are only allowed"));
+        }
 }
