@@ -1,8 +1,8 @@
-//! Integration tests for the prest library
+//! Integration tests for the fauxrest library
 
 use std::fs;
 use std::path::Path;
-use prest::{Config, Layout};
+use fauxrest::{Config, Layout};
 
 /// Helper to assert that a file exists and has content containing a substring.
 fn assert_contains(dest: &Path, rel_path: &str, expected: &str) {
@@ -27,8 +27,8 @@ fn test_json_ser_file_layout() {
     let config = Config::new("json".into(), Layout::File, &dist_dir);
 
     fs::create_dir(&dist_dir).unwrap();
-    prest::run(config, "testdata/example1")
-        .expect("Failed to run prest");
+    fauxrest::run(config, "testdata/example1")
+        .expect("Failed to run fauxrest");
     assert_file(&dist_dir, "index.json");
     assert_file(&dist_dir, "profile");
     assert_file(&dist_dir, "users/1");
@@ -43,8 +43,8 @@ fn test_json_ser_index_layout() {
     let config = Config::new("json".into(), Layout::Index, &dist_dir);
 
     fs::create_dir(&dist_dir).unwrap();
-    prest::run(config, "testdata/example1")
-        .expect("Failed to run prest");
+    fauxrest::run(config, "testdata/example1")
+        .expect("Failed to run fauxrest");
     assert_file(&dist_dir, "index.json");
     assert_file(&dist_dir, "profile/index.json");
     assert_file(&dist_dir, "users/1/index.json");
@@ -59,8 +59,8 @@ fn test_json_ser_extension_layout() {
     let config = Config::new("json".into(), Layout::Extension, &dist_dir);
 
     fs::create_dir(&dist_dir).unwrap();
-    prest::run(config, "testdata/example1")
-        .expect("Failed to run prest");
+    fauxrest::run(config, "testdata/example1")
+        .expect("Failed to run fauxrest");
     assert_file(&dist_dir, "index.json");
     assert_file(&dist_dir, "profile.json");
     assert_file(&dist_dir, "users/1.json");
@@ -73,7 +73,7 @@ fn test_integration_json_json_layout() {
     let tmp = tempfile::tempdir().unwrap();
     let data_dir = tmp.path().join("data");
     let dest_dir = tmp.path().join("dist");
-    let config_file = tmp.path().join("prest.json");
+    let config_file = tmp.path().join("fauxrest.json");
 
     fs::create_dir(&data_dir).unwrap();
     fs::write(data_dir.join("profile.json"), r#"{"name": "Alice"}"#).unwrap();
@@ -81,7 +81,7 @@ fn test_integration_json_json_layout() {
     fs::write(&config_file, &config_json).unwrap();
 
     let config: Config = Config::load(Path::new(&config_file)).unwrap();
-    assert!(prest::run(config, data_dir).is_ok());
+    assert!(fauxrest::run(config, data_dir).is_ok());
     assert_contains(&dest_dir, "profile/index.json", "Alice");
 }
 
@@ -90,7 +90,7 @@ fn test_integration_typescript_file_layout() {
     let tmp = tempfile::tempdir().unwrap();
     let data_dir = tmp.path().join("data");
     let dest_dir = tmp.path().join("dist");
-    let config_file = tmp.path().join("prest.json");
+    let config_file = tmp.path().join("fauxrest.json");
 
     fs::create_dir(&data_dir).unwrap();
     fs::write(data_dir.join("users.json"), r#"[{"id": 1, "name": "Bob"}]"#).unwrap();
@@ -98,7 +98,7 @@ fn test_integration_typescript_file_layout() {
     fs::write(&config_file, &config_json).unwrap();
 
     let config: Config = Config::load(Path::new(&config_file)).unwrap();
-    assert!(prest::run(config, data_dir).is_ok());
+    assert!(fauxrest::run(config, data_dir).is_ok());
     assert_contains(&dest_dir, "users/index.ts", "export const data");
 }
 
@@ -107,7 +107,7 @@ fn test_private_directive_hides_collection_endpoint() {
     let tmp = tempfile::tempdir().unwrap();
     let data_dir = tmp.path().join("data");
     let dest_dir = tmp.path().join("dist");
-    let config_file = tmp.path().join("prest.json");
+    let config_file = tmp.path().join("fauxrest.json");
 
     fs::create_dir(&data_dir).unwrap();
     fs::write(data_dir.join("users.json"), r#"[{"id": 1, "name": "Bob"}]"#).unwrap();
@@ -122,7 +122,7 @@ fn test_private_directive_hides_collection_endpoint() {
     fs::write(&config_file, &config_json).unwrap();
 
     let config: Config = Config::load(Path::new(&config_file)).unwrap();
-    assert!(prest::run(config, data_dir).is_ok());
+    assert!(fauxrest::run(config, data_dir).is_ok());
 
     assert!(!dest_dir.join("users/index.json").exists());
     assert!(!dest_dir.join("users/1/index.json").exists());
@@ -137,7 +137,7 @@ fn test_template_subpath_expansion_with_filter_override() {
         let tmp = tempfile::tempdir().unwrap();
         let data_dir = tmp.path().join("data");
         let dest_dir = tmp.path().join("dist");
-        let config_file = tmp.path().join("prest.json");
+        let config_file = tmp.path().join("fauxrest.json");
 
         fs::create_dir(&data_dir).unwrap();
         fs::write(
@@ -166,7 +166,7 @@ fn test_template_subpath_expansion_with_filter_override() {
         fs::write(&config_file, &config_json).unwrap();
 
         let config: Config = Config::load(Path::new(&config_file)).unwrap();
-        assert!(prest::run(config, data_dir).is_ok());
+        assert!(fauxrest::run(config, data_dir).is_ok());
 
         assert_file(&dest_dir, "activities/index.json");
         assert_file(&dest_dir, "activities/2024/index.json");
@@ -191,7 +191,7 @@ fn test_template_subpath_expansion_with_filter_override() {
 #[test]
 fn test_invalid_template_without_values_or_derive_fails_to_load() {
         let tmp = tempfile::tempdir().unwrap();
-        let config_file = tmp.path().join("prest.json");
+        let config_file = tmp.path().join("fauxrest.json");
         let config_json = r#"{
     "serializers": [{"serializer": "json", "layout": "index", "dest": "dist"}],
     "activities": {
@@ -214,7 +214,7 @@ fn test_template_subpath_expansion_with_derive() {
         let tmp = tempfile::tempdir().unwrap();
         let data_dir = tmp.path().join("data");
         let dest_dir = tmp.path().join("dist");
-        let config_file = tmp.path().join("prest.json");
+        let config_file = tmp.path().join("fauxrest.json");
 
         fs::create_dir(&data_dir).unwrap();
         fs::write(
@@ -242,7 +242,7 @@ fn test_template_subpath_expansion_with_derive() {
         fs::write(&config_file, &config_json).unwrap();
 
         let config: Config = Config::load(Path::new(&config_file)).unwrap();
-        assert!(prest::run(config, data_dir).is_ok());
+        assert!(fauxrest::run(config, data_dir).is_ok());
 
         assert_file(&dest_dir, "activities/2024/index.json");
         assert_file(&dest_dir, "activities/2025/index.json");
@@ -255,7 +255,7 @@ fn test_template_subpath_expansion_with_derive() {
 #[test]
 fn test_template_with_values_and_derive_is_rejected() {
         let tmp = tempfile::tempdir().unwrap();
-        let config_file = tmp.path().join("prest.json");
+        let config_file = tmp.path().join("fauxrest.json");
         let config_json = r#"{
     "serializers": [{"serializer": "json", "layout": "index", "dest": "dist"}],
     "activities": {
@@ -279,7 +279,7 @@ fn test_pick_directive_keeps_only_specified_fields() {
         let tmp = tempfile::tempdir().unwrap();
         let data_dir = tmp.path().join("data");
         let dest_dir = tmp.path().join("dist");
-        let config_file = tmp.path().join("prest.json");
+        let config_file = tmp.path().join("fauxrest.json");
 
         fs::create_dir(&data_dir).unwrap();
         fs::write(
@@ -301,7 +301,7 @@ fn test_pick_directive_keeps_only_specified_fields() {
         fs::write(&config_file, &config_json).unwrap();
 
         let config: Config = Config::load(Path::new(&config_file)).unwrap();
-        assert!(prest::run(config, data_dir).is_ok());
+        assert!(fauxrest::run(config, data_dir).is_ok());
 
         let content = fs::read_to_string(dest_dir.join("users/index.json")).unwrap();
         assert!(content.contains("\"id\""));
@@ -315,7 +315,7 @@ fn test_omit_directive_removes_specified_fields() {
         let tmp = tempfile::tempdir().unwrap();
         let data_dir = tmp.path().join("data");
         let dest_dir = tmp.path().join("dist");
-        let config_file = tmp.path().join("prest.json");
+        let config_file = tmp.path().join("fauxrest.json");
 
         fs::create_dir(&data_dir).unwrap();
         fs::write(
@@ -337,13 +337,109 @@ fn test_omit_directive_removes_specified_fields() {
         fs::write(&config_file, &config_json).unwrap();
 
         let config: Config = Config::load(Path::new(&config_file)).unwrap();
-        assert!(prest::run(config, data_dir).is_ok());
+        assert!(fauxrest::run(config, data_dir).is_ok());
 
         let content = fs::read_to_string(dest_dir.join("users/index.json")).unwrap();
         assert!(content.contains("\"id\""));
         assert!(content.contains("\"name\""));
         assert!(!content.contains("\"email\""));
         assert!(!content.contains("\"password\""));
+}
+
+    #[test]
+    fn test_overlay_only_aggregate_endpoint_is_generated() {
+        let tmp = tempfile::tempdir().unwrap();
+        let data_dir = tmp.path().join("data");
+        let dest_dir = tmp.path().join("dist");
+        let config_file = tmp.path().join("fauxrest.json");
+
+        fs::create_dir(&data_dir).unwrap();
+        fs::write(
+            data_dir.join("users.json"),
+            r#"[
+        {"id": 1, "name": "Alice"},
+        {"id": 2, "name": "Bob"}
+    ]"#,
+        )
+        .unwrap();
+        fs::write(
+            data_dir.join("skills.json"),
+            r#"[
+        {"id": "s1", "label": "Rust"}
+    ]"#,
+        )
+        .unwrap();
+
+        let config_json = format!(
+            r#"{{
+        "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+        "profile": {{
+        "$aggregate": ["users", "skills"]
+        }}
+    }}"#,
+            dest_dir.display()
+        );
+        fs::write(&config_file, &config_json).unwrap();
+
+        let config: Config = Config::load(Path::new(&config_file)).unwrap();
+        assert!(fauxrest::run(config, data_dir).is_ok());
+
+        let content = fs::read_to_string(dest_dir.join("profile/index.json")).unwrap();
+        assert!(content.contains("\"Alice\""));
+        assert!(content.contains("\"Rust\""));
+
+        let discovery = fs::read_to_string(dest_dir.join("index.json")).unwrap();
+        assert!(discovery.contains("\"/profile\""));
+    }
+
+#[test]
+fn test_overlay_only_keyed_aggregate_endpoint_is_generated() {
+        let tmp = tempfile::tempdir().unwrap();
+        let data_dir = tmp.path().join("data");
+        let dest_dir = tmp.path().join("dist");
+        let config_file = tmp.path().join("fauxrest.json");
+
+        fs::create_dir(&data_dir).unwrap();
+        fs::write(
+                data_dir.join("users.json"),
+                r#"[
+    {"id": 1, "name": "Alice"}
+]"#,
+        )
+        .unwrap();
+        fs::write(
+                data_dir.join("skills.json"),
+                r#"[
+    {"id": "s1", "label": "Rust"}
+]"#,
+        )
+        .unwrap();
+
+        let config_json = format!(
+                r#"{{
+    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "profile": {{
+        "$aggregate": {{
+            "mode": "keyed",
+            "sources": [
+                {{"from": "users", "as": "members"}},
+                "skills"
+            ]
+        }}
+    }}
+}}"#,
+                dest_dir.display()
+        );
+        fs::write(&config_file, &config_json).unwrap();
+
+        let config: Config = Config::load(Path::new(&config_file)).unwrap();
+        assert!(fauxrest::run(config, data_dir).is_ok());
+
+        let content = fs::read_to_string(dest_dir.join("profile/index.json")).unwrap();
+        assert!(content.contains("\"members\""));
+        assert!(content.contains("\"skills\""));
+        assert!(content.contains("\"Alice\""));
+        assert!(content.contains("\"Rust\""));
 }
 
     #[test]
@@ -361,7 +457,7 @@ fn test_omit_directive_removes_specified_fields() {
         .unwrap();
 
         let pretty = Config {
-            serializers: vec![prest::SerializerConfig {
+            serializers: vec![fauxrest::SerializerConfig {
                 serializer: "json".into(),
                 layout: Layout::Index,
                 dest: pretty_dir.clone(),
@@ -370,7 +466,7 @@ fn test_omit_directive_removes_specified_fields() {
             api: std::collections::HashMap::new(),
         };
         let minified = Config {
-            serializers: vec![prest::SerializerConfig {
+            serializers: vec![fauxrest::SerializerConfig {
                 serializer: "json".into(),
                 layout: Layout::Index,
                 dest: minify_dir.clone(),
@@ -379,8 +475,8 @@ fn test_omit_directive_removes_specified_fields() {
             api: std::collections::HashMap::new(),
         };
 
-        assert!(prest::run(pretty, &data_dir).is_ok());
-        assert!(prest::run(minified, &data_dir).is_ok());
+        assert!(fauxrest::run(pretty, &data_dir).is_ok());
+        assert!(fauxrest::run(minified, &data_dir).is_ok());
 
         let pretty_text = fs::read_to_string(pretty_dir.join("profile/index.json")).unwrap();
         let minified_text = fs::read_to_string(minify_dir.join("profile/index.json")).unwrap();
@@ -404,7 +500,7 @@ fn test_omit_directive_removes_specified_fields() {
         .unwrap();
 
         let pretty = Config {
-            serializers: vec![prest::SerializerConfig {
+            serializers: vec![fauxrest::SerializerConfig {
                 serializer: "typescript".into(),
                 layout: Layout::Index,
                 dest: pretty_dir.clone(),
@@ -413,7 +509,7 @@ fn test_omit_directive_removes_specified_fields() {
             api: std::collections::HashMap::new(),
         };
         let minified = Config {
-            serializers: vec![prest::SerializerConfig {
+            serializers: vec![fauxrest::SerializerConfig {
                 serializer: "typescript".into(),
                 layout: Layout::Index,
                 dest: minify_dir.clone(),
@@ -422,8 +518,8 @@ fn test_omit_directive_removes_specified_fields() {
             api: std::collections::HashMap::new(),
         };
 
-        assert!(prest::run(pretty, &data_dir).is_ok());
-        assert!(prest::run(minified, &data_dir).is_ok());
+        assert!(fauxrest::run(pretty, &data_dir).is_ok());
+        assert!(fauxrest::run(minified, &data_dir).is_ok());
 
         let pretty_text = fs::read_to_string(pretty_dir.join("users/index.ts")).unwrap();
         let minified_text = fs::read_to_string(minify_dir.join("users/index.ts")).unwrap();

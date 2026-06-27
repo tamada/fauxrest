@@ -1,4 +1,4 @@
-module github.com/tamada/prest
+module github.com/tamada/fauxrest
 
 go 1.26.3
 

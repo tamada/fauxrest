@@ -1,6 +1,6 @@
-# prest User Guide and Deployment Procedures
+# fauxrest User Guide and Deployment Procedures
 
-`prest` is a zero-maintenance, blazingly fast Static API Generator written in Rust. It compiles raw JSON datasets into structured, production-ready static API endpoints deployable directly to cost-effective, infinitely scalable CDNs (such as GitHub Pages, Cloudflare Pages, Netlify, AWS S3, etc.).
+`fauxrest` is a zero-maintenance, blazingly fast Static API Generator written in Rust. It compiles raw JSON datasets into structured, production-ready static API endpoints deployable directly to cost-effective, infinitely scalable CDNs (such as GitHub Pages, Cloudflare Pages, Netlify, AWS S3, etc.).
 
 ---
 
@@ -23,18 +23,18 @@
 
 ## 3. Installation
 
-To build `prest` from source, ensure Rust is installed.
+To build `fauxrest` from source, ensure Rust is installed.
 
 ```bash
 # Clone the repository
-git clone https://github.com/username/prest.git
-cd prest
+git clone https://github.com/username/fauxrest.git
+cd fauxrest
 
 # Build in release mode
 cargo build --release
 ```
 
-The compiled binary will be located at `target/release/prest`.
+The compiled binary will be located at `target/release/fauxrest`.
 
 ---
 
@@ -54,20 +54,20 @@ Create a `data/` directory and add JSON datasets:
 ### Step 2: Build
 Run the build command:
 ```bash
-prest build ./data prest.json
+fauxrest build ./data fauxrest.json
 ```
 
 ### Step 3: Verify Output
-`prest` generates structured files in the designated directory based on the serializers defined in `prest.json`.
+`fauxrest` generates structured files in the designated directory based on the serializers defined in `fauxrest.json`.
 
 ---
 
 ## 5. Development Server (`serve`)
 
-`prest` includes a lightweight, internal development server for local testing.
+`fauxrest` includes a lightweight, internal development server for local testing.
 
 ```bash
-prest serve ./data --port 8080
+fauxrest serve ./data --port 8080
 ```
 
 ### DX Capabilities
@@ -80,18 +80,18 @@ prest serve ./data --port 8080
 ## 6. Deployment Procedures
 
 ### GitHub Pages
-1. Build your endpoints: `prest build ./data prest.json`
+1. Build your endpoints: `fauxrest build ./data fauxrest.json`
 2. Commit/push the output directory (e.g., `./dist`) to your `gh-pages` branch.
 3. Configure GitHub Pages to serve from that branch.
 
 ### Cloudflare Pages / Netlify
 1. Connect your repository to the service.
-2. Build Command: `prest build ./data prest.json`
+2. Build Command: `fauxrest build ./data fauxrest.json`
 3. Publish Directory: (match your config)
 4. CORS headers are applied automatically via generated `_headers` files.
 
 ### AWS S3 / CloudFront
-1. Build: `prest build ./data prest.json`
+1. Build: `fauxrest build ./data fauxrest.json`
 2. Upload to S3: `aws s3 sync ./dist s3://my-api-bucket/`
 3. Enable "Static Website Hosting" on S3.
 4. Use CloudFront distribution for HTTPS and CDN caching.

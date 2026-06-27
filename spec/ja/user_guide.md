@@ -1,6 +1,6 @@
-# prest 利用者向けガイドおよびデプロイ手順 (User Guide)
+# fauxrest 利用者向けガイドおよびデプロイ手順 (User Guide)
 
-`prest` は、Rust で記述された、運用の手間が一切不要（ゼロメンテナンス）で極めて高速に動作する**静的 API ジェネレータ**です。
+`fauxrest` は、Rust で記述された、運用の手間が一切不要（ゼロメンテナンス）で極めて高速に動作する**静的 API ジェネレータ**です。
 
 生の JSON データセットを高度に構造化された本番グレードの静的 API エンドポイントにコンパイルし、GitHub Pages や Cloudflare Pages、AWS S3 などの安価でスケーラブルな静的配信 CDN に直接デプロイできるようにします。
 
@@ -32,18 +32,18 @@
 
 ## 3. インストール手順
 
-`prest` をソースからビルドするには、システムに Rust の開発環境がインストールされている必要があります。
+`fauxrest` をソースからビルドするには、システムに Rust の開発環境がインストールされている必要があります。
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/username/prest.git
-cd prest
+git clone https://github.com/username/fauxrest.git
+cd fauxrest
 
 # リリースモードでのビルド
 cargo build --release
 ```
 
-コンパイルされたバイナリは `target/release/prest` に出力されます。これをシステムの PATH が通ったディレクトリに配置して利用します。
+コンパイルされたバイナリは `target/release/fauxrest` に出力されます。これをシステムの PATH が通ったディレクトリに配置して利用します。
 
 ---
 
@@ -72,7 +72,7 @@ cargo build --release
 以下のコマンドを実行してビルドを行います。
 
 ```bash
-prest
+fauxrest
 ```
 
 ### ステップ 3: 出力の確認
@@ -93,10 +93,10 @@ dist/
 
 ## 5. 内蔵開発サーバー (`serve`)
 
-`prest` には、Nginx などの外部サーバーを立ち上げることなくローカル環境で即座に動作確認を行うための、軽量な開発用 HTTP サーバーが内蔵されています。
+`fauxrest` には、Nginx などの外部サーバーを立ち上げることなくローカル環境で即座に動作確認を行うための、軽量な開発用 HTTP サーバーが内蔵されています。
 
 ```bash
-prest serve --port 8080 --host 127.0.0.1
+fauxrest serve --port 8080 --host 127.0.0.1
 ```
 
 ### 開発サーバーの特徴
@@ -111,7 +111,7 @@ prest serve --port 8080 --host 127.0.0.1
 ### GitHub Pages
 1. デフォルト設定のままビルドを実行し、静的ファイルを生成します：
    ```bash
-   prest --dest ./dist
+   fauxrest --dest ./dist
    ```
 2. `./dist` フォルダを Git の `gh-pages` などのブランチにコミットおよびプッシュします。
 3. リポジトリ設定から、対象ブランチを GitHub Pages の公開元ディレクトリとして設定します。
@@ -119,14 +119,14 @@ prest serve --port 8080 --host 127.0.0.1
 ### Cloudflare Pages / Netlify
 1. ソースコードのリポジトリを Cloudflare Pages または Netlify に直接連携します。
 2. ビルド設定（Build Settings）を以下のように指定します：
-   - **Build Command**: `prest` (事前ビルドされたバイナリか、または `cargo build --release` 経由)
+   - **Build Command**: `fauxrest` (事前ビルドされたバイナリか、または `cargo build --release` 経由)
    - **Publish Directory**: `./dist`
 3. ビルド時に自動出力される `_headers` ファイルにより、配信ドメインに対する CORS ヘッダーが自動的に反映されます。
 
 ### AWS S3 / CloudFront
 1. 通常ビルドを実行します：
    ```bash
-   prest --dest ./dist
+   fauxrest --dest ./dist
    ```
 2. AWS CLI を用いて、S3 バケットへアセットを同期します：
    ```bash

@@ -2,16 +2,16 @@
 title: "🏃 Usage"
 ---
 
-`prest` provides a small command surface for build and local verification workflows.
+`fauxrest` provides a small command surface for build and local verification workflows.
 
-## How to run `prest`
+## How to run `fauxrest`
 
 ### Build psuede REST data
 
 Compile datasets into static outputs.
 
 ```bash
-prest build --config prest.json ./data
+fauxrest build --config fauxrest.json ./data
 ```
 
 Typical behavior:
@@ -26,7 +26,7 @@ Typical behavior:
 Start a local development server with rebuild support.
 
 ```bash
-prest serve ./data --port 8080
+fauxrest serve ./data --port 8080
 ```
 
 Serve mode capabilities:
@@ -38,13 +38,13 @@ Serve mode capabilities:
 ### Typical Local Loop
 
 1. Edit JSON data or config.
-2. Run `prest build` for deterministic artifact generation.
-3. Use `prest serve` while integrating a frontend locally.
+2. Run `fauxrest build` for deterministic artifact generation.
+3. Use `fauxrest serve` while integrating a frontend locally.
 
 ## 🐳 Container image support
 
-[![quay.io](https://img.shields.io/badges/quay.io-quay.io/tama5/prest:latest-EE0000?logo=redhat)](https://quay.io/repository/tama5/prest)
+[![quay.io](https://img.shields.io/badges/quay.io-quay.io/tama5/fauxrest:latest-EE0000?logo=redhat)](https://quay.io/repository/tama5/fauxrest)
 
 ```sh
-docker run -it --rm -v $PWD:/opt quay.io/tama5/prest:latest 
+docker run -it --rm -v $PWD:/opt quay.io/tama5/fauxrest:latest 
 ```

@@ -1,6 +1,6 @@
-# prest Conventions and Physical Mapping Specifications
+# fauxrest Conventions and Physical Mapping Specifications
 
-`prest` is a **convention-over-configuration** static API generator that allows for the rapid construction of robust static RESTful APIs by following predetermined, intuitive conventions without the need for detailed configuration files.
+`fauxrest` is a **convention-over-configuration** static API generator that allows for the rapid construction of robust static RESTful APIs by following predetermined, intuitive conventions without the need for detailed configuration files.
 
 This document defines the core philosophy, global configuration, basic conventions, and the physical file mapping rules.
 
@@ -8,16 +8,16 @@ This document defines the core philosophy, global configuration, basic conventio
 
 ## 1. Design Philosophy
 
-- **Convention over Configuration**: Influenced by Ruby on Rails, `prest` allows developers to build APIs simply by organizing data structures in the `data/` directory, without explicit route definitions.
+- **Convention over Configuration**: Influenced by Ruby on Rails, `fauxrest` allows developers to build APIs simply by organizing data structures in the `data/` directory, without explicit route definitions.
 - **Data-Source Driven**: API structure and endpoints are defined automatically by the structure of the JSON data itself, not by static configuration files. Configuration files exist as an *option* for handling exceptions or customizations.
 
 ---
 
 ## 2. Global Configuration ($config.format)
 
-The global output format is controlled via the `$config` key in the project root configuration file (e.g., `prest.json`).
+The global output format is controlled via the `$config` key in the project root configuration file (e.g., `fauxrest.json`).
 
-`prest` supports **three consistent Output Formatting Modes** based on the delivery characteristics of static file servers. Using this `format` parameter instead of fragmented boolean flags ensures a unified and consistent physical file structure across the entire API.
+`fauxrest` supports **three consistent Output Formatting Modes** based on the delivery characteristics of static file servers. Using this `format` parameter instead of fragmented boolean flags ensures a unified and consistent physical file structure across the entire API.
 
 ```json
 {
@@ -84,7 +84,7 @@ For special cases that cannot be inferred by conventions, use the `$index` meta-
 Operating systems have a physical rule: **"A file and a directory cannot share the same name at the same path."**
 For example, in `file` mode, outputting a collection file `/api/papers` prevents the creation of a directory `/api/papers/` required to house individual resources like `/api/papers/{id}`.
 
-To resolve this, `prest` applies **"Smart Fallback."**
+To resolve this, `fauxrest` applies **"Smart Fallback."**
 
 ### Smart Fallback Rules
 - When compiling in `file` mode, **collections that contain sub-paths (like individual resource items) automatically fallback to `.../index.json` format** to avoid physical collisions.

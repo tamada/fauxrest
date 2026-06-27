@@ -9,21 +9,21 @@ title: "⚓️ Install"
 ## Build From Source
 
 ```bash
-git clone https://github.com/username/prest.git
-cd prest
+git clone https://github.com/username/fauxrest.git
+cd fauxrest
 cargo build --release
 ```
 
-The binary is generated at `target/release/prest`.
+The binary is generated at `target/release/fauxrest`.
 
 ## Quick Start
 
 1. Create a `data/` directory with JSON files.
-2. Prepare a config file (for example `prest.json`) if you need explicit serializer/layout settings.
+2. Prepare a config file (for example `fauxrest.json`) if you need explicit serializer/layout settings.
 3. Build outputs:
 
 ```bash
-prest build ./data prest.json
+fauxrest build ./data fauxrest.json
 ```
 
 4. Check generated files under the configured destination path.

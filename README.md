@@ -1,11 +1,11 @@
-# prest
+# fauxrest
 
 > **Pseudo-REST Static API Generator** — Compile raw JSON datasets into structured, production-ready static API endpoints deployable directly to cost-effective, infinitely scalable CDNs (GitHub Pages, Cloudflare Pages, Netlify, AWS S3, etc.).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/)
 
-`prest` is a zero-maintenance, blazingly fast command-line utility written in Rust. It eliminates the need for dynamic server processes (like Node.js or Python) and databases for read-only APIs, allowing you to achieve infinite scalability and sub-millisecond response times at zero hosting cost.
+`fauxrest` is a zero-maintenance, blazingly fast command-line utility written in Rust. It eliminates the need for dynamic server processes (like Node.js or Python) and databases for read-only APIs, allowing you to achieve infinite scalability and sub-millisecond response times at zero hosting cost.
 
 ---
 
@@ -25,18 +25,18 @@
 
 ## 📦 Installation
 
-To compile `prest` from source, ensure you have Rust installed.
+To compile `fauxrest` from source, ensure you have Rust installed.
 
 ```bash
 # Clone the repository
-git clone https://github.com/username/prest.git
-cd prest
+git clone https://github.com/username/fauxrest.git
+cd fauxrest
 
 # Build in release mode
 cargo build --release
 ```
 
-The compiled binary will be located in `target/release/prest`.
+The compiled binary will be located in `target/release/fauxrest`.
 
 ---
 
@@ -50,13 +50,13 @@ data/
 └── users.json         # list of user objects with "id"
 ```
 
-Then run `prest`:
+Then run `fauxrest`:
 
 ```bash
-prest
+fauxrest
 ```
 
-`prest` will scan `./data`, infer the routes, and output:
+`fauxrest` will scan `./data`, infer the routes, and output:
 
 ```text
 dist/
@@ -105,7 +105,7 @@ module.exports = {
 
 ## 🧬 Routing Patterns & Transformations
 
-`prest` provides 4 native REST transformations to format and organize your datasets:
+`fauxrest` provides 4 native REST transformations to format and organize your datasets:
 
 1.  **Single Object (`type: single`):** Copies a single object directly to the route path.
 2.  **Collection (`type: list`):** Outputs a JSON array representing a list of entities.
@@ -129,7 +129,7 @@ To ensure seamless routing behavior across different CDN and static hosts:
 
 To maintain simplicity, high speed, and ease of deployment, certain features are explicitly **out of scope**:
 
-1.  **Dynamic Write Operations (`POST`, `PUT`, `DELETE`):** `prest` is purely a static read-only generator. If your clients require dynamic, stateful database updates, you should migrate to a standard, dynamic API backend.
+1.  **Dynamic Write Operations (`POST`, `PUT`, `DELETE`):** `fauxrest` is purely a static read-only generator. If your clients require dynamic, stateful database updates, you should migrate to a standard, dynamic API backend.
 2.  **API Versioning (Simultaneous `/v1` and `/v2` branches):** Maintaining legacy endpoint schemas within a static compiler adds unnecessary overhead. If multiple active versions must be supported, standard dynamic API gateways or hosting-level rewrite layers should be utilized.
 3.  **Advanced Mock Server Latency or Status Emulation:** This is a deployment publisher, not a test suite mock framework. If you need rich latency simulation (`?_delay=2000`) or status-code mocking, please use standard client-side libraries like MSW (Mock Service Worker).
 

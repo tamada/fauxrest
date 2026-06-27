@@ -1,16 +1,16 @@
-# prest Development Guidelines and Coding Standards
+# fauxrest Development Guidelines and Coding Standards
 
-This document defines the strict architectural boundaries, coding standards, and testing criteria to be followed by developers contributing to or maintaining `prest`.
+This document defines the strict architectural boundaries, coding standards, and testing criteria to be followed by developers contributing to or maintaining `fauxrest`.
 
 ---
 
 ## 1. Crate Architecture
 
-To maximize decoupling and reusability, `prest` clearly separates library logic from binary orchestration:
+To maximize decoupling and reusability, `fauxrest` clearly separates library logic from binary orchestration:
 
-- **Library Crate (`prest`):** Implemented in `src/lib.rs`. Encapsulates core business logic, serializers, layouts, and compilation logic. It must be free of CLI parser dependencies (`clap`, etc.) and expose a clean, programmatic interface.
-- **Binary Crate (`prest-bin`):** Implemented in `src/cmd/main.rs`. Responsible for CLI argument parsing, validation, and command dispatching.
-- **Dependency Flow Constraint:** `src/cmd/` depends on `prest` (library). The library must **never** reference any code within `src/cmd/` or depend on CLI state.
+- **Library Crate (`fauxrest`):** Implemented in `src/lib.rs`. Encapsulates core business logic, serializers, layouts, and compilation logic. It must be free of CLI parser dependencies (`clap`, etc.) and expose a clean, programmatic interface.
+- **Binary Crate (`fauxrest-bin`):** Implemented in `src/cmd/main.rs`. Responsible for CLI argument parsing, validation, and command dispatching.
+- **Dependency Flow Constraint:** `src/cmd/` depends on `fauxrest` (library). The library must **never** reference any code within `src/cmd/` or depend on CLI state.
 
 ---
 
