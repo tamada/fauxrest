@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use serde_json::Value;
 use regex::Regex;
 use crate::{Error, Result};
@@ -40,13 +40,90 @@ pub struct FilterCondition {
     pub value: Value,
 }
 
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[serde(untagged)]
+pub enum AggregateSpec {
+    Paths(Vec<String>),
+    Config(AggregateConfig),
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+pub struct AggregateConfig {
+    #[serde(default)]
+    pub mode: AggregateMode,
+    pub sources: Vec<AggregateSource>,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum AggregateMode {
+    #[default]
+    Flat,
+    Keyed,
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[serde(untagged)]
+pub enum AggregateSource {
+    Path(String),
+    Mapping(AggregateSourceMapping),
+}
+
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+pub struct AggregateSourceMapping {
+    pub from: String,
+    #[serde(rename = "as")]
+    pub as_key: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AggregateEntry {
+    pub from: String,
+    pub key: Option<String>,
+}
+
+impl AggregateSpec {
+    pub fn mode(&self) -> AggregateMode {
+        match self {
+            AggregateSpec::Paths(_) => AggregateMode::Flat,
+            AggregateSpec::Config(cfg) => cfg.mode.clone(),
+        }
+    }
+
+    pub fn entries(&self) -> Vec<AggregateEntry> {
+        match self {
+            AggregateSpec::Paths(paths) => paths
+                .iter()
+                .map(|p| AggregateEntry {
+                    from: p.clone(),
+                    key: None,
+                })
+                .collect(),
+            AggregateSpec::Config(cfg) => cfg
+                .sources
+                .iter()
+                .map(|s| match s {
+                    AggregateSource::Path(p) => AggregateEntry {
+                        from: p.clone(),
+                        key: None,
+                    },
+                    AggregateSource::Mapping(m) => AggregateEntry {
+                        from: m.from.clone(),
+                        key: m.as_key.clone(),
+                    },
+                })
+                .collect(),
+        }
+    }
+}
+
 #[derive(Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct ApiNode {
     #[serde(rename = "$filter")]
     pub filter: Option<Vec<FilterCondition>>,
 
     #[serde(rename = "$aggregate")]
-    pub aggregate: Option<Vec<String>>,
+    pub aggregate: Option<AggregateSpec>,
 
     #[serde(rename = "$pick")]
     pub pick: Option<Vec<String>>,
@@ -176,6 +253,10 @@ impl Config {
 }
 
 fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
+    if let Some(aggregate) = node.aggregate.as_ref() {
+        validate_aggregate(path, aggregate)?;
+    }
+
     let mut keys = node.sub_paths.keys().cloned().collect::<Vec<_>>();
     keys.sort();
     for key in keys {
@@ -228,6 +309,38 @@ fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
             )));
         }
         validate_node(&child_path, child)?;
+    }
+    Ok(())
+}
+
+fn validate_aggregate(path: &str, aggregate: &AggregateSpec) -> Result<()> {
+    let entries = aggregate.entries();
+    if entries.is_empty() {
+        return Err(Error::Config(format!("{}: $aggregate must not be empty", path)));
+    }
+
+    let mode = aggregate.mode();
+    let mut keyed_names = BTreeSet::new();
+    for entry in entries {
+        if entry.from.trim().is_empty() {
+            return Err(Error::Config(format!("{}: $aggregate source must not be empty", path)));
+        }
+
+        if mode == AggregateMode::Keyed {
+            let key = entry.key.unwrap_or(entry.from);
+            if key.trim().is_empty() {
+                return Err(Error::Config(format!(
+                    "{}: $aggregate keyed source alias must not be empty",
+                    path
+                )));
+            }
+            if !keyed_names.insert(key.clone()) {
+                return Err(Error::Config(format!(
+                    "{}: duplicate keyed aggregate key '{}'",
+                    path, key
+                )));
+            }
+        }
     }
     Ok(())
 }
@@ -309,7 +422,12 @@ mod tests {
         // Verify parsing of profile/$aggregate
         let profile = config.api.get("profile").expect("Missing profile node");
         let agg = profile.aggregate.as_ref().expect("Missing aggregate array");
-        assert_eq!(agg, &vec!["job-histories".to_string(), "activities".to_string(), "degrees".to_string(), "skills".to_string()]);
+        assert_eq!(agg.mode(), AggregateMode::Keyed);
+        let entries = agg.entries();
+        assert_eq!(entries[0].from, "job-histories");
+        assert_eq!(entries[1].from, "activities");
+        assert_eq!(entries[2].from, "degrees");
+        assert_eq!(entries[3].from, "skills");
 
         // Verify parsing of secret/$private
         let secret = config.api.get("secret").expect("Missing secret node");

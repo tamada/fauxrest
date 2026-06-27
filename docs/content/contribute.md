@@ -4,7 +4,7 @@ title: "👩‍💻 How to contribute 🧑‍💻"
 
 ## Crate Architecture
 
-`prest` separates core logic from CLI orchestration.
+`fauxrest` separates core logic from CLI orchestration.
 
 - Library crate: implemented in `src/lib.rs`.
 - Binary crate: implemented in `src/cmd/main.rs`.
@@ -16,7 +16,7 @@ Dependency rule:
 
 ## Programmatic Use
 
-Use the library crate when embedding `prest` behavior in tooling or internal pipelines.
+Use the library crate when embedding `fauxrest` behavior in tooling or internal pipelines.
 Keep command parsing and process-level concerns outside library boundaries.
 
 ## Development Standards

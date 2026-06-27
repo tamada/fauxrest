@@ -1,9 +1,9 @@
 use clap::{Parser, Subcommand};
-use prest::{Config, Layout, Result};
+use fauxrest::{Config, Layout, Result};
 use std::path::{Path, PathBuf};
 
 #[derive(Parser, Debug)]
-#[command(name = "prest", version, about = "Static API Generator", long_about = None)]
+#[command(name = "fauxrest", version, about = "Static API Generator", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -57,16 +57,16 @@ impl Args {
     /// or falls back to the default configuration.
     pub(crate) fn load_config(&self) -> Result<Config> {
         let config = if let Some(config) = &self.config {
-            prest::Config::load(config)
+            fauxrest::Config::load(config)
         } else if let Some(discovered_path) = Self::discover(Path::new(&self.inputs)) {
-            prest::Config::load(&discovered_path)
+            fauxrest::Config::load(&discovered_path)
         } else {
-            Ok(prest::Config::default())
+            Ok(fauxrest::Config::default())
         };
         match config {
             Ok(config) => {
                 if config.serializers.len() == 0 {
-                    Ok(prest::Config {
+                    Ok(fauxrest::Config {
                         serializers: vec![ self.serializer_config() ],
                         api: config.api,
                     })
@@ -78,13 +78,13 @@ impl Args {
         }
     }
 
-    fn serializer_config(&self) -> prest::SerializerConfig {
+    fn serializer_config(&self) -> fauxrest::SerializerConfig {
         let layout = if let Some(l) = &self.layout {
             l.clone()
         } else {
             Layout::Index
         };
-        prest::SerializerConfig {
+        fauxrest::SerializerConfig {
             layout,
             serializer: self.serializer.clone(),
             dest: self.dest.clone(),
@@ -93,9 +93,9 @@ impl Args {
     }
 
     /// Discovers and loads a configuration file from a directory.
-    /// It searches for '_config.json', '_prest.json', '.config.json', and '.prest.json' in order.
+    /// It searches for '_config.json', '_fauxrest.json', '.config.json', and '.fauxrest.json' in order.
     fn discover(dir: &Path) -> Option<PathBuf> {
-        let configs = [ "_config.json", "_prest.json", ".config.json", ".prest.json" ];
+        let configs = [ "_config.json", "_fauxrest.json", ".config.json", ".fauxrest.json" ];
         configs.iter()
             .map(|c| dir.join(c))
             .find(|path| path.exists())
@@ -104,7 +104,7 @@ impl Args {
 
 fn perform_build(args: Args) -> Result<()> {
     let config = args.load_config()?;
-    prest::run(config, PathBuf::from(args.inputs))
+    fauxrest::run(config, PathBuf::from(args.inputs))
 }
 
 fn main() -> Result<()> {
@@ -120,7 +120,7 @@ fn main() -> Result<()> {
             if let Some(args) = cli.args {
                 perform_build(args)
             } else {
-                Err(prest::Error::Config("missing inputs".into()))
+                Err(fauxrest::Error::Config("missing inputs".into()))
             }
 
         }

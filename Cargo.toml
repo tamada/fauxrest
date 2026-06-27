@@ -1,10 +1,10 @@
 [package]
-name = "prest"
+name = "fauxrest"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "prest"
+name = "fauxrest"
 path = "src/cmd/main.rs"
 
 [dependencies]

@@ -1,23 +1,23 @@
-# prest Technical Specifications and Data Transformation
+# fauxrest Technical Specifications and Data Transformation
 
-`prest` is a high-performance static API generator designed for static hosting environments. It includes advanced build specifications, transformation logic, and developer experience (DX) features.
+`fauxrest` is a high-performance static API generator designed for static hosting environments. It includes advanced build specifications, transformation logic, and developer experience (DX) features.
 
 ---
 
 ## 1. Configuration Tiers
 
-`prest` supports three configuration tiers depending on the development phase and flexibility required:
+`fauxrest` supports three configuration tiers depending on the development phase and flexibility required:
 
-- **Tier 1: Zero-Config**: If no configuration file exists, `prest` automatically infers and builds an API from the structure in `./data` using convention-over-configuration.
+- **Tier 1: Zero-Config**: If no configuration file exists, `fauxrest` automatically infers and builds an API from the structure in `./data` using convention-over-configuration.
 - **Tier 2: Convention Overlay (`_config.json`)**: Allows patching the automatically inferred API tree using a structured JSON configuration that mirrors the API routes. 
-  - **Auto-Discovery**: `prest` automatically searches for the configuration file in the following order: `_config.json`, `_prest.json`, `.config.json`, `.prest.json`.
+  - **Auto-Discovery**: `fauxrest` automatically searches for the configuration file in the following order: `_config.json`, `_fauxrest.json`, `.config.json`, `.fauxrest.json`.
 - **Tier 3: Programmatic Configuration (`api.config.js`)**: Allows writing complex data transformation functions using JavaScript/TypeScript.
 
 ---
 
 ## 2. Serializer and Layout Specifications
 
-`prest`'s compilation system is defined by two orthogonal concepts: the **"Serializer"** (which determines the physical data structure) and the **"Layout"** (which determines the file system placement).
+`fauxrest`'s compilation system is defined by two orthogonal concepts: the **"Serializer"** (which determines the physical data structure) and the **"Layout"** (which determines the file system placement).
 
 ### A. Three Physical Serializers
 Each serializer renders input data (JSON) into a specific physical format.
@@ -176,7 +176,7 @@ By using the `$aggregate` directive, you can merge multiple collections into a s
 
 ## 8. Automated CORS and Platform Headers
 
-`prest` automatically generates server configuration files during build time to resolve CORS constraints:
+`fauxrest` automatically generates server configuration files during build time to resolve CORS constraints:
 - **Cloudflare Pages / Netlify**: Generates a `_headers` file with wildcard CORS rules.
 - **Vercel**: Generates a `vercel.json` configuration file.
 
@@ -184,14 +184,14 @@ By using the `$aggregate` directive, you can merge multiple collections into a s
 
 ## 9. Automated TypeScript Type Generation (`.d.ts`)
 
-To ensure type safety, `prest` parses JSON data structures during build time and automatically generates accurate TypeScript definition files.
+To ensure type safety, `fauxrest` parses JSON data structures during build time and automatically generates accurate TypeScript definition files.
 - **Output**: `dist/types/` (e.g., `profile.d.ts`, `users.d.ts`).
 
 ---
 
 ## 10. Caching & Incremental Builds
 
-To optimize build times for large datasets, `prest` incorporates differential building:
+To optimize build times for large datasets, `fauxrest` incorporates differential building:
 - During build, SHA-256 hashes of all input files are calculated and stored in `.static-api-cache.json`.
 - Subsequent builds verify hashes, compiling only changed files.
 
@@ -199,4 +199,4 @@ To optimize build times for large datasets, `prest` incorporates differential bu
 
 ## 11. Media Asset Bundling & Path Rewriting
 
-`prest` automatically detects relative file paths in JSON values, copies the referenced assets to `/dist/api/assets/`, and rewrites the paths in the generated JSON to the public relative URL.
+`fauxrest` automatically detects relative file paths in JSON values, copies the referenced assets to `/dist/api/assets/`, and rewrites the paths in the generated JSON to the public relative URL.

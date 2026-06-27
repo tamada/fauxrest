@@ -9,7 +9,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use serde_json::{json, Map, Value};
 
-use crate::config::{ApiNode, DeriveConfig, FilterCondition, FilterOp};
+use crate::config::{AggregateMode, AggregateSpec, ApiNode, DeriveConfig, FilterCondition, FilterOp};
 use crate::{Config, Error, JSONSerializer, Layout, Result, Serializer, SerializerConfig, SqliteSerializer, TypescriptSerializer};
 
 const DERIVE_CARDINALITY_WARN_THRESHOLD: usize = 1000;
@@ -52,6 +52,32 @@ fn run_serializer(
             &conf.dest,
         )?);
     }
+
+    // Support virtual aggregate endpoints defined only in overlay config.
+    let mut overlay_names = api_overlay.keys().cloned().collect::<Vec<_>>();
+    overlay_names.sort();
+    for name in overlay_names {
+        if datasets.contains_key(&name) {
+            continue;
+        }
+        let Some(node) = api_overlay.get(&name) else {
+            continue;
+        };
+        if node.aggregate.is_none() {
+            continue;
+        }
+        endpoints.extend(materialize_node(
+            &name,
+            &Value::Null,
+            Some(node),
+            None,
+            &datasets,
+            serializer.as_ref(),
+            layout.as_ref(),
+            &conf.dest,
+        )?);
+    }
+
     endpoints.sort();
     endpoints.dedup();
     Ok(endpoints)
@@ -174,19 +200,46 @@ fn materialize_node(
     Ok(endpoints)
 }
 
-fn aggregate_values(paths: &[String], datasets: &HashMap<String, Value>) -> Result<Value> {
-    let mut merged = Vec::new();
-    for path in paths {
-        let data = datasets
-            .get(path)
-            .ok_or_else(|| Error::Config(format!("$aggregate references unknown dataset '{}'", path)))?;
-        if let Value::Array(arr) = data {
-            merged.extend(arr.iter().cloned());
-        } else {
-            merged.push(data.clone());
+fn aggregate_values(aggregate: &AggregateSpec, datasets: &HashMap<String, Value>) -> Result<Value> {
+    match aggregate.mode() {
+        AggregateMode::Flat => {
+            let mut merged = Vec::new();
+            for entry in aggregate.entries() {
+                let data = datasets
+                    .get(&entry.from)
+                    .ok_or_else(|| Error::Config(format!(
+                        "$aggregate references unknown dataset '{}'",
+                        entry.from
+                    )))?;
+                if let Value::Array(arr) = data {
+                    merged.extend(arr.iter().cloned());
+                } else {
+                    merged.push(data.clone());
+                }
+            }
+            Ok(Value::Array(merged))
+        }
+        AggregateMode::Keyed => {
+            let mut merged = Map::new();
+            for entry in aggregate.entries() {
+                let data = datasets
+                    .get(&entry.from)
+                    .ok_or_else(|| Error::Config(format!(
+                        "$aggregate references unknown dataset '{}'",
+                        entry.from
+                    )))?;
+                let key = entry.key.unwrap_or(entry.from.clone());
+                if merged.contains_key(&key) {
+                    return Err(Error::Config(format!(
+                        "$aggregate keyed output contains duplicate key '{}'",
+                        key
+                    )));
+                }
+                merged.insert(key, data.clone());
+            }
+            Ok(Value::Object(merged))
         }
     }
-    Ok(Value::Array(merged))
 }
 
 fn apply_filters(data: &Value, filters: &[FilterCondition]) -> Result<Value> {

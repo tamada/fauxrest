@@ -28,8 +28,8 @@ container-local:
         --build-arg GIT_REVISION={{git_revision}} \
         --build-arg BUILD_DATE={{build_date}} \
         --build-arg VERSION={{app_version}} \
-        -t {{container_image}}/prest:latest \
-        -t {{container_image}}/prest:{{ app_version }} \
+        -t {{container_image}}/fauxrest:latest \
+        -t {{container_image}}/fauxrest:{{ app_version }} \
         -f Containerfile \
         .
 
@@ -39,7 +39,7 @@ container:
         --build-arg GIT_REVISION={{git_revision}} \
         --build-arg BUILD_DATE={{build_date}} \
         --build-arg VERSION={{ app_version }} \
-        -t {{container_image}}/prest:latest \
-        -t {{container_image}}/prest:{{ app_version }} \
+        -t {{container_image}}/fauxrest:latest \
+        -t {{container_image}}/fauxrest:{{ app_version }} \
         -f Containerfile \
         .

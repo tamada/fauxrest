@@ -4,7 +4,7 @@ title: "⚙️  Configuration"
 
 ## Configuration Tiers
 
-`prest` supports three tiers depending on required control:
+`fauxrest` supports three tiers depending on required control:
 
 1. Zero-config: infer endpoints from `./data` structure.
 2. Convention overlay: patch inferred tree via `_config.json` style files.
@@ -13,9 +13,9 @@ title: "⚙️  Configuration"
 Auto-discovery for config files checks:
 
 - `_config.json`
-- `_prest.json`
+- `_fauxrest.json`
 - `.config.json`
-- `.prest.json`
+- `.fauxrest.json`
 
 ## Serializer Configuration
 

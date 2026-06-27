@@ -1,9 +1,9 @@
-# About prest
+# About fauxrest
 
-`prest` is a convention-over-configuration static API generator written in Rust.
+`fauxrest` is a convention-over-configuration static API generator written in Rust.
 It compiles JSON datasets into production-ready static API endpoints for CDN hosting.
 
-## Why prest
+## Why fauxrest
 
 1. Infinite scalability through static asset delivery on edge networks.
 2. Low operating cost by removing application servers and databases for read APIs.
@@ -25,5 +25,5 @@ It compiles JSON datasets into production-ready static API endpoints for CDN hos
 
 ## Delivery Model
 
-`prest` can emit multiple outputs in one build, such as JSON for API delivery,
+`fauxrest` can emit multiple outputs in one build, such as JSON for API delivery,
 TypeScript modules for frontend builds, and SQLite for offline query workloads.

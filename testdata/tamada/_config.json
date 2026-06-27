@@ -18,12 +18,15 @@
         }
     },
     "profile": {
-        "$aggregate": [
-            "job-histories",
-            "activities",
-            "degrees",
-            "skills"
-        ]
+        "$aggregate": {
+            "mode": "keyed",
+            "sources": [
+                "job-histories",
+                "activities",
+                "degrees",
+                "skills"
+            ]
+        }
     },
     "secret": {
         "$private": true

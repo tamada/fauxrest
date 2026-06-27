@@ -1,4 +1,4 @@
-//! `prest` library: Static API generator core logic
+//! `fauxrest` library: Static API generator core logic
 //!
 //! This crate provides serializers, delivery layouts, and orchestration logic
 //! for compiling raw JSON datasets into structured static API endpoints.
@@ -7,7 +7,7 @@ use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// Error type for prest
+/// Error type for fauxrest
 #[derive(Error, Debug)]
 pub enum Error {
     /// IO error
