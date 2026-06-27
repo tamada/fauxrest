@@ -11,13 +11,13 @@ title: "🏃 Usage"
 Compile datasets into static outputs.
 
 ```bash
-fauxrest build --config fauxrest.json ./data
+fauxrest build data
 ```
 
 Typical behavior:
 
-- Reads data from `./data`.
-- Loads configuration from the provided config path.
+- Reads data from `./data` (The json files starts with `_` and `.` are ignored).
+- Loads configuration from `data` folder (finds `_config.json`, `_fauxrest.json`, `.config_json`, and `.fauxrest.json` in this order).
 - Runs configured serializers and layouts.
 - Writes artifacts to serializer-specific destinations.
 

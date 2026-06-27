@@ -42,6 +42,58 @@
 				"-n",
 				"20"
 			]
+		},
+		{
+			"label": "cargo-test-derive-int-fix",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "run-tamadalab-derive-check",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"run",
+				"--",
+				"testdata/tamadalab",
+				"--config",
+				"testdata/tamadalab/_config.json",
+				"--dest",
+				"/tmp/fauxrest-tamadalab-intfix"
+			]
+		},
+		{
+			"label": "check-tamadalab-years-output",
+			"type": "shell",
+			"command": "sh",
+			"args": [
+				"-lc",
+				"find /tmp/fauxrest-tamadalab-intfix/papers/years -maxdepth 2 -type f | head -n 20"
+			]
+		},
+		{
+			"label": "jj-describe-current-final",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"describe",
+				"-r",
+				"@",
+				"-m",
+				"chore: rename prest to fauxrest and improve aggregate/derive behavior\n\n- rename crate/bin, CLI references, tests, and docs/spec branding to fauxrest\n- rename integration test file to tests/test_fauxrest.rs\n- update config filename examples/discovery from *_prest.json to *_fauxrest.json\n- add overlay-only aggregate endpoint emission for config-defined endpoints\n- extend $aggregate to support object form with mode: flat|keyed and sources mapping\n- update testdata/tamada profile aggregate to keyed mode\n- fix $derive pattern handling for numeric/bool scalar fields by stringifying before regex\n- add regression tests for overlay-only aggregate, keyed aggregate, and int-field derive expansion"
+			]
+		},
+		{
+			"label": "jj-new-after-describe",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"new"
+			]
 		}
 	]
 }
