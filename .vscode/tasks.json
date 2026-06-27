@@ -94,6 +94,157 @@
 			"args": [
 				"new"
 			]
+		},
+		{
+			"label": "jj-status-after-new",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"status"
+			]
+		},
+		{
+			"label": "cargo-test-emit-items",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "cargo-test-emit-list-id",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "cargo-test-emit-directive",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "run-tamadalab-emit-debug",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"run",
+				"--",
+				"testdata/tamadalab",
+				"--config",
+				"testdata/tamadalab/_config.json",
+				"--dest",
+				"/tmp/fauxrest-tamadalab-emit-debug"
+			]
+		},
+		{
+			"label": "list-tamadalab-emit-debug",
+			"type": "shell",
+			"command": "sh",
+			"args": [
+				"-lc",
+				"find /tmp/fauxrest-tamadalab-emit-debug -maxdepth 5 -type f | sort"
+			]
+		},
+		{
+			"label": "cargo-test-type-mismatch-warning",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "run-tamadalab-type-warning-check",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"run",
+				"--",
+				"testdata/tamadalab",
+				"--config",
+				"testdata/tamadalab/_config.json",
+				"--dest",
+				"/tmp/fauxrest-tamadalab-warning-check"
+			]
+		},
+		{
+			"label": "inspect-tamada-config-bytes",
+			"type": "shell",
+			"command": "sh",
+			"args": [
+				"-lc",
+				"nl -ba testdata/tamada/_config.json | sed -n '1,40p' && echo '---' && od -An -tx1 -N 120 testdata/tamada/_config.json"
+			]
+		},
+		{
+			"label": "cargo-test-after-config-check",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "cargo-test-after-warning-and-emit",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "print-tamada-config-numbered",
+			"type": "shell",
+			"command": "sh",
+			"args": [
+				"-lc",
+				"nl -ba testdata/tamada/_config.json | sed -n '1,120p'"
+			]
+		},
+		{
+			"label": "cargo-test-final-type-warning",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "run-tamadalab-after-warning-fix",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"run",
+				"--",
+				"testdata/tamadalab",
+				"--config",
+				"testdata/tamadalab/_config.json",
+				"--dest",
+				"/tmp/fauxrest-tamadalab-warning-check2"
+			]
+		},
+		{
+			"label": "jj-describe-noninteractive",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"--no-pager",
+				"describe",
+				"-m",
+				"add filter type-mismatch warnings"
+			]
 		}
 	]
 }

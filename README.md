@@ -1,9 +1,12 @@
 # fauxrest
 
-> **Pseudo-REST Static API Generator** — Compile raw JSON datasets into structured, production-ready static API endpoints deployable directly to cost-effective, infinitely scalable CDNs (GitHub Pages, Cloudflare Pages, Netlify, AWS S3, etc.).
+[![Version](https://img.shields.io/badge/Version-0.1.0-blue)](https://github.com/tamada/fauxrest/releases/tag/v0.1.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?logo=spdx)](LICENSE)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/)
+[![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-c45508logo=rust)](https://www.rust-lang.org/)
+[![Docker](https://img.shields.io/badge/Container-quay.io/tama5/fauxrest:latest-2496ED?logo=docker)](https://quay.io/repository/tama5/fauxrest)
+
+> **Pseudo-REST Static API Generator** — Compile raw JSON datasets into structured, production-ready static API endpoints deployable directly to cost-effective, infinitely scalable CDNs (GitHub Pages, Cloudflare Pages, Netlify, AWS S3, etc.).
 
 `fauxrest` is a zero-maintenance, blazingly fast command-line utility written in Rust. It eliminates the need for dynamic server processes (like Node.js or Python) and databases for read-only APIs, allowing you to achieve infinite scalability and sub-millisecond response times at zero hosting cost.
 

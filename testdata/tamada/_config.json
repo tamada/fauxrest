@@ -7,11 +7,8 @@
         }
     },
     "activities": {
-        "$filter": [
-            { "field": "public", "op": "eq", "value": true }
-        ],
         "${year}": {
-            "$values": ["2026", "2025", "2024"],
+            "$derive": { "field": "from", "pattern": "^(\\d{4}).*" },
             "$filter": [
                 { "field": "from", "op": "contains", "value": "{year}" }
             ]
