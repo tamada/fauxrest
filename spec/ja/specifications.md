@@ -57,6 +57,8 @@
 
 `"${year}"` のようなテンプレート形式のサブパスを使う場合は、子ノードに `$values` を指定して静的に展開します。
 
+展開値を事前に列挙できない場合は、`$derive` で入力データから値を導出できます。`$derive` はテンプレート形式のサブパス配下でのみ使用でき、`$values` と同時指定はできません。
+
 ```json
 {
   "api": {
@@ -76,6 +78,14 @@
       // /api/activities/2026, /api/activities/2025 のように静的展開
       "${year}": {
         "$values": ["2026", "2025"],
+        "$filter": [
+          { "field": "from", "op": "contains", "value": "{year}" }
+        ]
+      }
+    },
+    "events": {
+      "${year}": {
+        "$derive": { "field": "from", "pattern": "^(\\d{4})" },
         "$filter": [
           { "field": "from", "op": "contains", "value": "{year}" }
         ]

@@ -57,6 +57,8 @@ Keys prefixed with `$` are interpreted as **directives** modifying the data at t
 
 When using template-style sub-path keys such as `"${year}"`, provide `$values` in the child node so endpoints can be expanded statically at build time.
 
+When values are not known in advance, use `$derive` to derive expansion values from loaded input data. `$derive` is only valid under template sub-path keys and cannot be used together with `$values`.
+
 ```json
 {
   "api": {
@@ -76,6 +78,14 @@ When using template-style sub-path keys such as `"${year}"`, provide `$values` i
       // Statically expands to /api/activities/2026, /api/activities/2025, ...
       "${year}": {
         "$values": ["2026", "2025"],
+        "$filter": [
+          { "field": "from", "op": "contains", "value": "{year}" }
+        ]
+      }
+    },
+    "events": {
+      "${year}": {
+        "$derive": { "field": "from", "pattern": "^(\\d{4})" },
         "$filter": [
           { "field": "from", "op": "contains", "value": "{year}" }
         ]

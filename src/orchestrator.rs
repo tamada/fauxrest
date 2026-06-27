@@ -4,13 +4,15 @@
 //! reading raw JSON and generating static files according to specified layouts.
 
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::path::{Path, PathBuf};
 use serde_json::{json, Map, Value};
 
-use crate::config::{ApiNode, FilterCondition, FilterOp};
+use crate::config::{ApiNode, DeriveConfig, FilterCondition, FilterOp};
 use crate::{Config, Error, JSONSerializer, Layout, Result, Serializer, SerializerConfig, SqliteSerializer, TypescriptSerializer};
+
+const DERIVE_CARDINALITY_WARN_THRESHOLD: usize = 1000;
 
 /// Executes the API build process
 pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
@@ -137,10 +139,8 @@ fn materialize_node(
                 .get(&key)
                 .ok_or_else(|| Error::Config(format!("missing sub-path node '{}'", key)))?;
             if let Some(var) = template_var_from_key(&key) {
-                let values = child.values.as_ref().ok_or_else(|| {
-                    Error::Config(format!("{}/{}: template key requires $values", endpoint, key))
-                })?;
-                for value in values {
+                let values = resolve_template_values(endpoint, &key, child, &endpoint_base)?;
+                for value in &values {
                     let segment = scalar_to_path_segment(value)?;
                     let child_endpoint = format!("{}/{}", endpoint, segment);
                     let expanded_child = expand_template_node(child, var, value);
@@ -320,6 +320,120 @@ fn apply_omit_map(mut obj: Map<String, Value>, omit: &[String]) -> Map<String, V
     obj
 }
 
+fn resolve_template_values(
+    endpoint: &str,
+    key: &str,
+    child: &ApiNode,
+    source_data: &Value,
+) -> Result<Vec<Value>> {
+    if let Some(values) = child.values.as_ref() {
+        return Ok(values.clone());
+    }
+
+    if let Some(derive) = child.derive.as_ref() {
+        let cfg = derive.to_config();
+        return derive_values_from_data(source_data, &cfg, &format!("{}/{}", endpoint, key));
+    }
+
+    Err(Error::Config(format!(
+        "{}/{}: template key requires $values or $derive",
+        endpoint, key
+    )))
+}
+
+fn derive_values_from_data(source_data: &Value, cfg: &DeriveConfig, context: &str) -> Result<Vec<Value>> {
+    let mut unique: BTreeMap<String, Value> = BTreeMap::new();
+    let mut skipped = 0usize;
+
+    match source_data {
+        Value::Array(arr) => {
+            for item in arr {
+                if let Some(v) = item.get(&cfg.field) {
+                    if let Some(extracted) = derive_scalar_value(v, cfg)? {
+                        let key = scalar_deterministic_key(&extracted);
+                        unique.entry(key).or_insert(extracted);
+                    } else {
+                        skipped += 1;
+                    }
+                }
+            }
+        }
+        Value::Object(obj) => {
+            if let Some(v) = obj.get(&cfg.field) {
+                if let Some(extracted) = derive_scalar_value(v, cfg)? {
+                    let key = scalar_deterministic_key(&extracted);
+                    unique.entry(key).or_insert(extracted);
+                } else {
+                    skipped += 1;
+                }
+            }
+        }
+        _ => {
+            return Ok(vec![]);
+        }
+    }
+
+    if unique.len() > DERIVE_CARDINALITY_WARN_THRESHOLD {
+        eprintln!(
+            "warning: {} derived {} values (threshold {})",
+            context,
+            unique.len(),
+            DERIVE_CARDINALITY_WARN_THRESHOLD
+        );
+    }
+    if skipped > 0 {
+        eprintln!(
+            "warning: {} skipped {} non-derivable values while processing $derive",
+            context,
+            skipped
+        );
+    }
+
+    Ok(unique.into_values().collect())
+}
+
+fn derive_scalar_value(value: &Value, cfg: &DeriveConfig) -> Result<Option<Value>> {
+    let extracted = if let Some(pattern) = cfg.pattern.as_ref() {
+        let Some(s) = value.as_str() else {
+            return Ok(None);
+        };
+        let re = Regex::new(pattern)
+            .map_err(|e| Error::Config(format!("invalid $derive.pattern '{}': {}", pattern, e)))?;
+        if let Some(caps) = re.captures(s) {
+            if let Some(group1) = caps.get(1) {
+                Value::String(group1.as_str().to_string())
+            } else if let Some(full) = caps.get(0) {
+                Value::String(full.as_str().to_string())
+            } else {
+                return Ok(None);
+            }
+        } else {
+            return Ok(None);
+        }
+    } else {
+        value.clone()
+    };
+
+    if !matches!(extracted, Value::String(_) | Value::Number(_) | Value::Bool(_)) {
+        return Ok(None);
+    }
+    if let Value::String(ref s) = extracted {
+        if s.is_empty() || s.contains('/') {
+            return Ok(None);
+        }
+    }
+    Ok(Some(extracted))
+}
+
+fn scalar_deterministic_key(value: &Value) -> String {
+    match value {
+        Value::String(s) => format!("s:{}", s),
+        Value::Number(n) => format!("n:{}", n),
+        Value::Bool(b) => format!("b:{}", b),
+        _ => format!("x:{}", value),
+    }
+}
+
 fn template_var_from_key(key: &str) -> Option<&str> {
     if key.starts_with("${") && key.ends_with('}') && key.len() > 3 {
         Some(&key[2..key.len() - 1])
@@ -331,6 +445,7 @@ fn template_var_from_key(key: &str) -> Option<&str> {
 fn expand_template_node(node: &ApiNode, var: &str, value: &Value) -> ApiNode {
     let mut out = node.clone();
     out.values = None;
+    out.derive = None;
     if let Some(filters) = &node.filter {
         let token = format!("{{{}}}", var);
         out.filter = Some(
