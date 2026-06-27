@@ -253,6 +253,46 @@ fn test_template_subpath_expansion_with_derive() {
 }
 
 #[test]
+fn test_template_subpath_expansion_with_derive_from_int_field() {
+        let tmp = tempfile::tempdir().unwrap();
+        let data_dir = tmp.path().join("data");
+        let dest_dir = tmp.path().join("dist");
+        let config_file = tmp.path().join("fauxrest.json");
+
+        fs::create_dir(&data_dir).unwrap();
+        fs::write(
+                data_dir.join("papers.json"),
+                r#"[
+    {"id": 1, "year": 2024, "from": "2024", "title": "p1"},
+    {"id": 2, "year": 2025, "from": "2025", "title": "p2"}
+]"#,
+        )
+        .unwrap();
+
+        let config_json = format!(
+                r#"{{
+    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "papers": {{
+        "years": {{
+            "${{year}}": {{
+                "$derive": {{ "field": "year", "pattern": ".*" }},
+                "$filter": [{{"field": "from", "op": "contains", "value": "{{year}}"}}]
+            }}
+        }}
+    }}
+}}"#,
+                dest_dir.display()
+        );
+        fs::write(&config_file, &config_json).unwrap();
+
+        let config: Config = Config::load(Path::new(&config_file)).unwrap();
+        assert!(fauxrest::run(config, data_dir).is_ok());
+
+        assert_file(&dest_dir, "papers/years/2024/index.json");
+        assert_file(&dest_dir, "papers/years/2025/index.json");
+}
+
+#[test]
 fn test_template_with_values_and_derive_is_rejected() {
         let tmp = tempfile::tempdir().unwrap();
         let config_file = tmp.path().join("fauxrest.json");

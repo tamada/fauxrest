@@ -1,0 +1,74 @@
+{
+    "grants": {
+        "$filter": [
+            { "field": "secret", "op": "eq", "value": "false" }
+        ],
+        "current": {
+            "$filter": [
+                { "field": "status", "op": "eq", "value": "continued" }
+            ]
+        }
+    },
+    "members": {
+        "${category}": {
+            "$derive": { "field": "category", "pattern": ".*" },
+            "$filter": [
+                { "field": "category", "op": "eq", "value": "{category}" }
+            ]
+        }
+    },
+    "theses": {
+        "$filter": [
+            { "field": "hide", "op": "eq", "value": "false" }
+        ],
+        "types/master": {
+            "$filter": [
+                { "field": "type", "op": "eq", "value": "masterthessis" }
+            ]
+        },
+        "types/bachelor": {
+            "$filter": [
+                { "field": "type", "op": "eq", "value": "bachelorthessis" }
+            ]
+        },
+        "years": {
+            "${year}": {
+                "$derive": { "field": "year", "pattern": ".*" },
+                "$filter": [
+                    { "field": "from", "op": "contains", "value": "{year}" }
+                ]
+            }
+        }
+    },
+    "papers": {
+        "$filter": [
+            { "field": "hide", "op": "eq", "value": "true" }
+        ],
+        "years": {
+            "${year}": {
+                "$derive": { "field": "year", "pattern": ".*" },
+                "$filter": [
+                    { "field": "from", "op": "contains", "value": "{year}" }
+                ]
+            }
+        },
+        "types": {
+            "${type}": {
+                "$derive": { "field": "type", "pattern": ".*" },
+                "$filter": [
+                    { "field": "from", "op": "contains", "value": "{type}" }
+                ]
+            }
+        },
+        "languages/english": {
+            "$filter": [
+                { "field": "language", "op": "contains", "value": "english" }
+            ]
+        },
+        "languages/japanese": {
+            "$filter": [
+                { "field": "language", "op": "contains", "value": "japanese" }
+            ]
+        }
+    }
+}

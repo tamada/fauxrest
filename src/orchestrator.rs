@@ -447,12 +447,15 @@ fn derive_values_from_data(source_data: &Value, cfg: &DeriveConfig, context: &st
 
 fn derive_scalar_value(value: &Value, cfg: &DeriveConfig) -> Result<Option<Value>> {
     let extracted = if let Some(pattern) = cfg.pattern.as_ref() {
-        let Some(s) = value.as_str() else {
-            return Ok(None);
+        let s = match value {
+            Value::String(v) => v.clone(),
+            Value::Number(v) => v.to_string(),
+            Value::Bool(v) => v.to_string(),
+            _ => return Ok(None),
         };
         let re = Regex::new(pattern)
             .map_err(|e| Error::Config(format!("invalid $derive.pattern '{}': {}", pattern, e)))?;
-        if let Some(caps) = re.captures(s) {
+        if let Some(caps) = re.captures(&s) {
             if let Some(group1) = caps.get(1) {
                 Value::String(group1.as_str().to_string())
             } else if let Some(full) = caps.get(0) {
