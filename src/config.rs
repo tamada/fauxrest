@@ -425,17 +425,16 @@ mod tests {
         // Verify parsing of activities template and $emit
         let activities = config.api.get("activities").expect("Missing activities node");
         assert_eq!(activities.filter, None);
-        assert_eq!(activities.emit, Some(vec![EmitTarget::List]));
+        assert_eq!(activities.emit, None);
         let by_year = activities
             .sub_paths
             .get("${year}")
             .expect("Missing ${year} sub-path");
-        let values = by_year.values.as_ref().expect("Missing template values");
-        assert_eq!(values, &vec![
-            Value::String("2026".to_string()),
-            Value::String("2025".to_string()),
-            Value::String("2024".to_string()),
-        ]);
+        let derive_config = by_year.derive.as_ref()
+            .expect("Missing $derive")
+            .to_config();
+        assert_eq!(derive_config.field, "from");
+        assert_eq!(derive_config.pattern, Some("^(\\d{4}).*".to_string()));
 
         // Verify parsing of profile/$aggregate
         let profile = config.api.get("profile").expect("Missing profile node");
