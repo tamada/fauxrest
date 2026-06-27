@@ -1,0 +1,34 @@
+{
+    "job-histories": {
+        "current": {
+            "$filter": [
+                { "field": "to", "op": "eq", "value": "Present" }
+            ]
+        }
+    },
+    "activities": {
+        "$filter": [
+            { "field": "public", "op": "eq", "value": true }
+        ],
+        "${year}": {
+            "$values": ["2026", "2025", "2024"],
+            "$filter": [
+                { "field": "from", "op": "contains", "value": "{year}" }
+            ]
+        }
+    },
+    "profile": {
+        "$aggregate": {
+            "mode": "keyed",
+            "sources": [
+                "job-histories",
+                "activities",
+                "degrees",
+                "skills"
+            ]
+        }
+    },
+    "secret": {
+        "$private": true
+    }
+}
