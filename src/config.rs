@@ -210,7 +210,7 @@ pub struct SerializerConfig {
 #[derive(Deserialize)]
 pub struct Config {
     /// List of serializer configurations
-    #[serde(default)]
+    #[serde(default, rename = "$config")]
     pub serializers: Vec<SerializerConfig>,
 
     /// Advanced routing overlay
