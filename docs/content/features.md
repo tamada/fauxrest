@@ -27,6 +27,15 @@ Child `$filter` overrides parent `$filter` when both are present.
 
 `$private: true` suppresses generation of the target endpoint and all descendants.
 
+`$emit` controls endpoint emission at that node.
+
+- `$emit: ["list"]` emits only collection endpoints.
+- `$emit: ["ids"]` emits only per-item endpoints.
+- `$emit: ["list", "ids"]` emits both.
+- `$emit: []` emits neither (allowed).
+
+Legacy `$emit_list`, `$emit_id`, and `$emit_items` are still accepted for backward compatibility.
+
 ### Aggregation
 
 `$aggregate` bundles multiple endpoints or collections into one endpoint payload.

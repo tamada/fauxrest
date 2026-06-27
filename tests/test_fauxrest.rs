@@ -252,6 +252,127 @@ fn test_template_subpath_expansion_with_derive() {
         assert!(discovery.contains("\"/activities/2025\""));
 }
 
+    #[test]
+    fn test_emit_id_false_suppresses_item_files_but_keeps_id_field() {
+        let tmp = tempfile::tempdir().unwrap();
+        let data_dir = tmp.path().join("data");
+        let dest_dir = tmp.path().join("dist");
+        let config_file = tmp.path().join("fauxrest.json");
+
+        fs::create_dir(&data_dir).unwrap();
+        fs::write(
+            data_dir.join("activities.json"),
+            r#"[
+        {"id": 1, "from": "2024-01-01", "public": true, "label": "a"},
+        {"id": 2, "from": "2025-02-01", "public": true, "label": "b"}
+    ]"#,
+        )
+        .unwrap();
+
+        let config_json = format!(
+            r#"{{
+        "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+        "activities": {{
+        "${{year}}": {{
+            "$derive": {{ "field": "from", "pattern": "^(\\d{{4}})" }},
+            "$filter": [{{"field": "from", "op": "contains", "value": "{{year}}"}}],
+            "$emit": ["list"]
+        }}
+        }}
+    }}"#,
+            dest_dir.display()
+        );
+        fs::write(&config_file, &config_json).unwrap();
+
+        let config: Config = Config::load(Path::new(&config_file)).unwrap();
+        assert!(fauxrest::run(config, data_dir).is_ok());
+
+        let by_2024 = dest_dir.join("activities/2024/index.json");
+        assert!(by_2024.exists());
+        let content = fs::read_to_string(by_2024).unwrap();
+        assert!(content.contains("\"id\": 1"));
+        assert!(!dest_dir.join("activities/2024/1/index.json").exists());
+    }
+
+    #[test]
+    fn test_emit_list_false_emit_id_true_emits_only_item_endpoints() {
+        let tmp = tempfile::tempdir().unwrap();
+        let data_dir = tmp.path().join("data");
+        let dest_dir = tmp.path().join("dist");
+        let config_file = tmp.path().join("fauxrest.json");
+
+        fs::create_dir(&data_dir).unwrap();
+        fs::write(
+            data_dir.join("users.json"),
+            r#"[
+        {"id": 1, "name": "Alice"},
+        {"id": 2, "name": "Bob"}
+    ]"#,
+        )
+        .unwrap();
+
+        let config_json = format!(
+            r#"{{
+        "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+        "users": {{
+        "$emit": ["ids"]
+        }}
+    }}"#,
+            dest_dir.display()
+        );
+        fs::write(&config_file, &config_json).unwrap();
+
+        let config: Config = Config::load(Path::new(&config_file)).unwrap();
+        assert!(fauxrest::run(config, data_dir).is_ok());
+
+        assert!(!dest_dir.join("users/index.json").exists());
+        assert!(dest_dir.join("users/1/index.json").exists());
+        assert!(dest_dir.join("users/2/index.json").exists());
+
+        let discovery = fs::read_to_string(dest_dir.join("index.json")).unwrap();
+        assert!(!discovery.contains("\"/users\""));
+        assert!(discovery.contains("\"/users/1\""));
+        assert!(discovery.contains("\"/users/2\""));
+    }
+
+    #[test]
+    fn test_emit_empty_set_is_allowed_and_emits_nothing_at_node() {
+        let tmp = tempfile::tempdir().unwrap();
+        let data_dir = tmp.path().join("data");
+        let dest_dir = tmp.path().join("dist");
+        let config_file = tmp.path().join("fauxrest.json");
+
+        fs::create_dir(&data_dir).unwrap();
+        fs::write(
+            data_dir.join("users.json"),
+            r#"[
+        {"id": 1, "name": "Alice"}
+    ]"#,
+        )
+        .unwrap();
+
+        let config_json = format!(
+            r#"{{
+        "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+        "users": {{
+        "$emit": []
+        }}
+    }}"#,
+            dest_dir.display()
+        );
+        fs::write(&config_file, &config_json).unwrap();
+
+        let config: Config = Config::load(Path::new(&config_file)).unwrap();
+        assert!(fauxrest::run(config, data_dir).is_ok());
+
+        assert!(!dest_dir.join("users/index.json").exists());
+        assert!(!dest_dir.join("users/1/index.json").exists());
+
+        let discovery = fs::read_to_string(dest_dir.join("index.json")).unwrap();
+        assert!(!discovery.contains("\"/users\""));
+        assert!(!discovery.contains("\"/users/1\""));
+    }
+
 #[test]
 fn test_template_subpath_expansion_with_derive_from_int_field() {
         let tmp = tempfile::tempdir().unwrap();

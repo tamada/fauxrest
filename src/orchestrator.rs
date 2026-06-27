@@ -4,15 +4,17 @@
 //! reading raw JSON and generating static files according to specified layouts.
 
 use regex::Regex;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::{Mutex, OnceLock};
 use serde_json::{json, Map, Value};
 
-use crate::config::{AggregateMode, AggregateSpec, ApiNode, DeriveConfig, FilterCondition, FilterOp};
+use crate::config::{AggregateMode, AggregateSpec, ApiNode, DeriveConfig, EmitTarget, FilterCondition, FilterOp};
 use crate::{Config, Error, JSONSerializer, Layout, Result, Serializer, SerializerConfig, SqliteSerializer, TypescriptSerializer};
 
 const DERIVE_CARDINALITY_WARN_THRESHOLD: usize = 1000;
+static TYPE_MISMATCH_WARNINGS: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
 
 /// Executes the API build process
 pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
@@ -141,11 +143,16 @@ fn materialize_node(
     if is_private {
         return Ok(vec![]);
     }
-    write_data(endpoint, &endpoint_data, s, l, dest)?;
+    let (emit_list, emit_id) = resolve_emit_flags(node);
 
-    let mut endpoints = vec![format!("/{}", endpoint)];
+    let mut endpoints = Vec::new();
+    if emit_list {
+        write_data(endpoint, &endpoint_data, s, l, dest)?;
+        endpoints.push(format!("/{}", endpoint));
+    }
 
-    if let Value::Array(arr) = &endpoint_data {
+    if emit_id {
+        if let Value::Array(arr) = &endpoint_data {
         for item in arr {
             if let Some(id) = item.get("id") {
                 let id_str = id.as_str().map(|s| s.to_string()).unwrap_or_else(|| id.to_string());
@@ -153,6 +160,7 @@ fn materialize_node(
                 write_data(&item_path, item, s, l, dest)?;
                 endpoints.push(format!("/{}", item_path));
             }
+        }
         }
     }
 
@@ -198,6 +206,22 @@ fn materialize_node(
     }
 
     Ok(endpoints)
+}
+
+fn resolve_emit_flags(node: Option<&ApiNode>) -> (bool, bool) {
+    let Some(node) = node else {
+        return (true, true);
+    };
+
+    if let Some(targets) = node.emit.as_ref() {
+        let emit_list = targets.iter().any(|t| matches!(t, EmitTarget::List));
+        let emit_id = targets.iter().any(|t| matches!(t, EmitTarget::Ids));
+        return (emit_list, emit_id);
+    }
+
+    let emit_list = node.emit_list.unwrap_or(true);
+    let emit_id = node.emit_id.or(node.emit_items).unwrap_or(true);
+    (emit_list, emit_id)
 }
 
 fn aggregate_values(aggregate: &AggregateSpec, datasets: &HashMap<String, Value>) -> Result<Value> {
@@ -275,21 +299,100 @@ fn matches_all_conditions(item: &Value, filters: &[FilterCondition]) -> Result<b
 fn matches_condition(item: &Value, cond: &FilterCondition) -> Result<bool> {
     let target = item.get(&cond.field);
     let result = match cond.op {
-        FilterOp::Eq => target == Some(&cond.value),
-        FilterOp::Neq => target != Some(&cond.value),
-        FilterOp::Gt => compare_ord(target, &cond.value, |lhs, rhs| lhs > rhs),
-        FilterOp::Gte => compare_ord(target, &cond.value, |lhs, rhs| lhs >= rhs),
-        FilterOp::Lt => compare_ord(target, &cond.value, |lhs, rhs| lhs < rhs),
-        FilterOp::Lte => compare_ord(target, &cond.value, |lhs, rhs| lhs <= rhs),
-        FilterOp::Contains => contains_value(target, &cond.value),
+        FilterOp::Eq => {
+            warn_if_type_mismatch("eq", &cond.field, target, &cond.value);
+            target == Some(&cond.value)
+        }
+        FilterOp::Neq => {
+            warn_if_type_mismatch("neq", &cond.field, target, &cond.value);
+            target != Some(&cond.value)
+        }
+        FilterOp::Gt => {
+            warn_if_type_mismatch("gt", &cond.field, target, &cond.value);
+            compare_ord(target, &cond.value, |lhs, rhs| lhs > rhs)
+        }
+        FilterOp::Gte => {
+            warn_if_type_mismatch("gte", &cond.field, target, &cond.value);
+            compare_ord(target, &cond.value, |lhs, rhs| lhs >= rhs)
+        }
+        FilterOp::Lt => {
+            warn_if_type_mismatch("lt", &cond.field, target, &cond.value);
+            compare_ord(target, &cond.value, |lhs, rhs| lhs < rhs)
+        }
+        FilterOp::Lte => {
+            warn_if_type_mismatch("lte", &cond.field, target, &cond.value);
+            compare_ord(target, &cond.value, |lhs, rhs| lhs <= rhs)
+        }
+        FilterOp::Contains => {
+            warn_if_type_mismatch("contains", &cond.field, target, &cond.value);
+            contains_value(target, &cond.value)
+        }
         FilterOp::Exists => {
             let expected = cond.value.as_bool().unwrap_or(false);
             target.is_some() == expected
         }
-        FilterOp::RegEq => regex_match(target, &cond.value, true)?,
-        FilterOp::RegNeq => regex_match(target, &cond.value, false)?,
+        FilterOp::RegEq => {
+            warn_if_type_mismatch("regeq", &cond.field, target, &cond.value);
+            regex_match(target, &cond.value, true)?
+        }
+        FilterOp::RegNeq => {
+            warn_if_type_mismatch("regneq", &cond.field, target, &cond.value);
+            regex_match(target, &cond.value, false)?
+        }
     };
     Ok(result)
+}
+
+fn warn_if_type_mismatch(op: &str, field: &str, target: Option<&Value>, rhs: &Value) {
+    let Some(lhs) = target else {
+        return;
+    };
+
+    if !is_type_compatible(op, lhs, rhs) {
+        emit_type_mismatch_warning(op, field, lhs, rhs);
+    }
+}
+
+fn is_type_compatible(op: &str, lhs: &Value, rhs: &Value) -> bool {
+    match op {
+        "eq" | "neq" => value_kind(lhs) == value_kind(rhs),
+        "gt" | "gte" | "lt" | "lte" => lhs.is_number() && rhs.is_number(),
+        "contains" => match lhs {
+            Value::String(_) => rhs.is_string(),
+            Value::Array(_) => true,
+            _ => false,
+        },
+        "regeq" | "regneq" => lhs.is_string() && rhs.is_string(),
+        _ => true,
+    }
+}
+
+fn emit_type_mismatch_warning(op: &str, field: &str, lhs: &Value, rhs: &Value) {
+    let lhs_kind = value_kind(lhs);
+    let rhs_kind = value_kind(rhs);
+    let key = format!("{}|{}|{}|{}", field, op, lhs_kind, rhs_kind);
+    let warnings = TYPE_MISMATCH_WARNINGS.get_or_init(|| Mutex::new(HashSet::new()));
+    let mut guard = match warnings.lock() {
+        Ok(g) => g,
+        Err(_) => return,
+    };
+    if guard.insert(key) {
+        eprintln!(
+            "warning: $filter type mismatch for field '{}' with op '{}': lhs is {}, rhs is {}",
+            field, op, lhs_kind, rhs_kind
+        );
+    }
+}
+
+fn value_kind(v: &Value) -> &'static str {
+    match v {
+        Value::Null => "null",
+        Value::Bool(_) => "bool",
+        Value::Number(_) => "number",
+        Value::String(_) => "string",
+        Value::Array(_) => "array",
+        Value::Object(_) => "object",
+    }
 }
 
 fn compare_ord<F>(target: Option<&Value>, rhs: &Value, cmp: F) -> bool

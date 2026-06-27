@@ -40,6 +40,13 @@ pub struct FilterCondition {
     pub value: Value,
 }
 
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum EmitTarget {
+    List,
+    Ids,
+}
+
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum AggregateSpec {
@@ -133,6 +140,19 @@ pub struct ApiNode {
 
     #[serde(rename = "$private")]
     pub private: Option<bool>,
+
+    #[serde(rename = "$emit")]
+    pub emit: Option<Vec<EmitTarget>>,
+
+    #[serde(rename = "$emit_list")]
+    pub emit_list: Option<bool>,
+
+    #[serde(rename = "$emit_id")]
+    pub emit_id: Option<bool>,
+
+    // Backward-compatible alias of $emit_id.
+    #[serde(rename = "$emit_items")]
+    pub emit_items: Option<bool>,
 
     #[serde(rename = "$values")]
     pub values: Option<Vec<Value>>,
@@ -402,12 +422,10 @@ mod tests {
         assert_eq!(filter[0].op, FilterOp::Eq);
         assert_eq!(filter[0].value, Value::String("Present".to_string()));
 
-        // Verify parsing of activities/$filter
+        // Verify parsing of activities template and $emit
         let activities = config.api.get("activities").expect("Missing activities node");
-        let filter2 = activities.filter.as_ref().expect("Missing filter array for activities");
-        assert_eq!(filter2[0].field, "public");
-        assert_eq!(filter2[0].op, FilterOp::Eq);
-        assert_eq!(filter2[0].value, Value::Bool(true));
+        assert_eq!(activities.filter, None);
+        assert_eq!(activities.emit, Some(vec![EmitTarget::List]));
         let by_year = activities
             .sub_paths
             .get("${year}")
@@ -432,6 +450,12 @@ mod tests {
         // Verify parsing of secret/$private
         let secret = config.api.get("secret").expect("Missing secret node");
         assert_eq!(secret.private, Some(true));
+
+        // Verify optional parsing of $emit_items
+        assert_eq!(profile.emit_items, None);
+        assert_eq!(profile.emit, None);
+        assert_eq!(profile.emit_list, None);
+        assert_eq!(profile.emit_id, None);
     }
 
         #[test]

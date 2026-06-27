@@ -65,7 +65,7 @@ impl Args {
         };
         match config {
             Ok(config) => {
-                if config.serializers.len() == 0 {
+                if config.serializers.is_empty() {
                     Ok(fauxrest::Config {
                         serializers: vec![ self.serializer_config() ],
                         api: config.api,

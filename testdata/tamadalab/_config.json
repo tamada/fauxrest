@@ -1,16 +1,35 @@
 {
     "grants": {
+        "ids": {
+            "$emit": ["ids"],
+            "$filter": [
+                { "field": "secret", "op": "eq", "value": false }
+            ]
+        },
         "$filter": [
-            { "field": "secret", "op": "eq", "value": "false" }
+            { "field": "secret", "op": "eq", "value": false }
         ],
+        "$emit": ["list"],
         "current": {
+            "$emit": ["list"],
             "$filter": [
                 { "field": "status", "op": "eq", "value": "continued" }
             ]
         }
     },
     "members": {
+        "ids": {
+            "$emit": ["ids"],
+            "$filter": [
+                { "field": "category", "op": "neq", "value": "non_member" }
+            ]
+        },
+        "$emit": ["list"],
+        "$filter": [
+            { "field": "category", "op": "neq", "value": "non_member" }
+        ],
         "${category}": {
+            "$emit": ["list"],
             "$derive": { "field": "category", "pattern": ".*" },
             "$filter": [
                 { "field": "category", "op": "eq", "value": "{category}" }
@@ -18,21 +37,38 @@
         }
     },
     "theses": {
+        "ids": {
+            "$emit": ["ids"],
+            "$filter": [
+                { "field": "hide", "op": "eq", "value": false }
+            ]
+        },
+        "$emit": ["list"],
         "$filter": [
-            { "field": "hide", "op": "eq", "value": "false" }
+            { "field": "hide", "op": "eq", "value": false }
         ],
         "types/master": {
+            "$emit": ["list"],
             "$filter": [
                 { "field": "type", "op": "eq", "value": "masterthessis" }
             ]
         },
         "types/bachelor": {
+            "$emit": ["list"],
             "$filter": [
                 { "field": "type", "op": "eq", "value": "bachelorthessis" }
             ]
         },
+        "types/phd": {
+            "$emit": ["list"],
+            "$filter": [
+                { "field": "type", "op": "eq", "value": "phdthesis" }
+            ]
+        },
         "years": {
+            "$emit": [],
             "${year}": {
+                "$emit": ["list"],
                 "$derive": { "field": "year", "pattern": ".*" },
                 "$filter": [
                     { "field": "from", "op": "contains", "value": "{year}" }
@@ -41,11 +77,20 @@
         }
     },
     "papers": {
+        "ids": {
+            "$emit": ["ids"],
+            "$filter": [
+                { "field": "hide", "op": "eq", "value": false }
+            ]
+        },
+        "$emit": ["list"],
         "$filter": [
-            { "field": "hide", "op": "eq", "value": "true" }
+            { "field": "hide", "op": "eq", "value": false }
         ],
         "years": {
+            "$emit": [],
             "${year}": {
+                "$emit": ["list"],
                 "$derive": { "field": "year", "pattern": ".*" },
                 "$filter": [
                     { "field": "from", "op": "contains", "value": "{year}" }
@@ -53,7 +98,9 @@
             }
         },
         "types": {
+            "$emit": [],
             "${type}": {
+                "$emit": ["list"],
                 "$derive": { "field": "type", "pattern": ".*" },
                 "$filter": [
                     { "field": "from", "op": "contains", "value": "{type}" }
@@ -61,11 +108,13 @@
             }
         },
         "languages/english": {
+            "$emit": ["list"],
             "$filter": [
                 { "field": "language", "op": "contains", "value": "english" }
             ]
         },
         "languages/japanese": {
+            "$emit": ["list"],
             "$filter": [
                 { "field": "language", "op": "contains", "value": "japanese" }
             ]
