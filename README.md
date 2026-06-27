@@ -1,8 +1,9 @@
 # fauxrest
 
-[![Version](https://img.shields.io/badge/Version-0.1.0-blue)](https://github.com/tamada/fauxrest/releases/tag/v0.1.0)
+[![Version](https://img.shields.io/badge/Version-0.0.1-blue)](https://github.com/tamada/fauxrest/releases/tag/v0.0.1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?logo=spdx)](LICENSE)
 
+[![Coverage Status](https://coveralls.io/repos/github/tamada/fauxrest/badge.svg?branch=releases/v0.0.1)](https://coveralls.io/github/tamada/fauxrest?branch=main)
 [![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-c45508logo=rust)](https://www.rust-lang.org/)
 [![Docker](https://img.shields.io/badge/Container-quay.io/tama5/fauxrest:latest-2496ED?logo=docker)](https://quay.io/repository/tama5/fauxrest)
 
