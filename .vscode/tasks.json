@@ -1,0 +1,47 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "jj-describe-current",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"describe",
+				"-r",
+				"@",
+				"-m",
+				"chore: rename prest to fauxrest and extend aggregate with keyed mode\n\n- rename crate/bin, CLI references, tests, and docs/spec branding to fauxrest\n- rename integration test file to tests/test_fauxrest.rs\n- update config filename examples/discovery from *_prest.json to *_fauxrest.json\n- add overlay-only aggregate endpoint emission for config-defined endpoints\n- extend $aggregate to support object form with mode: flat|keyed and sources mapping\n- update testdata/tamada profile aggregate to keyed mode\n- add regression tests for overlay-only aggregate and keyed aggregate outputs"
+			]
+		},
+		{
+			"label": "jj-status-check",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"status"
+			]
+		},
+		{
+			"label": "jj-log-check",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"log",
+				"-n",
+				"20"
+			]
+		},
+		{
+			"label": "jj-ancestors-check",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"log",
+				"-r",
+				"::@",
+				"-n",
+				"20"
+			]
+		}
+	]
+}
