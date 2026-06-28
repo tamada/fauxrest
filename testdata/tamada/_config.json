@@ -1,31 +1,22 @@
 {
-    "job-histories": {
-        "current": {
-            "$filter": [
-                { "field": "to", "op": "eq", "value": "Present" }
-            ]
-        }
-    },
-    "activities": {
-        "${year}": {
-            "$derive": { "field": "from", "pattern": "^(\\d{4}).*" },
-            "$filter": [
-                { "field": "from", "op": "contains", "value": "{year}" }
-            ]
-        }
-    },
-    "profile": {
-        "$aggregate": {
-            "mode": "keyed",
-            "sources": [
-                "job-histories",
-                "activities",
-                "degrees",
-                "skills"
-            ]
-        }
-    },
-    "secret": {
-        "$private": true
+  "job-histories": {
+    "current": {
+      "$filter": [{ "field": "to", "op": "eq", "value": "Present" }]
     }
+  },
+  "activities": {
+    "${year}": {
+      "$derive": { "field": "from", "pattern": "^(\\d{4}).*" },
+      "$filter": [{ "field": "from", "op": "contains", "value": "{year}" }]
+    }
+  },
+  "profile": {
+    "$aggregate": {
+      "mode": "keyed",
+      "sources": ["job-histories", "activities", "degrees", "skills"]
+    }
+  },
+  "secret": {
+    "$emit": []
+  }
 }
