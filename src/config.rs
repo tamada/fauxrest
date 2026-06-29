@@ -105,21 +105,8 @@ pub struct ApiNode {
     #[serde(rename = "$omit")]
     pub omit: Option<Vec<String>>,
 
-    #[serde(rename = "$private")]
-    pub private: Option<bool>,
-
     #[serde(rename = "$emit")]
     pub emit: Option<Vec<EmitTarget>>,
-
-    #[serde(rename = "$emit_list")]
-    pub emit_list: Option<bool>,
-
-    #[serde(rename = "$emit_id")]
-    pub emit_id: Option<bool>,
-
-    // Backward-compatible alias of $emit_id.
-    #[serde(rename = "$emit_items")]
-    pub emit_items: Option<bool>,
 
     #[serde(rename = "$values")]
     pub values: Option<Vec<Value>>,
@@ -129,6 +116,17 @@ pub struct ApiNode {
 
     #[serde(flatten)]
     pub sub_paths: HashMap<String, ApiNode>,
+    // #[serde(rename = "$private")]
+    // pub private: Option<bool>,
+    // #[serde(rename = "$emit_list")]
+    // pub emit_list: Option<bool>,
+
+    // #[serde(rename = "$emit_id")]
+    // pub emit_id: Option<bool>,
+
+    // // Backward-compatible alias of $emit_id.
+    // #[serde(rename = "$emit_items")]
+    // pub emit_items: Option<bool>,
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq)]
@@ -428,6 +426,7 @@ mod tests {
 
         // Verify parsing of profile/$aggregate
         let profile = config.api.get("profile").expect("Missing profile node");
+        assert_eq!(profile.emit, None);
         let agg = profile.aggregate.as_ref().expect("Missing aggregate array");
         assert_eq!(agg.mode(), AggregateMode::Keyed);
         let entries = agg.entries();
@@ -438,13 +437,13 @@ mod tests {
 
         // Verify parsing of secret/$private
         let secret = config.api.get("secret").expect("Missing secret node");
-        assert_eq!(secret.private, Some(true));
+        assert_eq!(secret.emit, None);
+        // assert_eq!(secret.private, Some(true));
 
         // Verify optional parsing of $emit_items
-        assert_eq!(profile.emit_items, None);
-        assert_eq!(profile.emit, None);
-        assert_eq!(profile.emit_list, None);
-        assert_eq!(profile.emit_id, None);
+        // assert_eq!(profile.emit_items, None);
+        // assert_eq!(profile.emit_list, None);
+        // assert_eq!(profile.emit_id, None);
     }
 
     #[test]
