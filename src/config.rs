@@ -437,7 +437,7 @@ mod tests {
 
         // Verify parsing of secret/$private
         let secret = config.api.get("secret").expect("Missing secret node");
-        assert_eq!(secret.emit, None);
+        assert_eq!(secret.emit, Some(vec![]));
         // assert_eq!(secret.private, Some(true));
 
         // Verify optional parsing of $emit_items
@@ -452,7 +452,7 @@ mod tests {
         write!(
             tmp,
             r#"{{
-    "serializers": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
     "activities": {{
         "${{year}}": {{
             "$derive": {{"field":"from", "pattern":"^(\\d{{4}})"}}
@@ -482,7 +482,7 @@ mod tests {
         write!(
             tmp,
             r#"{{
-    "serializers": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
     "activities": {{
         "by-year": {{
             "$derive": "from"
