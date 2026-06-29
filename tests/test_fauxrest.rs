@@ -77,7 +77,7 @@ fn test_integration_json_json_layout() {
 
     fs::create_dir(&data_dir).unwrap();
     fs::write(data_dir.join("profile.json"), r#"{"name": "Alice"}"#).unwrap();
-    let config_json = format!(r#"{{"serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}]}}"#, dest_dir.display());
+    let config_json = format!(r#"{{"$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}]}}"#, dest_dir.display());
     fs::write(&config_file, &config_json).unwrap();
 
     let config: Config = Config::load(Path::new(&config_file)).unwrap();
@@ -94,7 +94,7 @@ fn test_integration_typescript_file_layout() {
 
     fs::create_dir(&data_dir).unwrap();
     fs::write(data_dir.join("users.json"), r#"[{"id": 1, "name": "Bob"}]"#).unwrap();
-    let config_json = format!(r#"{{"serializers": [{{"serializer": "typescript", "layout": "file", "dest": "{}"}}]}}"#, dest_dir.display());
+    let config_json = format!(r#"{{"$config": [{{"serializer": "typescript", "layout": "file", "dest": "{}"}}]}}"#, dest_dir.display());
     fs::write(&config_file, &config_json).unwrap();
 
     let config: Config = Config::load(Path::new(&config_file)).unwrap();
@@ -114,8 +114,8 @@ fn test_private_directive_hides_collection_endpoint() {
 
     let config_json = format!(
         r#"{{
-  "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
-  "users": {{"$private": true}}
+  "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "users": {{"$emit": []}}
 }}"#,
         dest_dir.display()
     );
@@ -152,7 +152,7 @@ fn test_template_subpath_expansion_with_filter_override() {
 
         let config_json = format!(
                 r#"{{
-    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
     "activities": {{
         "$filter": [{{"field": "public", "op": "eq", "value": true}}],
         "${{year}}": {{
@@ -193,7 +193,7 @@ fn test_invalid_template_without_values_or_derive_fails_to_load() {
         let tmp = tempfile::tempdir().unwrap();
         let config_file = tmp.path().join("fauxrest.json");
         let config_json = r#"{
-    "serializers": [{"serializer": "json", "layout": "index", "dest": "dist"}],
+    "$config": [{"serializer": "json", "layout": "index", "dest": "dist"}],
     "activities": {
         "${year}": {
             "$filter": [{"field": "from", "op": "contains", "value": "{year}"}]
@@ -229,7 +229,7 @@ fn test_template_subpath_expansion_with_derive() {
 
         let config_json = format!(
                 r#"{{
-    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
     "activities": {{
         "${{year}}": {{
             "$derive": {{ "field": "from", "pattern": "^(\\d{{4}})" }},
@@ -271,7 +271,7 @@ fn test_template_subpath_expansion_with_derive() {
 
         let config_json = format!(
             r#"{{
-        "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+        "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
         "activities": {{
         "${{year}}": {{
             "$derive": {{ "field": "from", "pattern": "^(\\d{{4}})" }},
@@ -313,7 +313,7 @@ fn test_template_subpath_expansion_with_derive() {
 
         let config_json = format!(
             r#"{{
-        "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+        "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
         "users": {{
         "$emit": ["ids"]
         }}
@@ -353,7 +353,7 @@ fn test_template_subpath_expansion_with_derive() {
 
         let config_json = format!(
             r#"{{
-        "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+        "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
         "users": {{
         "$emit": []
         }}
@@ -392,7 +392,7 @@ fn test_template_subpath_expansion_with_derive_from_int_field() {
 
         let config_json = format!(
                 r#"{{
-    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
     "papers": {{
         "years": {{
             "${{year}}": {{
@@ -418,7 +418,7 @@ fn test_template_with_values_and_derive_is_rejected() {
         let tmp = tempfile::tempdir().unwrap();
         let config_file = tmp.path().join("fauxrest.json");
         let config_json = r#"{
-    "serializers": [{"serializer": "json", "layout": "index", "dest": "dist"}],
+    "$config": [{"serializer": "json", "layout": "index", "dest": "dist"}],
     "activities": {
         "${year}": {
             "$values": ["2024"],
@@ -452,7 +452,7 @@ fn test_pick_directive_keeps_only_specified_fields() {
         .unwrap();
         let config_json = format!(
                 r#"{{
-    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
     "users": {{
         "$pick": ["id", "name"]
     }}
@@ -488,7 +488,7 @@ fn test_omit_directive_removes_specified_fields() {
         .unwrap();
         let config_json = format!(
                 r#"{{
-    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
     "users": {{
         "$omit": ["password", "email"]
     }}
@@ -533,7 +533,7 @@ fn test_omit_directive_removes_specified_fields() {
 
         let config_json = format!(
             r#"{{
-        "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+        "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
         "profile": {{
         "$aggregate": ["users", "skills"]
         }}
@@ -578,7 +578,7 @@ fn test_overlay_only_keyed_aggregate_endpoint_is_generated() {
 
         let config_json = format!(
                 r#"{{
-    "serializers": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
     "profile": {{
         "$aggregate": {{
             "mode": "keyed",

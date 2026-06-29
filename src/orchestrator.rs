@@ -271,7 +271,7 @@ fn resolve_emit_flags(node: Option<&ApiNode>) -> (bool, bool) {
         let emit_id = targets.iter().any(|t| matches!(t, EmitTarget::Ids));
         (emit_list, emit_id)
     } else {
-        (false, false)
+        (true, true)
     }
 }
 
