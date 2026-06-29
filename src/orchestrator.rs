@@ -209,10 +209,10 @@ fn materialize_node(
     let effective_filter = target.map_node(|n| n.filter.as_ref()).or(filter);
 
     let (base, endpoint_data) = target.build_endpoint_data(&effective_filter, sources)?;
-    let is_private = *target.map_node(|n| n.private.as_ref()).unwrap_or(&false);
-    if is_private {
-        return Ok(vec![]);
-    }
+    // let is_private = *target.map_node(|n| n.private.as_ref()).unwrap_or(&false);
+    // if is_private {
+    //     return Ok(vec![]);
+    // }
     let mut endpoints = Vec::new();
 
     let (emit_list, emit_id) = resolve_emit_flags(target.node);
@@ -269,12 +269,10 @@ fn resolve_emit_flags(node: Option<&ApiNode>) -> (bool, bool) {
     if let Some(targets) = node.emit.as_ref() {
         let emit_list = targets.iter().any(|t| matches!(t, EmitTarget::List));
         let emit_id = targets.iter().any(|t| matches!(t, EmitTarget::Ids));
-        return (emit_list, emit_id);
+        (emit_list, emit_id)
+    } else {
+        (false, false)
     }
-
-    let emit_list = node.emit_list.unwrap_or(true);
-    let emit_id = node.emit_id.or(node.emit_items).unwrap_or(true);
-    (emit_list, emit_id)
 }
 
 fn aggregate_values2(aggregate: &AggregateSpec, source: &DataSource) -> Result<Value> {
