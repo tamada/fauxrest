@@ -63,7 +63,7 @@ impl FilterCondition {
         warn_if_type_mismatch(&self.op, &self.field, target, &self.value);
         let result = match self.op {
             FilterOp::Eq => target.is_some_and(|t| t.eq(&self.value)),
-            FilterOp::Neq => target.is_none_or(|t| !t.ne(&self.value)),
+            FilterOp::Neq => target.is_some_and(|t| t.ne(&self.value)),
             FilterOp::Gt => compare_ord(target, &self.value, |lhs, rhs| lhs > rhs),
             FilterOp::Gte => compare_ord(target, &self.value, |lhs, rhs| lhs >= rhs),
             FilterOp::Lt => compare_ord(target, &self.value, |lhs, rhs| lhs < rhs),
