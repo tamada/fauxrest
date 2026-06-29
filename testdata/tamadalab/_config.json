@@ -21,7 +21,10 @@
     "${category}": {
       "$emit": ["list"],
       "$derive": { "field": "category", "pattern": ".*" },
-      "$filter": [{ "field": "category", "op": "eq", "value": "{category}" }]
+      "$filter": [
+        { "field": "category", "op": "eq", "value": "{category}" },
+        { "field": "category", "op": "neq", "value": "non_member" }
+      ]
     }
   },
   "theses": {
