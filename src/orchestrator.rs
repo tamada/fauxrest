@@ -4,16 +4,16 @@
 //! reading raw JSON and generating static files according to specified layouts.
 
 use regex::Regex;
-use serde_json::{json, Map, Value};
+use serde_json::{Map, Value, json};
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use crate::Result;
 use crate::config::{
     AggregateMode, AggregateSpec, ApiNode, DeriveConfig, EmitTarget, FilterCondition,
 };
 use crate::context::SerializerContext;
-use crate::Result;
 use crate::{Config, Error, JSONSerializer, Serializer, SqliteSerializer, TypescriptSerializer};
 
 const DERIVE_CARDINALITY_WARN_THRESHOLD: usize = 1000;
@@ -487,10 +487,10 @@ fn derive_scalar_value(value: &Value, cfg: &DeriveConfig) -> Result<Option<Value
     ) {
         return Ok(None);
     }
-    if let Value::String(ref s) = extracted {
-        if s.is_empty() || s.contains('/') {
-            return Ok(None);
-        }
+    if let Value::String(ref s) = extracted
+        && (s.is_empty() || s.contains('/'))
+    {
+        return Ok(None);
     }
     Ok(Some(extracted))
 }
