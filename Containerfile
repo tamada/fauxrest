@@ -7,14 +7,14 @@ WORKDIR /app
 COPY . .
 RUN cargo build --release
 
-ARG GIT_REVISION
-ARG BUILD_DATE
-ARG VERSION
-
 # ------------------------------
 # Stage 2. Build for runtime
 # ------------------------------
 FROM dhi.io/debian-base:trixie
+
+ARG GIT_REVISION \
+    BUILD_DATE   \
+    VERSION
 
 LABEL org.opencontainers.image.title="fauxrest" \
        org.opencontainers.image.description="Pseudo-REST Static API Generator" \
