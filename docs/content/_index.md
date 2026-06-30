@@ -1,6 +1,6 @@
 ---
 title: "FauxREST"
-date: 2026-06-30
+date: "2026-06-30"
 ---
 
 ## About fauxrest
