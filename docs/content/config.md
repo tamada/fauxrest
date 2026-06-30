@@ -8,7 +8,6 @@ title: "⚙️  Configuration"
 
 1. Zero-config: infer endpoints from `./data` structure.
 2. Convention overlay: patch inferred tree via `_config.json` style files.
-3. Programmatic config: define advanced logic in `api.config.js`.
 
 Auto-discovery for config files checks:
 
@@ -56,11 +55,11 @@ In `file` layout, smart fallback avoids file-directory collisions by emitting
 
 In overlay config, keys starting with `$` are directives.
 
+- `$emit`: emit endpoint at a path.
 - `$filter`: filter collection records.
 - `$pick`: allowlist keys.
 - `$omit`: denylist keys.
 - `$aggregate`: merge sources into one endpoint.
-- `$private`: hide endpoint and descendants.
 
 Template sub-paths like `${year}` support:
 
