@@ -1,12 +1,12 @@
 baseURL = "https://tamada.github.io/fauxrest"
 languageCode = "en-us"
 defaultContentLanguage = "en"
-title = "fauxrest"
+title = "FauxREST"
 googleAnalytics = ""
 theme = ["github.com/tamada/hugo_theme_mod", "github.com/nunocoracao/blowfish/v2"]
 
 [params]
-logo = "images/fauxrest.svg" # relative path from docs/assets.
+logo = "fauxrest.svg" # relative path from docs/assets.
 description = "Pseudo-REST Static API Generator"
 dateFormat = "2006-01-02"
 copyright = "Copyright &copy; 2026 by Haruaki Tamada. Made with [Hugo](https://gohugo.io/). Deployed to [GitHub Pages](https://pages.github.com/)."
@@ -17,35 +17,23 @@ copyright = "Copyright &copy; 2026 by Haruaki Tamada. Made with [Hugo](https://g
     pageRef = "/features"
     weight = 100
 [[menus.main]]
-    name = "⚙️ Configuration"
-    pageRef = "/config"
+    name = "💃 For Users"
+    pageRef = "/users"
     weight = 200
 [[menus.main]]
-    name = "⚓️ Install"
-    pageRef = "/install"
+    name = "🕺 For Developers"
+    pageRef = "/developers"
     weight = 300
-[[menus.main]]
-    name = "🏃 Usage"
-    pageRef = "/cli"
-    weight = 400
-[[menus.main]]
-    name = "🚶 API Examples"
-    pageRef = "/examples"
-    weight = 500
-[[menus.main]]
-    name = "👩‍💻 How to contribute 🧑‍💻"
-    pageRef = "/contribute"
-    weight = 1000
 [[menus.main]]
     identifier = "haruaki-tamada"
     pre = "haruaki-tamada"
     url = "https://tamada.github.io"
-    weight = 100
+    weight = 10000
 [[menus.main]]
     identifier = "github"
     pre = "github"
     url = "https://github.com/tamada/lis"
-    weight = 200
+    weight = 20000
 [[menus.footer]]
     name = ":smile: About"
     pageRef = "/about"

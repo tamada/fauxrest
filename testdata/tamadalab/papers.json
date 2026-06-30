@@ -1,0 +1,3830 @@
+[
+  {
+    "id": "2026wsse_fedorov",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Nikolay Fedorov",
+      "Akito Monden",
+      "Hiroki Inayoshi",
+      "Haruaki Tamada",
+      "Masateru Tsunoda"
+    ],
+    "title": "Detection of LLM-assisted Code Plagiarism Using k-gram Software Birthmarks",
+    "source": "Proc. 8th World Symposium on Software Engineering ([WSSE 2026](https://wsse.org))",
+    "month": "October",
+    "pages": "",
+    "year": "2026",
+    "hide": false,
+    "note": "(Nara, Japan; submitted)",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2026tse_fedorov",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Nikolay Fedorov",
+      "Akito Monden",
+      "Hiroki Inayoshi",
+      "Haruaki Tamada",
+      "Masateru Tsunoda"
+    ],
+    "title": "Project-wise Comparison of Software Birthmarks Using Weighted Partial Similarity",
+    "source": "IEEE Transactions on Software Engineering",
+    "pages": "",
+    "arxiv": "2606.25418",
+    "year": "2026",
+    "hide": false,
+    "note": "(submitted)",
+    "links": [
+      "like",
+      "bibtex",
+      "arxiv"
+    ]
+  },
+  {
+    "id": "2026snpd_tamada",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada"
+    ],
+    "title": "Cross-Platform Software Birthmarking for Real-World Binaries via Intermediate Representation",
+    "source": "Proc. 34th IEEE/ACIS International Conference on Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing ([SNPD2026](https://acisinternational.org/conferences/snpd-2026-i/))",
+    "month": "August",
+    "pages": "",
+    "arxiv": "2606.21988",
+    "year": "2026",
+    "hide": false,
+    "note": "(Okayama, Japan; submitted)",
+    "links": [
+      "like",
+      "bibtex",
+      "arxiv"
+    ]
+  },
+  {
+    "id": "2025ncipsj_nishimura",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "西村 淳志",
+      "神崎 雄一郎"
+    ],
+    "title": "命令の置換に基づくWebAssembly コードの難読化の試み",
+    "source": "[情報処理学会第87回全国大会](https://www.ipsj.or.jp/event/taikai/87/index.html)講演論文集",
+    "month": "March",
+    "pages": "",
+    "year": "2025",
+    "hide": true,
+    "note": "（大阪）",
+    "links": [
+      "like",
+      "bibtex",
+      "link"
+    ]
+  },
+  {
+    "id": "2024fose_fusano",
+    "weight": 20231110,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "房野 悠真",
+      "玉田 春昭"
+    ],
+    "title": "ビルド可能性と依存関係のぜい弱性を用いたOSSプロジェクトの生存性評価",
+    "source": "第31回ソフトウェア工学の基礎ワークショップ（[FOSE 2024](http://fose.jssst.or.jp/fose2024/)）",
+    "month": "November",
+    "pages": "207--208",
+    "year": "2024",
+    "hide": false,
+    "note": "（佐賀, ライブ論文）",
+    "links": [
+      "poster",
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2024fose_hayami",
+    "weight": 20231110,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "速水 健杜",
+      "玉田 春昭"
+    ],
+    "title": "プロジェクト理解のための動的チャート作成ツールの開発",
+    "source": "第31回ソフトウェア工学の基礎ワークショップ（[FOSE 2024](http://fose.jssst.or.jp/fose2024/)）",
+    "month": "November",
+    "pages": "229--230",
+    "year": "2024",
+    "hide": false,
+    "note": "（佐賀, ライブ論文）",
+    "links": [
+      "poster",
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2024fose_shirokoshi",
+    "weight": 20231110,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "城越 悠仁",
+      "玉田 春昭"
+    ],
+    "title": "プログラミング教育における生成AIを活用したエラー文理解支援のためのツール開発",
+    "source": "第31回ソフトウェア工学の基礎ワークショップ（[FOSE 2024](http://fose.jssst.or.jp/fose2024/)）",
+    "month": "November",
+    "pages": "199--200",
+    "year": "2024",
+    "hide": false,
+    "note": "（佐賀, ライブ論文）",
+    "links": [
+      "poster",
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2024fose_tsugihara",
+    "weight": 20231110,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "次原 蒼司",
+      "玉田 春昭"
+    ],
+    "title": "プログラミング習慣化のためのバーチャルペットを育成するVSCode拡張機能の開発",
+    "source": "第31回ソフトウェア工学の基礎ワークショップ（[FOSE 2024](http://fose.jssst.or.jp/fose2024/)）",
+    "month": "November",
+    "pages": "201--202",
+    "year": "2024",
+    "hide": false,
+    "note": "（佐賀, ライブ論文）",
+    "links": [
+      "poster",
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2024ses_yamazaki",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "村山 永遠",
+      "神﨑 雄一郎",
+      "玉田 春昭"
+    ],
+    "title": "バイナリに対応するシンボリック実行エンジンを用いた動的バースマークの抽出システム",
+    "source": "ソフトウェアエンジニアリングシンポジウム（[SES 2024](http://ses.sigse.jp/2024)）",
+    "month": "September",
+    "year": "2024",
+    "hide": false,
+    "note": "（横浜, ポスター）",
+    "links": [
+      "poster",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2024wsse_fedorov",
+    "weight": 20240914,
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Nikolay Fedorov",
+      "Hiroki Inayoshi",
+      "Haruaki Tamada",
+      "Akito Monden"
+    ],
+    "title": "Comparison of Similarity Functions for n-gram Software Birthmarks",
+    "source": "The 6th World Symposium on Software Engineering ([WSSE 2024](https://wsse.org))",
+    "month": "September",
+    "pages": "169--176",
+    "year": "2024",
+    "hide": false,
+    "note": "(Kyoto, Japan)",
+    "href": "https://dl.acm.org/doi/10.1145/3698062.3698087",
+    "doi": "10.1145/3698062.3698087",
+    "links": [
+      "like",
+      "bibtex",
+      "link"
+    ]
+  },
+  {
+    "id": "2023bcd_kaide",
+    "weight": 20231214,
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Kaito Kaide",
+      "Haruaki Tamada"
+    ],
+    "title": "Analyzing the Growth Patterns of GitHub Projects to Construct Best Practices for Project Managements",
+    "source": "[The 8th IEEE/ACIS International Conference on Big Data, Cloud Computing, and Data Science Engineering (BCD 2023)](https://acisinternational.org/conferences/bcd-2023/)",
+    "month": "December",
+    "pages": "58--63",
+    "year": "2023",
+    "hide": false,
+    "note": "(Ho Chi Minh City, Vietnam)",
+    "href": "https://ieeexplore.ieee.org/document/10466327",
+    "doi": "10.1109/BCD57833.2023.10466327",
+    "links": [
+      "paper",
+      "like",
+      "bibtex",
+      "link",
+      "doi"
+    ]
+  },
+  {
+    "id": "2023fose_nishi",
+    "weight": 20231110,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "吉田 大介，玉田 春昭"
+    ],
+    "title": "コードリーディング習慣化のためのWebアプリケーションCodeLeaderの開発",
+    "source": "第30回ソフトウェア工学の基礎ワークショップ（[FOSE 2023](http://fose.jssst.or.jp/fose2023/)）",
+    "month": "November",
+    "year": "2023",
+    "hide": false,
+    "note": "（伊勢志摩, ライブ論文）",
+    "links": [
+      "poster",
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2023fose_nishi",
+    "weight": 20231109,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "西 仁哉，玉田 春昭"
+    ],
+    "title": "GitHubにおけるForkリポジトリのコミット活動に基づく生存プロジェクト発見ツールの試作",
+    "source": "第30回ソフトウェア工学の基礎ワークショップ（[FOSE 2023](http://fose.jssst.or.jp/fose2023/)）",
+    "month": "November",
+    "year": "2023",
+    "hide": false,
+    "note": "（伊勢志摩, ライブ論文）",
+    "links": [
+      "poster",
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2023fit_cermeno",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "セルメニョ アレハンドロ",
+      "玉田 春昭",
+      "神崎 雄一郎"
+    ],
+    "title": "動的バースマークの自動抽出に向けて 〜比較ソフトウェアの入力からの実行系列の自動抽出〜",
+    "source": "第23回情報科学技術フォーラム（Forum on Information Technology 2023）([FIT 2023](https://www.ipsj.or.jp/event/fit/fit2023/))（講演番号 B-005）",
+    "month": "September",
+    "pages": "165--168",
+    "year": "2023",
+    "hide": false,
+    "note": "B-005",
+    "href": "https://onsite.gakkai-web.net/fit2023/abstract/data/html/program/b.html",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2023ipsjnc_matsuda",
+    "weight": 20230302,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "松田 隼汰",
+      "神崎 雄一郎",
+      "光本 智洋",
+      "玉田 春昭"
+    ],
+    "title": "シンボリック実行を利用した動的ソフトウェアバースマークの抽出システムの検討",
+    "source": "情報処理学会第85回全国大会講演論文集 (講演番号6K-05)",
+    "month": "March",
+    "year": "2023",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2022fose_kaide",
+    "weight": 20221111,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "開出 凱斗",
+      "玉田 春昭，戸田 航史，中村 匡秀"
+    ],
+    "title": "GitHub における模範プロジェクトの検出とその成長パターンの分類に向けて",
+    "source": "第29回ソフトウェア工学の基礎ワークショップ（[FOSE2022](http://fose.jssst.or.jp/fose2022/)）",
+    "month": "November",
+    "pages": "203--204",
+    "year": "2022",
+    "hide": false,
+    "note": "（島根, ライブ論文）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2022ses_tamada",
+    "weight": 20220905,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭"
+    ],
+    "title": "BYOD下におけるプログラミング演習環境の統一に向けて",
+    "source": "[ソフトウェアシンポジウム2022](http://ses.sigse.jp/2022/) [WS3 ソフトウェア工学教育の自動化・最適化に向けて](https://ses.sigse.jp/2022/workshop.html#ws3)",
+    "month": "September",
+    "year": "2022",
+    "hide": false,
+    "note": "（オンライン）",
+    "href": "https://ses.sigse.jp/2022/workshop.html#ws3",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2022snpd_kaide",
+    "weight": 20220701,
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Kaito Kaide",
+      "Haruaki Tamada"
+    ],
+    "title": "ARGO: Projects' Time-Series Data Fetching and Visualizing Tool for GitHub",
+    "source": "Proc. 23rd ACIS International Conference on Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing ([SNPD 2022 Summer](http://acisinternational.org/conferences/snpd-2022-summer/))",
+    "month": "July",
+    "year": "2022",
+    "hide": false,
+    "note": "(Online)",
+    "href": "https://ieeexplore.ieee.org/abstract/document/10053144",
+    "doi": "10.1109/SNPD-Summer57817.2022.00032",
+    "links": [
+      "paper",
+      "like",
+      "bibtex",
+      "link",
+      "doi"
+    ]
+  },
+  {
+    "id": "2022icsim_otsuki",
+    "weight": 20220123,
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Naruaki Otsuki",
+      "Haruaki Tamada"
+    ],
+    "title": "Overcoming the obfuscation method of the dynamic name resolution",
+    "source": "Proc. the 5th International Conference on Software Engineering and Information Management ([ICSIM 2022](http://www.icsim.org/))",
+    "month": "January",
+    "year": "2022",
+    "hide": false,
+    "note": "(Online)",
+    "href": "https://dl.acm.org/doi/10.1145/3520084.3520103",
+    "doi": "10.1145/3520084.3520103",
+    "links": [
+      "paper",
+      "link",
+      "doi",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2021ses_higuchi",
+    "weight": 20210907,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "樋口 凱斗",
+      "玉田 春昭",
+      "戸田 航史",
+      "中村 匡秀"
+    ],
+    "title": "自発的ソフトウェア進化におけるプロジェクトの成長過程可視化ツールの試作",
+    "source": "[ソフトウェアエンジニアリングシンポジウム2021](http://ses.sigse.jp/2021/) ポスター（論文あり）",
+    "month": "September",
+    "pages": "299--300",
+    "year": "2021",
+    "hide": false,
+    "note": "（オンライン）",
+    "href": "https://ses.sigse.jp/2021/accepted.html#poster",
+    "links": [
+      "paper",
+      "poster",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2021ses_tamada",
+    "weight": 20210906,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭"
+    ],
+    "title": "プログラミング初学者向けのGit/GitHub操作支援手法・データ収集方法",
+    "source": "[ソフトウェアエンジニアリングシンポジウム2021](http://ses.sigse.jp/2021/) [ワークショップ 討論テーマ（4）ソフトウェア工学教育支援に向けた開発者の活動ログの収集，分析および共有](https://ses.sigse.jp/2021/workshop.html#ws4)",
+    "month": "September",
+    "year": "2021",
+    "hide": false,
+    "note": "（オンライン）",
+    "href": "https://ses.sigse.jp/2021/workshop.html#ws4",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2021fit_masuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "増田 亜里紗",
+      "玉田 春昭"
+    ],
+    "title": "プログラミング初学者向けGit/GitHub 操作支援フレームワークの設計と実装",
+    "source": "第20回情報科学技術フォーラム（Forum on Information Technology 2021）([FIT 2021](https://www.ipsj.or.jp/event/fit/fit2021/))（講演番号 B-013）",
+    "month": "August",
+    "pages": "153--158",
+    "year": "2021",
+    "hide": false,
+    "note": "（オンライン）",
+    "href": "https://www.ieice.org/publications/conference-FIT-DVDs/FIT2021/data/html/program/b.html",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2021ncipsj_mitsumoto",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "光本智洋",
+      "神崎雄一郎"
+    ],
+    "title": "SMTソルバによる命令列生成を用いたアセンブリプログラムの難読化",
+    "source": "情報処理学会第83回全国大会講演論文集 (講演番号2K-04)",
+    "month": "March",
+    "year": "2021",
+    "hide": true,
+    "note": "（学生奨励賞受賞）",
+    "href": "https://www.ipsj.or.jp/event/taikai/83/ipsj_web2021/data/pdf/2K-04.html",
+    "links": [
+      "like",
+      "bibtex",
+      "link"
+    ]
+  },
+  {
+    "id": "2021gihyo_tamada",
+    "type": "techreport",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭"
+    ],
+    "title": "ウィズコロナ時代の大学のオンライン授業 〜様々なツールを使った授業設計",
+    "source": "[gihyo.jp](https://gihyo.jp) 新春特別企画",
+    "month": "January",
+    "year": "2021",
+    "hide": false,
+    "href": "https://gihyo.jp/lifestyle/column/newyear/2021/online-college-classes-in-the-with-corona-era",
+    "links": [
+      "bibtex",
+      "like",
+      "link"
+    ]
+  },
+  {
+    "id": "2020ijsi_toda",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Koji Toda",
+      "Haruaki Tamada",
+      "Masahide Nakamura",
+      "Kenichi Matsumoto"
+    ],
+    "title": "Capturing Spontaneous Software Evolution in a Social Coding Platform with Project-as-a-City Concept",
+    "source": "[International Journal of Software Innovation](https://www.igi-global.com/journal/international-journal-software-innovation/)",
+    "month": "June",
+    "pages": "35--50",
+    "year": "2020",
+    "hide": false,
+    "href": "https://www.igi-global.com/article/capturing-spotaneous-software-evolution-in-a-social-coding-platform-with-project-as-a-city-concept/256235",
+    "doi": "10.4018/IJSI.2020070103",
+    "links": [
+      "bibtex",
+      "like",
+      "doi",
+      "link"
+    ]
+  },
+  {
+    "id": "2020gcieice_kobayashi",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "小林 竜也",
+      "玉田 春昭"
+    ],
+    "title": "科目間の関連を可視化するシラバスシステム",
+    "source": "電子情報通信学会 2020年総合大会 D-15-24",
+    "month": "March",
+    "pages": "138",
+    "year": "2020",
+    "hide": false,
+    "href": "https://www.ieice-taikai.jp/2020general/jpn/webpro/_html/iss.html#d_15_24",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2020ipsj_nakamura",
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "中村 潤",
+      "玉田 春昭"
+    ],
+    "title": "大量のソフトウェアを対象にしたソフトウェアバースマークによる盗用検出 ―全文検索システムを用いた検査対象の絞り込み手法",
+    "source": "情報処理学会論文誌",
+    "month": "February",
+    "pages": "454--473",
+    "year": "2020",
+    "hide": false,
+    "href": "http://id.nii.ac.jp/1001/00203076/",
+    "links": [
+      "paper",
+      "like",
+      "bibtex",
+      "link"
+    ]
+  },
+  {
+    "id": "2020scis_otsuki",
+    "weight": 20200128,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "大槻 成輝",
+      "玉田 春昭",
+      "神崎 雄一郎"
+    ],
+    "title": "JVM環境におけるオペコード列と名前に着目した適用難読化ツールの特定",
+    "source": "2020年暗号と情報セキュリティシンポジウム予稿集（[SCIS 2020](https://www.iwsec.org/scis/2020/)）",
+    "month": "January",
+    "pages": "[1E1-3](https://www.iwsec.org/scis/2020/program.html#1E1)",
+    "year": "2020",
+    "hide": false,
+    "note": "（高知）",
+    "href": "https://www.iwsec.org/scis/2020/",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019sigss_miyazaki",
+    "weight": 20191001,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "宮崎 光",
+      "玉田 春昭"
+    ],
+    "title": "CUIツールの開発支援サービスとしての再構築手順の提案",
+    "source": "信学技法, Vol.119, No.246, SS2019-14",
+    "month": "October",
+    "pages": "7--12",
+    "year": "2019",
+    "hide": false,
+    "note": "（熊本）",
+    "href": "https://www.ieice.org/ken/program/index.php?mode=program&tgs_regid=2ec4de3009f045dc7781d0ada3d42205f76aec7a89ac0556404d5194bd4a49df&tgid=SS&layout=&lang=",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019css_tamada",
+    "weight": 20191001,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "神崎 雄一郎"
+    ],
+    "title": "Javaバイトコードを対象とした命令の頻度解析による適用難読化ツールの特定",
+    "source": "コンピュータセキュリティシンポジウム2019予稿集（[CSS 2019](https://www.iwsec.org/css/2019/)）",
+    "month": "October",
+    "pages": "[1C1-3](https://www.iwsec.org/css/2019/program.html#i1C1)",
+    "year": "2019",
+    "hide": false,
+    "note": "（佐世保，長崎）",
+    "href": "https://www.iwsec.org/css/2019/program.html#i1C1",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019jsmedsd_nakamura",
+    "weight": 20190930,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "中村 匡秀",
+      "戸田 航史",
+      "玉田 春昭",
+      "松本 健一"
+    ],
+    "title": "自発的ソフトウェア進化を促すプロジェクト状態の推定",
+    "source": "日本機械学会 第29回設計工学・システム部門講演会, No.2413",
+    "month": "September",
+    "year": "2019",
+    "hide": false,
+    "note": "（仙台，宮城）",
+    "href": "https://www.jsme.or.jp/conference/dsdconf19/",
+    "links": [
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019ses_isobe",
+    "weight": 20190903,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "磯部 陽介",
+      "玉田 春昭"
+    ],
+    "title": "ランダムフォレストを用いた名前難読化の耐タンパ化性能の評価",
+    "source": "[ソフトウェアエンジニアリングシンポジウム2019](http://ses.sigse.jp/2019/) 招待講演",
+    "month": "August",
+    "year": "2019",
+    "hide": false,
+    "note": "（東京）",
+    "href": "http://ses.sigse.jp/2019/workshop.html#ws2",
+    "links": [
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019ses_toda",
+    "weight": 20190902,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "Koji Toda",
+      "Haruaki Tamada",
+      "Masahide Nakamura",
+      "Kenichi Matsumoto"
+    ],
+    "title": "Characterizing Project Evolution on a Social Coding Platform",
+    "source": "[ソフトウェアエンジニアリングシンポジウム2019](http://ses.sigse.jp/2019/) 既発表論文",
+    "month": "August",
+    "year": "2019",
+    "hide": false,
+    "note": "（東京）",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019ses_tamada",
+    "weight": 20190901,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭"
+    ],
+    "title": "初学者向けGitHub flow学習支援",
+    "source": "[ソフトウェアエンジニアリングシンポジウム2019](http://ses.sigse.jp/2019/) ワークショップ 討論テーマ（2）[実証的ソフトウェア工学によるプログラミング教育とソフトウェア工学教育](https://ses.sigse.jp/2019/workshop.html)",
+    "month": "August",
+    "year": "2019",
+    "hide": false,
+    "note": "（東京）",
+    "href": "http://ses.sigse.jp/2019/workshop.html#ws2",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019hcii_miyazaki",
+    "weight": 20190720,
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Ko Miyazaki",
+      "Haruaki Tamada"
+    ],
+    "title": "Identifying Users in the Bridging Service between Two Different Chat Services using User Icons",
+    "source": "Proc. HCI International 2019, Digital Human Modeling and Applications in Health, Safety, Ergonomics and Risk Management. Healthcare Applications, ([HCII2019](http://2019.hci.international)), Lecture Notes in Computer Science, vol 11582",
+    "month": "July",
+    "year": "2019",
+    "hide": false,
+    "note": "(Orlando, FL, USA)",
+    "href": "https://link.springer.com/chapter/10.1007/978-3-030-22219-2_29",
+    "doi": "10.1007/978-3-030-22219-2_29",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019ipsj_yokoi",
+    "weight": 20190715,
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "横井 昂典",
+      "玉田 春昭"
+    ],
+    "title": "単体テストコードとアスペクト指向を用いた動的バースマークの抽出コストの削減",
+    "source": "情報処理学会論文誌",
+    "month": "July",
+    "pages": "1247--1259",
+    "year": "2019",
+    "hide": false,
+    "href": "http://id.nii.ac.jp/1001/00198225/",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019snpd_toda",
+    "weight": 20190701,
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Koji Toda",
+      "Haruaki Tamada",
+      "Masahide Nakamura",
+      "Kenichi Matsumoto"
+    ],
+    "title": "Characterizing Project Evolution on a Social Coding Platform",
+    "source": "Proc. 20th ACIS International Conference on Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing ([SNPD 2019](http://acisinternational.org/conferences/snpd-2019/))",
+    "month": "July",
+    "pages": "525--532",
+    "year": "2019",
+    "hide": false,
+    "note": "(Toyama, Japan)",
+    "href": "https://ieeexplore.ieee.org/document/8935866",
+    "doi": "10.1109/SNPD.2019.8935866",
+    "links": [
+      "paper",
+      "like",
+      "bibtex",
+      "link",
+      "doi"
+    ]
+  },
+  {
+    "id": "2019ipsj_isobe",
+    "weight": 20190415,
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "磯部 陽介",
+      "玉田 春昭"
+    ],
+    "title": "ランダムフォレストを用いた名前難読化の耐タンパ化性能の評価",
+    "source": "情報処理学会論文誌",
+    "month": "April",
+    "pages": "1063--1074",
+    "year": "2019",
+    "hide": false,
+    "href": "http://id.nii.ac.jp/1001/00195412/",
+    "links": [
+      "paper",
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019forum_hosaki",
+    "type": "bulletin",
+    "language": "japanese",
+    "authors": [
+      "穂崎 良典",
+      "荻野 晃大",
+      "玉田 春昭",
+      "水口 充",
+      "吉村 正義"
+    ],
+    "title": "コーディネーターの立場から見た「理工系コーオプ教育プログラム」の実践報告",
+    "source": "高等教育フォーラム",
+    "month": "March",
+    "pages": "105--111",
+    "year": "2019",
+    "hide": false,
+    "href": "http://hdl.handle.net/10965/00010232",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2019scis_tamada",
+    "weight": 20190120,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "神崎 雄一郎"
+    ],
+    "title": "オペコードの編集距離を用いたJVM向け難読化ツールの難読化性能の評価",
+    "source": "2019年暗号と情報セキュリティシンポジウム予稿集 ([SCIS 2019](http://www.iwsec.org/scis/2019/)), 3D2-1",
+    "month": "January",
+    "year": "2019",
+    "hide": false,
+    "note": "（大津, 滋賀）",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018sgrk_hosaki",
+    "weight": 20181115,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "穂崎 良典",
+      "荻野 晃大",
+      "玉田 春昭",
+      "水口 充",
+      "吉村 正義"
+    ],
+    "title": "コーディネータの立場から見た理工系コーオプ教育プログラムの実践",
+    "source": "産学連携学会 [関西・中四国支部 第１０回研究・事例発表会](http://www.sgrk.shimane-u.ac.jp/j-sip-B150/meeting/10th-2018/home.htm) M10-24",
+    "month": "November",
+    "year": "2018",
+    "hide": false,
+    "note": "（岡山）",
+    "href": "http://www.sgrk.shimane-u.ac.jp/j-sip-B150/meeting/10th-2018/program.htm",
+    "links": [
+      "paper",
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018fose_yanagawa",
+    "weight": 20181110,
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "柳川 龍太郎",
+      "西尾 泰介",
+      "玉田 春昭"
+    ],
+    "title": "システム開発初心者のためのGitHub flow学習支援システム",
+    "source": "第25回ソフトウェア工学の基礎ワークショップ（[FOSE2018](http://fose.jssst.or.jp/fose2018/)）",
+    "month": "November",
+    "year": "2018",
+    "hide": false,
+    "note": "（函館, ポスター発表）",
+    "links": [
+      "poster",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018fose_nishi",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "西 陽太",
+      "神崎 雄一郎",
+      "門田 暁人",
+      "玉田 春昭"
+    ],
+    "title": "難読化されたJavaバイトコードに対するシンボリック実行攻撃の困難さ評価の検討",
+    "source": "第25回ソフトウェア工学の基礎ワークショップ（[FOSE2018](http://fose.jssst.or.jp/fose2018/)）",
+    "month": "November",
+    "pages": "151--152",
+    "year": "2018",
+    "hide": false,
+    "note": "（函館, ライブ論文）",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018fit_miyazaki",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "宮崎 光",
+      "玉田 春昭"
+    ],
+    "title": "異なるチャットシステム間でメッセージ送信可能なシステムの構築",
+    "source": "第17回情報科学技術フォーラム（Forum on Information Technology 2018）([FIT 2018](https://www.ipsj.or.jp/event/fit/fit2018/))",
+    "month": "September",
+    "year": "2018",
+    "hide": false,
+    "note": "（福岡）",
+    "href": "https://www.ipsj.or.jp/event/fit/fit2018/FIT2018_program_web/data/html/program/b.html",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018ijndc_isobe",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Yosuke Isobe",
+      "Haruaki Tamada"
+    ],
+    "title": "Design and Evaluation of the De-obfuscation Method against the Identifier Renaming Methods",
+    "source": "International Journal of Networked and Distributed Computing",
+    "month": "September",
+    "pages": "232--238",
+    "year": "2018",
+    "hide": false,
+    "href": "https://www.atlantis-press.com/journals/ijndc/125905555",
+    "doi": "10.2991/ijndc.2018.6.4.6",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018ijndc_yokoi",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Takanori Yokoi",
+      "Haruaki Tamada"
+    ],
+    "title": "Improvement of the Dynamic Software Birthmark Process by Reducing the Time of the Extraction",
+    "source": "International Journal of Networked and Distributed Computing",
+    "month": "September",
+    "pages": "224--231",
+    "year": "2018",
+    "hide": false,
+    "href": "https://www.atlantis-press.com/journals/ijndc/125905554",
+    "doi": "10.2991/ijndc.2018.6.4.5",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018ses_nishio",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "西尾 泰介",
+      "柳川 龍太郎",
+      "玉田 春昭"
+    ],
+    "title": "初学者を対象としたGitHub flow支援ボット",
+    "source": "[ソフトウェアシンポジウム2018](http://ses.sigse.jp/2018/) ワークショップ 討論テーマ（4）ソーシャルコーディングのための実証的ソフトウェア工学",
+    "month": "September",
+    "year": "2018",
+    "hide": false,
+    "note": "（東京）",
+    "href": "http://ses.sigse.jp/2018/workshop.html#ws4",
+    "links": [
+      "paper",
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018snpd_yokoi",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Takanori Yokoi",
+      "Haruaki Tamada"
+    ],
+    "title": "A Beforehand Extraction Method for Dynamic Software Birthmarks using Unit Test Codes",
+    "source": "Proc. 19th ACIS International Conference on Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing ([SNPD 2018](http://www.acisinternational.org/snpd2018/))",
+    "month": "July",
+    "year": "2018",
+    "hide": false,
+    "note": "(Busan, Korea)",
+    "href": "https://ieeexplore.ieee.org/document/8441058",
+    "doi": "10.1109/SNPD.2018.8441058",
+    "links": [
+      "paper",
+      "link",
+      "like",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018snpd_isobe",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Yosuke Isobe",
+      "Haruaki Tamada"
+    ],
+    "title": "Are Identifier Renaming Methods Secure? --An Evaluation Focuses on Opcodes using Random Forest--",
+    "source": "Proc. 19th ACIS International Conference on Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing ([SNPD 2018](http://www.acisinternational.org/snpd2018/))",
+    "month": "July",
+    "year": "2018",
+    "hide": false,
+    "note": "(Busan, Korea)",
+    "href": "https://ieeexplore.ieee.org/document/8441153",
+    "doi": "10.1109/SNPD.2018.8441153",
+    "links": [
+      "paper",
+      "link",
+      "like",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018forum_minakuchi",
+    "type": "bulletin",
+    "language": "japanese",
+    "authors": [
+      "水口 充",
+      "荻野 晃大",
+      "玉田 春昭",
+      "穂崎 良典"
+    ],
+    "title": "理工系コーオプ教育プログラムの改善と実践",
+    "source": "高等教育フォーラム",
+    "month": "March",
+    "pages": "73--77",
+    "year": "2018",
+    "hide": false,
+    "href": "http://hdl.handle.net/10965/00010071",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018jsst_fujiwara",
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "藤原 賢二",
+      "上村 恭平",
+      "井垣 宏",
+      "吉田 則裕",
+      "伏田 享平",
+      "玉田 春昭",
+      "楠本 真二",
+      "飯田 元"
+    ],
+    "title": "スナップショットを用いたプログラミング演習における行き詰まり箇所の特定",
+    "source": "コンピュータ ソフトウェア",
+    "month": "January",
+    "pages": "1_3-1_13",
+    "year": "2018",
+    "hide": false,
+    "href": "https://www.jstage.jst.go.jp/article/jssst/35/1/35_1_3/_article/-char/ja",
+    "doi": "10.11309/jssst.35.1_3",
+    "links": [
+      "link",
+      "doi",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018wws_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭"
+    ],
+    "title": "ソーシャルコーディングプラットフォーム上のサービス連携のためのメタボット",
+    "source": "[ウィンターワークショップ2018](http://wws.sigse.jp/2018/index.html)",
+    "month": "January",
+    "year": "2018",
+    "hide": false,
+    "note": "（広島）",
+    "href": "https://ipsj.ixsq.nii.ac.jp/ej/?action=pages_view_main&active_action=repository_view_main_item_detail&item_id=185315&item_no=1&page_id=13&block_id=8",
+    "links": [
+      "paper",
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2018icsim_nakamura",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Jun Nakamura",
+      "Haruaki Tamada"
+    ],
+    "title": "mituba: Scaling up Software Theft Detection with the Search Engine",
+    "source": "Proc. International Conference on Software Engineering and Information Management ([ICSIM 2018](http://www.icsim.org/icsim2018.html))",
+    "month": "January",
+    "pages": "6--10",
+    "year": "2018",
+    "hide": false,
+    "note": "(Casablanca, Morocco)",
+    "href": "https://dl.acm.org/citation.cfm?id=3178475",
+    "doi": "10.1145/3178461.3178475",
+    "links": [
+      "paper",
+      "link",
+      "like",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017fose_nakamura",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "中村 潤",
+      "玉田 春昭"
+    ],
+    "title": "検索エンジンを用いたソフトウェアバースマークによる検査対象の絞り込み手法",
+    "source": "第24回ソフトウェア工学の基礎ワークショップ（[FOSE2017](http://fose.jssst.or.jp/fose2017/)）",
+    "month": "November",
+    "pages": "99--104",
+    "year": "2017",
+    "hide": false,
+    "note": "（福井）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017fose_isobe",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "磯部 陽介",
+      "玉田 春昭"
+    ],
+    "title": "ランダムフォレストによる名前難読化の逆変換",
+    "source": "第24回ソフトウェア工学の基礎ワークショップ（[FOSE2017](http://fose.jssst.or.jp/fose2017/)）",
+    "month": "November",
+    "pages": "93--98",
+    "year": "2017",
+    "hide": false,
+    "note": "（福井）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017css_yokoi",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "横井 昂典",
+      "玉田 春昭"
+    ],
+    "title": "単体テストコードを利用した動的バースマークの抽出",
+    "source": "コンピュータセキュリティシンポジウム2017（[CSS 2017](http://www.iwsec.org/css/2017/)）",
+    "month": "October",
+    "pages": "1288-–1294 (3C3-4)",
+    "year": "2017",
+    "hide": false,
+    "note": "（山形）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017internship_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "荻野 晃大",
+      "水口 充",
+      "穂崎 良典"
+    ],
+    "title": "理工系コーオプ教育プログラムの改善と実践",
+    "source": "日本インターンシップ学会 [第１８回大会](https://sites.google.com/a/ts.siu.ac.jp/jsi2017/)",
+    "month": "September",
+    "pages": "44–-45",
+    "year": "2017",
+    "hide": false,
+    "note": "（札幌）",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017sigse_kanegae",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "鐘ヶ江 由佳",
+      "玉田 春昭",
+      "畑 秀明"
+    ],
+    "title": "GitHubにおける言語ごとのビルドファイルの更新理由調査",
+    "source": "研究報告ソフトウェア工学（SE）, Vol. 2017-SE-196, No.28",
+    "month": "July",
+    "year": "2017",
+    "hide": false,
+    "href": "http://www.ipsj.or.jp/kenkyukai/event/se196.html",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017ijsi_tsuzaki",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Takehiro Tsuzaki",
+      "Teruaki Yamamoto",
+      "Haruaki Tamada",
+      "Akito Monden"
+    ],
+    "title": "Scaling Up Software Birthmarks Using Fuzzy Hashing",
+    "source": "International Journal of Software Innovation (IJSI)",
+    "month": "June",
+    "pages": "89--102",
+    "year": "2017",
+    "hide": false,
+    "href": "http://www.igi-global.com/article/scaling-up-software-birthmarks-using-fuzzy-hashing/182539",
+    "doi": "10.4018/IJSI.2017070107",
+    "links": [
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017forum_ogino",
+    "type": "bulletin",
+    "language": "japanese",
+    "authors": [
+      "荻野 晃大",
+      "玉田 春昭",
+      "穂崎 良典"
+    ],
+    "title": "理工系コーオプ教育プログラムの実践報告",
+    "source": "高等教育フォーラム",
+    "month": "March",
+    "pages": "13--23",
+    "year": "2017",
+    "hide": false,
+    "href": "http://hdl.handle.net/10965/00002455",
+    "links": [
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017repit_fujiwara",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "藤原 賢二",
+      "上村 恭平",
+      "井垣 宏",
+      "伏田 享平",
+      "玉田 春昭",
+      "楠本 真二",
+      "飯田 元"
+    ],
+    "title": "スナップショットを用いたプログラミング演習における行き詰まり箇所の特定",
+    "source": "第3回実践的IT教育シンポジウム（[rePiT2017](https://sites.google.com/site/sigrepit/repit2017/program)）論文集",
+    "month": "January",
+    "pages": "17--26",
+    "year": "2017",
+    "hide": false,
+    "note": "（大阪, **最優秀論文賞**）",
+    "href": "https://sites.google.com/site/sigrepit/repit2017",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017scis_sagisaka",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "匂坂 勇仁",
+      "玉田 春昭"
+    ],
+    "title": "命令列に着目した名前難読化の逆変換手法",
+    "source": "2017年暗号と情報セキュリティシンポジウム予稿集 ([SCIS 2017](http://www.iwsec.org/scis/2017/)), 3D1-5",
+    "month": "January",
+    "year": "2017",
+    "hide": false,
+    "note": "（沖縄, 那覇）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017scis_yokoi",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "横井 昂典",
+      "玉田 春昭"
+    ],
+    "title": "使用クラスに基づいたTF-IDFによる難読化の不自然さ評価",
+    "source": "2017年暗号と情報セキュリティシンポジウム予稿集 ([SCIS 2017](http://www.iwsec.org/scis/2017/)), 3D1-4",
+    "month": "January",
+    "year": "2017",
+    "hide": false,
+    "note": "（沖縄, 那覇）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2017scis_isobe",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "磯部 陽介",
+      "玉田 春昭"
+    ],
+    "title": "協調フィルタリングを利用した名前難読化の逆変換",
+    "source": "2017年暗号と情報セキュリティシンポジウム予稿集 ([SCIS 2017](http://www.iwsec.org/scis/2017/)), 3D1-3",
+    "month": "January",
+    "year": "2017",
+    "hide": false,
+    "note": "（沖縄, 那覇）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016acit_inokuchi",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Akira Inokuchi",
+      "Haruaki Tamada",
+      "Hideaki Hata",
+      "Masateru Tsunoda"
+    ],
+    "title": "Toward Obliging Bots for Supporting Next Actions",
+    "source": "Proc. of the 4th International Conference on Applied Computing & Information Technology (ACIT 2016)",
+    "month": "December",
+    "pages": "183--188",
+    "year": "2016",
+    "hide": false,
+    "note": "(UNLV, Las Vegas, NV, USA)",
+    "href": "http://ieeexplore.ieee.org/document/7916979/",
+    "doi": "10.1109/ACIT-CSII-BCD.2016.044",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016acit_nakamura",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Jun Nakamura",
+      "Haruaki Tamada"
+    ],
+    "title": "Fast Comparison of Software Birthmarks for Detecting the Theft with the Search Engine",
+    "source": "Proc. of the 4th International Conference on Applied Computing & Information Technology (ACIT 2016)",
+    "month": "December",
+    "pages": "152--157",
+    "year": "2016",
+    "hide": false,
+    "note": "(UNLV, Las Vegas, NV, USA)",
+    "href": "http://ieeexplore.ieee.org/document/7916974/",
+    "doi": "10.1109/ACIT-CSII-BCD.2016.039",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016sgrk_fukuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "福田 理恵",
+      "吉田 謙一",
+      "玉田 春昭",
+      "荻野 晃大",
+      "穂崎 良典"
+    ],
+    "title": "産業界から見た専門教育実践型インターンシップの成果と課題",
+    "source": "産学連携学会 関西・中四国支部 第８回研究・事例発表会, M8-14",
+    "month": "November",
+    "year": "2016",
+    "hide": false,
+    "note": "（鳥取, 米子）",
+    "href": "http://www.sgrk.shimane-u.ac.jp/j-sip-B150/meeting/8th-2016/home.htm",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016sigse_watanabe",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "渡辺 哲士",
+      "門田 暁人",
+      "玉田 春昭",
+      "神崎 雄一郎"
+    ],
+    "title": "バイナリコード中の文字列に着目したソフトウェアの流用検出",
+    "source": "信学技報",
+    "month": "October",
+    "year": "2016",
+    "hide": false,
+    "note": "（滋賀, 彦根）",
+    "href": "https://www.ieice.org/ken/form/index.php?tgs_regid=3bdd8daae3d479e13f735e15d675f772d407a40b03e66269b2db60918432b8d4&cmd=info&lang=",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016internship_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "荻野 晃大",
+      "穂崎 良典"
+    ],
+    "title": "専門教育実践型インターンシップの開発と試行",
+    "source": "日本インターンシップ学会 [第１７回大会](http://www.js-internship.jp/taikai/bn_taikai17.pdf)",
+    "month": "September",
+    "year": "2016",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016icis_sagisaka",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Hayato Sagisaka",
+      "Haruaki Tamada"
+    ],
+    "title": "Identifying the Applied Obfuscation Method towards De-obfuscation",
+    "source": "Proc. 15th IEEE/ACIS International Conference on Computer and Information Science ([ICIS 2016](http://www.acisinternational.org/icis2016/))",
+    "month": "July",
+    "pages": "873--878",
+    "year": "2016",
+    "hide": false,
+    "note": "(Oakayama, Japan)",
+    "href": "http://ieeexplore.ieee.org/document/7550869/",
+    "doi": "10.1109/ICIS.2016.7550869",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016icis_tsuzaki",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Takehiro Tsuzaki",
+      "Teruaki Yamamoto",
+      "Haruaki Tamada",
+      "Akito Monden"
+    ],
+    "title": "A Fuzzy Hashing Technique for Large Scale Software Birthmarks",
+    "source": "Proc. 15th IEEE/ACIS International Conference on Computer and Information Science ([ICIS 2016](http://www.acisinternational.org/icis2016/))",
+    "month": "July",
+    "pages": "867--872",
+    "year": "2016",
+    "hide": false,
+    "note": "(Oakayama, Japan)",
+    "href": "http://ieeexplore.ieee.org/document/7550868/",
+    "doi": "10.1109/ICIS.2016.7550868",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016saner_kina",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Kanako Kina",
+      "Masateru Tsunoda",
+      "Hideaki Hata",
+      "Haruaki Tamada",
+      "Hiroshi Igaki"
+    ],
+    "title": "Analyzing the Decision Criteria of Software Developers Based on Prospect Theory",
+    "source": "Proc. 22nd International Conference on  Software Analysis, Evolution and Reengineering ([SANER 2016](http://saner.inf.usi.ch/home))",
+    "month": "March",
+    "pages": "644--648",
+    "year": "2016",
+    "hide": false,
+    "note": "(Osaka, Japan)",
+    "href": "http://ieeexplore.ieee.org/document/7476689/",
+    "doi": "10.1109/SANER.2016.115",
+    "links": [
+      "paper",
+      "link",
+      "doi",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016ipsjnc_tsuzaki",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "津崎 豪宏",
+      "玉田 春昭"
+    ],
+    "title": "バージョン管理のWebベースチュートリアルを用いた初学者の振舞分析",
+    "source": "情報処理学会第78回全国大会",
+    "month": "March",
+    "year": "2016",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016ipsjnc_sagisaka",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "匂坂 勇仁",
+      "玉田 春昭"
+    ],
+    "title": "逆難読化に向けた適用された難読化手法の特定",
+    "source": "情報処理学会第78回全国大会",
+    "month": "March",
+    "year": "2016",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016ipsjnc_kawabata",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "川端 盛志",
+      "玉田 春昭"
+    ],
+    "title": "初学者を対象としたプログラム中の識別子の適切性評価",
+    "source": "情報処理学会第78回全国大会",
+    "month": "March",
+    "year": "2016",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2016gihyo_tamada",
+    "type": "techreport",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭"
+    ],
+    "title": "大学におけるGitHub／GitHub Educationの活用事例 〜慣れることがソーシャルコーディングの道を拓く",
+    "source": "[gihyo.jp](https://gihyo.jp) 新春特別企画",
+    "month": "January",
+    "year": "2016",
+    "hide": false,
+    "href": "https://gihyo.jp/lifestyle/column/newyear/2016/case-study-of-github-education",
+    "links": [
+      "link",
+      "bibtex",
+      "like"
+    ]
+  },
+  {
+    "id": "2015sigse_wakabayashi",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "若林 洸太",
+      "門田 暁人",
+      "伊原 彰紀",
+      "玉田 春昭"
+    ],
+    "title": "コードクローンと使用ライブラリに着目したオープンソースソフトウェアの進化の定量化",
+    "source": "研究報告ソフトウェア工学（SE）, Vol.2015-SE-190, No.2",
+    "month": "December",
+    "pages": "1--6",
+    "year": "2015",
+    "hide": false,
+    "href": "https://ipsj.ixsq.nii.ac.jp/ej/index.php?active_action=repository_view_main_item_detail&page_id=13&block_id=8&item_id=146488&item_no=1",
+    "links": [
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015ijsi_fukuda",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Kazumasa Fukuda",
+      "Haruaki Tamada"
+    ],
+    "title": "To Prevent Reverse-Engineering Tools by Shuffling the Stack Status with Hook Mechanism",
+    "source": "International Journal of Software Innovation (IJSI)",
+    "pages": "14--25",
+    "year": "2015",
+    "hide": false,
+    "href": "http://www.igi-global.com/article/126613",
+    "doi": "10.4018/IJSI.2015070102",
+    "links": [
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015acit_itsuda",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Atsushi Itsuda",
+      "Shin Fujiwara",
+      "Nao Yamasaki",
+      "Haruaki Tamada",
+      "Hideaki Hata",
+      "Masateru Tsunoda",
+      "Hiroshi Igaki"
+    ],
+    "title": "Fu-Rin-Ka-Zan: Quantitative Analysis of Developers' Characteristics based on Project Historical Data",
+    "source": "Proc. of the 3rd International Conference on Applied Computing & Information Technology ([ACIT 2015](http://www.acisinternational.org/acit2015/))",
+    "month": "July",
+    "pages": "15--20",
+    "year": "2015",
+    "hide": false,
+    "note": "(Okayama, Japan)",
+    "href": "https://ieeexplore.ieee.org/document/7336027/",
+    "doi": "10.1109/ACIT-CSI.2015.12",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015sigss_sagisaka",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "匂坂 勇仁",
+      "玉田 春昭"
+    ],
+    "title": "適用保護手法特定の試み −不自然さ評価方法を用いて−",
+    "source": "信学技報, Vol. 115, No. 153, SS2015-21",
+    "month": "July",
+    "pages": "63--68",
+    "year": "2015",
+    "hide": false,
+    "note": "（札幌）",
+    "href": "https://ipsj.ixsq.nii.ac.jp/ej/index.php?active_action=repository_view_main_item_detail&page_id=13&block_id=8&item_id=142709&item_no=1",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015sigse_fukumoto",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "福本 大",
+      "北川 裕基",
+      "玉田 春昭"
+    ],
+    "title": "コーディングスタイルを基にした初心者プログラマ向けの著者解析",
+    "source": "研究報告ソフトウェア工学（SE）, Vol.2015-SE-187, No.16",
+    "month": "March",
+    "year": "2015",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015sigse_yamasaki",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "山崎 尚",
+      "五田 篤志",
+      "玉田 春昭",
+      "畑 秀明",
+      "角田 雅照",
+      "井垣 宏"
+    ],
+    "title": "ゲーム理論による開発者特性を考慮したチームビルディング",
+    "source": "研究報告ソフトウェア工学（SE）, Vol.2015-SE-187, No.6",
+    "month": "March",
+    "year": "2015",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015sigse_itsuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "五田 篤志",
+      "山崎 尚",
+      "玉田 春昭",
+      "畑 秀明",
+      "角田 雅照",
+      "井垣 宏"
+    ],
+    "title": "開発履歴による開発者特性とアンケートによる特性の自己診断の関連分析",
+    "source": "研究報告ソフトウェア工学（SE）, Vol.2015-SE-187, No.5",
+    "month": "March",
+    "year": "2015",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015wws_tsunoda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "角田 雅照",
+      "玉田 春昭",
+      "畑 秀明",
+      "井垣 宏"
+    ],
+    "title": "ソフトウェア開発者の特性計測のための尺度作成に向けて",
+    "source": "ウィンターワークショップ 2015 in 宜野湾 ([WWS 2015](http://wws.sigse.jp/2015/))",
+    "month": "January",
+    "pages": "13--14",
+    "year": "2015",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015scis_yamamoto",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "山本 照明",
+      "玉田 春昭",
+      "門田 暁人"
+    ],
+    "title": "大量のプログラムを対象としたファジーハッシュを用いたバースマーク手法",
+    "source": "2015年暗号と情報セキュリティシンポジウム予稿集（[SCIS2015](http://www.iwsec.org/scis/2015)）, 3B4-4",
+    "month": "January",
+    "year": "2015",
+    "hide": false,
+    "note": "（福岡, 小倉）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015scis_fukuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "福田 收真",
+      "稲垣 賢一",
+      "玉田 春昭"
+    ],
+    "title": "メタプログラミング技法を用いた偽装難読化手法",
+    "source": "2015年暗号と情報セキュリティシンポジウム予稿集（[SCIS2015](http://www.iwsec.org/scis/2015)）, 3B4-3",
+    "month": "January",
+    "year": "2015",
+    "hide": false,
+    "note": "（福岡, 小倉）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015scis_inagaki",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "稲垣 賢一",
+      "福田 收真",
+      "玉田 春昭"
+    ],
+    "title": "メソッド呼び出しのフックを用いた動的コールフローグラフ偽装の試み",
+    "source": "2015年暗号と情報セキュリティシンポジウム予稿集（[SCIS2015](http://www.iwsec.org/scis/2015)）, 3B4-2",
+    "month": "January",
+    "year": "2015",
+    "hide": false,
+    "note": "（福岡, 小倉）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2015scis_kitagawa",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "北川 裕基",
+      "福本 大",
+      "玉田 春昭"
+    ],
+    "title": "コーディングスタイルの特徴量を用いた初心者プログラマーを対象にした著者解析",
+    "source": "2015年暗号と情報セキュリティシンポジウム予稿集（[SCIS2015](http://www.iwsec.org/scis/2015)）, 3B4-1",
+    "month": "January",
+    "year": "2015",
+    "hide": false,
+    "note": "（福岡, 小倉）",
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2014fose_fukuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "福田 收真",
+      "玉田 春昭"
+    ],
+    "title": "フックを用いた変数アクセス偽装難読化に向けて",
+    "source": "ソフトウェア工学の基礎XXI, 日本ソフトウェア科学会 FOSE2014 ([FOSE2014](http://fose.jssst.or.jp/fose2014/))",
+    "month": "December",
+    "pages": "81--86",
+    "year": "2014",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2014seew_tsunoda",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Masateru Tsunoda",
+      "Haruaki Tamada",
+      "Hideaki Hata"
+    ],
+    "title": "How to Classify Personalities of Team Members on Project-Based Learning",
+    "source": "Proc. Software Engineering Education Workshop ([SEEW 2014](http://seew.iiit.ac.in/))",
+    "month": "December",
+    "year": "2014",
+    "hide": false,
+    "note": "(Jeju, Korea)",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2014intern_matsumoto",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "松本 翔伍",
+      "玉田 春昭"
+    ],
+    "title": "インターンシップによる教育とその学内展開",
+    "source": "日本インターンシップ学会　第15回大会 D-2",
+    "month": "September",
+    "pages": "61--62",
+    "year": "2014",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2014sigse_itsuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "五田 篤志",
+      "山崎 尚",
+      "玉田 春昭",
+      "畑 秀明",
+      "角田 雅照",
+      "井垣 宏"
+    ],
+    "title": "開発履歴を利用した風林火山モデルに基づく開発者特性の分析",
+    "source": "研究報告ソフトウェア工学（SE）, Vol. 2014-SE-185, No. 9",
+    "month": "July",
+    "year": "2014",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2014snpd_fukuda",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Kazumasa Fukuda",
+      "Haruaki Tamada"
+    ],
+    "title": "An Obfuscation Method to Build a Fake Call Flow Graph by Hooking Method Calls",
+    "source": "Proc. 14th ACIS International Conference on Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing ([SNPD 2014](http://www.acisinternational.org/snpd2014/))",
+    "month": "June",
+    "year": "2014",
+    "hide": false,
+    "note": "(Las Vegas, U.S.A)",
+    "href": "https://ieeexplore.ieee.org/document/6888726",
+    "doi": "10.1109/SNPD.2014.6888726",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2014scis_fukuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "福田 收真",
+      "玉田 春昭"
+    ],
+    "title": "メソッド呼び出し関係隠蔽のための引数順序の入れ替えによる難読化",
+    "source": "2014年暗号と情報セキュリティシンポジウム予稿集 ([SCIS2014](http://www.iwsec.org/scis/2014/)), 2D2-3",
+    "month": "January",
+    "year": "2014",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2014scis_ohtaki",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "大滝 隆貴",
+      "大堂 哲也",
+      "玉田 春昭",
+      "神崎 雄一郎",
+      "門田 暁人"
+    ],
+    "title": "Javaバイトコード命令のオペコード、オペランドを用いた難読化手法のステルシネス評価",
+    "source": "2014年暗号と情報セキュリティシンポジウム予稿集（[SCIS2014](http://www.iwsec.org/scis/2014/)）, 2D2-2",
+    "month": "January",
+    "year": "2014",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013fose_fujiwara",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "藤原 新",
+      "五田 篤志",
+      "玉田 春昭",
+      "角田 雅照",
+      "畑 秀明"
+    ],
+    "title": "ソフトウェア開発履歴を利用した風林火山モデルによる開発者の特性診断の試み",
+    "source": "ソフトウェア工学の基礎XX, 日本ソフトウェア科学会 FOSE2013（[FOSE2013](http://sdl.ist.osaka-u.ac.jp/fose2013/)）",
+    "month": "November",
+    "pages": "295--296",
+    "year": "2013",
+    "hide": false,
+    "links": [
+      "paper",
+      "poster",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013css_fukuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "福田 收真",
+      "玉田 春昭"
+    ],
+    "title": "Java 7におけるAPI名隠ぺいのためのinvokedynamic命令を用いた難読化の試み",
+    "source": "コンピュータセキュリティシンポジウム 2013 ([CSS 2013](http://www.iwsec.org/css/2013/)) No.3D4-2",
+    "month": "October",
+    "pages": "1050--1057",
+    "year": "2013",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013ss_tunoda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "角田 雅照",
+      "玉田 春昭",
+      "畑 秀明"
+    ],
+    "title": "ソフトウェア開発チームにおけるパーソナリティの影響に関する調査",
+    "source": "ソフトウェアエンジニアリングシンポジウム2013 併設ワークショップ 「開発マネジメントにおける産学の問題共有と連携強化」",
+    "month": "September",
+    "year": "2013",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013jssst_futamura",
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "二村 阿美",
+      "門田 暁人",
+      "玉田 春昭",
+      "神崎 雄一郎",
+      "中村 匡秀",
+      "松本 健一"
+    ],
+    "title": "命令のランダム性に基づくプログラム難読化の評価",
+    "source": "コンピュータソフトウェア",
+    "month": "September",
+    "pages": "18--24",
+    "year": "2013",
+    "hide": false,
+    "href": "https://www.jstage.jst.go.jp/article/jssst/30/3/30_3_18/_article/-char/ja/",
+    "doi": "10.11309/jssst.30.3_18",
+    "links": [
+      "paper",
+      "link",
+      "doi",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013snpd_ohdo",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Tetsuya Ohdo",
+      "Haruaki Tamada",
+      "Yuichiro Kanzaki",
+      "Akito Monden"
+    ],
+    "title": "An Instruction Folding Method to Prevent Reverse Engineering in Java Platform",
+    "source": "Proc. 13th ACIS International Conference on Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing ([SNPD 2013](http://acis.cps.cmich.edu/SNPD2013/))",
+    "month": "July",
+    "pages": "517--522",
+    "year": "2013",
+    "hide": false,
+    "note": "(Honolulu, Hawaii, U.S.A.)",
+    "href": "https://ieeexplore.ieee.org/document/6598513/",
+    "doi": "10.1109/SNPD.2013.31",
+    "links": [
+      "paper",
+      "link",
+      "doi",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013snpd_fukuda",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Kazumasa Fukuda",
+      "Haruaki Tamada"
+    ],
+    "title": "A Dynamic Birthmark from Analyzing Operand Stack Runtime Behavior to Detect Copied Software",
+    "source": "Proc. 13th ACIS International Conference on Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing ([SNPD 2013](http://acis.cps.cmich.edu/SNPD2013/))",
+    "month": "July",
+    "pages": "505--510",
+    "year": "2013",
+    "hide": false,
+    "note": "(Honolulu, Hawaii, U.S.A.)",
+    "href": "https://ieeexplore.ieee.org/document/6598511/",
+    "doi": "10.1109/SNPD.2013.11",
+    "links": [
+      "paper",
+      "link",
+      "doi",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013ipsjnc_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "五田 篤志",
+      "井上 知奈津",
+      "福本 大",
+      "吉岡 智哉"
+    ],
+    "title": "PlayStation Vitaアプリケーションに対する電子透かし法の実装",
+    "source": "電子情報通信学会 2013年総合大会 D-3-3",
+    "month": "March",
+    "year": "2013",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013cdrg_tamada",
+    "type": "keynote",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭"
+    ],
+    "title": "プログラムの保護技術",
+    "source": "岩手大学 CDRG セミナー",
+    "month": "March",
+    "year": "2013",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013scis_fukuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "福田 收真",
+      "玉田 春昭",
+      "大堂 哲也"
+    ],
+    "title": "盗用発見のためのオペランドスタックの挙動に基づいたバースマーク",
+    "source": "2013年暗号と情報セキュリティシンポジウム予稿集 ([SCIS2013](https://www.iwsec.org/scis/2013/index.html))",
+    "month": "January",
+    "pages": "3F2-5",
+    "year": "2013",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2013scis_ohdo",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "大堂 哲也",
+      "玉田 春昭"
+    ],
+    "title": "Javaを対象とした畳込み手法による耐タンパ化の試み",
+    "source": "2013年暗号と情報セキュリティシンポジウム予稿集 ([SCIS2013](https://www.iwsec.org/scis/2013/index.html))",
+    "month": "January",
+    "pages": "2C4-3",
+    "year": "2013",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2012fose_futamura",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "二村 阿美",
+      "門田 暁人",
+      "玉田 春昭",
+      "神崎 雄一郎",
+      "中村 匡秀",
+      "松本 健一"
+    ],
+    "title": "命令の乱雑さに基づくプログラム理解性の評価",
+    "source": "ソフトウェア工学の基礎XIX, 日本ソフトウェア科学会（FOSE2012）",
+    "month": "December",
+    "pages": "151--160",
+    "year": "2012",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2012iwesep_fujiwara",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Kenji Fujiwara",
+      "Kyohei Fushida",
+      "Haruaki Tamada",
+      "Hiroshi Igaki",
+      "Norihiro Yoshida"
+    ],
+    "title": "Why Novice Programmers Fall into a Pitfall?: Coding Pattern Analysis in Programming Exercise",
+    "source": "Proc. 4th International Workshop on Empirical Software Engineering in Practice (IWESEP 2012)",
+    "month": "October",
+    "pages": "46--51",
+    "year": "2012",
+    "hide": false,
+    "note": "(Osaka, Japan) **Best Student Paper Award**",
+    "href": "https://ieeexplore.ieee.org/document/6363296/",
+    "doi": "10.1109/IWESEP.2012.13",
+    "links": [
+      "paper",
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2012ipsjkansai_yoshioka",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "吉岡 智哉",
+      "福田 收真",
+      "玉田 春昭"
+    ],
+    "title": "メンタルシミュレーションモデルに基づいたプログラムの読みやすさ評価",
+    "source": "情報処理学会関西支部支部大会（B-02）",
+    "month": "September",
+    "year": "2012",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2012ipsjkansai_itsuda",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "五田 篤志",
+      "井上 知奈津",
+      "大堂 哲也",
+      "福本 大",
+      "玉田 春昭"
+    ],
+    "title": "ソフトウェア開発のグループワーク演習における各個人のタスクの自動計測",
+    "source": "情報処理学会関西支部支部大会（B-01）",
+    "month": "September",
+    "year": "2012",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2012snpd_tamada",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada",
+      "Kazumasa Fukuda",
+      "Tomoya Yoshioka"
+    ],
+    "title": "Program Incomprehensibility Evaluation for Obfuscation Methods with Queue-based Mental Simulation Model",
+    "source": "Proc. 13th ACIS International Conference on Software Engineering, Artificial Intelligence, Networking and Parallel/Distributed Computing (SNPD 2012)",
+    "month": "August",
+    "pages": "498--503",
+    "year": "2012",
+    "hide": false,
+    "note": "(Kyoto, Japan)",
+    "href": "https://ieeexplore.ieee.org/document/6299328/",
+    "doi": "10.1109/SNPD.2012.32",
+    "links": [
+      "paper",
+      "like",
+      "doi",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2012ksu_ogino",
+    "type": "bulletin",
+    "language": "japanese",
+    "authors": [
+      "荻野 晃大",
+      "玉田 春昭",
+      "上田 博唯"
+    ],
+    "title": "ロボットアシスタントを用いた教育支援システムの開発とプログラミング初学者のコーディング傾向の分析",
+    "source": "京都産業大学総合学術研究所所報",
+    "month": "July",
+    "pages": "123--131",
+    "year": "2012",
+    "hide": false,
+    "href": "http://hdl.handle.net/10965/00003006",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2012ieicenc_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "福田 收真",
+      "吉岡 智哉",
+      "岩間 文也",
+      "小畠 良太",
+      "片岡 明範"
+    ],
+    "title": "メンタルシミュレーションモデルを利用した動的名前解決難読化手法の読みにくさ評価",
+    "source": "電子情報通信学会 2012年総合大会 D-3-3",
+    "month": "March",
+    "year": "2012",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2012sigss_fushida",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "伏田 享平",
+      "玉田 春昭",
+      "井垣 宏",
+      "藤原 賢二",
+      "吉田 則裕"
+    ],
+    "title": "プログラミング演習における初学者を対象としたコーディング傾向の分析",
+    "source": "信学技報 ソフトウェアサイエンス研究会, Vol.2012-03-SS",
+    "month": "March",
+    "pages": "67--72",
+    "year": "2012",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2012scis_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "神崎 雄一郎",
+      "門田 暁人"
+    ],
+    "title": "Java言語を対象とした実行時多様化の試み",
+    "source": "2012年暗号と情報セキュリティシンポジウム予稿集 (SCIS2012)",
+    "month": "January",
+    "pages": "4E2-3",
+    "year": "2012",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2011mensura_tamada",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada",
+      "Akihiro Ogino",
+      "Hirotada Ueda"
+    ],
+    "title": "A Framework for Programming Process Measurement and Compile Error Interpretation for Novice Programmers",
+    "source": "Proc. The Joint Conference of the 21st International Workshop on Software Measurement (IWSM) and the 6th International Conference on Software Process and Product Measurement (Mensura) (IWSM/MENSURA 2011)",
+    "month": "November",
+    "pages": "233--238",
+    "year": "2011",
+    "hide": false,
+    "note": "(Nara, Japan)",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2011hcii_ogino",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Akihiro Ogino",
+      "Haruaki Tamada",
+      "Hirotada Ueda"
+    ],
+    "title": "Phynocation: A prototyping of a teaching assistant robot for C language class",
+    "source": "Proc. HCI International 2011 (HCII2011)",
+    "month": "July",
+    "year": "2011",
+    "hide": false,
+    "note": "(Orlando, Florida, USA)",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2011ksu_ogino",
+    "type": "bulletin",
+    "language": "japanese",
+    "authors": [
+      "荻野 晃大",
+      "玉田 春昭",
+      "上田 博唯"
+    ],
+    "title": "ロボットをアシスタントとして利用する教育支援システムの研究",
+    "source": "京都産業大学総合学術研究所所報",
+    "month": "July",
+    "pages": "45--54",
+    "year": "2011",
+    "hide": false,
+    "href": "http://hdl.handle.net/10965/00003011",
+    "links": [
+      "like",
+      "bibtex",
+      "link"
+    ]
+  },
+  {
+    "id": "2011patent_tamada",
+    "type": "patent",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "門田 暁人",
+      "中村 匡秀",
+      "松本 健一"
+    ],
+    "title": "プログラム変換装置, 実行支援装置, それらの方法およびそれらのコンピュータ・プログラム",
+    "source": "特許第4669934号 (特開2006-344160, December 2006, 特願2005-171372, June 10, 2005)",
+    "month": "January",
+    "year": "2011",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2010patent_ueda",
+    "type": "patent",
+    "language": "japanese",
+    "authors": [
+      "上田 博唯",
+      "荻野 晃大",
+      "玉田 春昭"
+    ],
+    "title": "教育支援システムと教育支援方法",
+    "source": "特開2010-231580 (特願2009-079368, March 27 2009)",
+    "month": "October",
+    "year": "2010",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2010mve_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "荻野 晃大",
+      "上田 博唯"
+    ],
+    "title": "アシスタントロボットを用いたプログラミング教育支援システムの構築",
+    "source": "信学技報 マルチメディア・仮想環境基礎研究会, Vol.MVE2010-48",
+    "month": "June",
+    "pages": "143--148",
+    "year": "2010",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2009ieice_matsumura",
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "松村 知子",
+      "森崎 修司",
+      "勝又 敏次",
+      "玉田 春昭",
+      "吉田 則裕",
+      "楠本 真二",
+      "松本 健一"
+    ],
+    "title": "問題の早期発見・改善を支援するインプロセスプロジェクト管理手法の実プロジェクトへの適用",
+    "source": "電子情報通信学会論文誌",
+    "month": "November",
+    "pages": "1974--1986",
+    "year": "2009",
+    "hide": false,
+    "href": "http://search.ieice.org/bin/summary.php?id=j92-d_11_1974&category=D&lang=J&year=2009&abst=",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2009mve_tamada",
+    "type": "patent",
+    "language": "japanese",
+    "authors": [
+      "佐藤 太一",
+      "芳賀 智之",
+      "松本 健一",
+      "門田 暁人",
+      "玉田 春昭"
+    ],
+    "title": "処理装置、難読化装置、プログラムおよび集積回路",
+    "source": "特開2009-230717 (特願2008-078779, March 2008)",
+    "month": "October",
+    "year": "2009",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2009sigss_ushimado",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "牛窓 朋義",
+      "門田 暁人",
+      "玉田 春昭",
+      "松本 健一"
+    ],
+    "title": "使用クラスに基づくソフトウェアの機能面からの分類",
+    "source": "信学技報 ソフトウェアサイエンス研究会, Vol.SS2009-17",
+    "month": "August",
+    "pages": "31--36",
+    "year": "2009",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2009hcii_tamada",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada",
+      "Akihiro Ogino",
+      "Hirotada Ueda"
+    ],
+    "title": "Robot Helps Teachers for Education of the C Language Beginners",
+    "source": "Proc. HCI International 2009 (HCII2009)",
+    "month": "July",
+    "year": "2009",
+    "hide": false,
+    "note": "(San Diego, CA, USA)",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2009ipsj_itsuda",
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "角田 雅照",
+      "玉田 春昭",
+      "森崎 修司",
+      "松村 知子",
+      "黒崎 章",
+      "松本 健一"
+    ],
+    "title": "コードレビュー指摘密度を用いたソフトウェア欠陥密度予測",
+    "source": "情報処理学会論文誌",
+    "month": "March",
+    "pages": "1144--1155",
+    "year": "2009",
+    "hide": false,
+    "href": "http://id.nii.ac.jp/1001/00009255/",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2008ijcsns_yamauchi",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Hiroki Yamauchi",
+      "Akito Monden",
+      "Masahide Nakamura",
+      "Haruaki Tamada",
+      "Yuichiro Kanzaki",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Goal-Oriented Approach to Software Obfuscation",
+    "source": "International Journal of Computer Science and Network Security",
+    "month": "September",
+    "pages": "59--71",
+    "year": "2008",
+    "hide": false,
+    "href": "http://paper.ijcsns.org/07_book/html/200809/200809010.html",
+    "links": [
+      "link",
+      "like",
+      "paper",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2008ipsjnc_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "森崎 修司",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "バースマークを用いたソフトウェア拡張開発での流用度合いの測定",
+    "source": "情報処理学会第70回全国大会",
+    "month": "March",
+    "pages": "5-399--5-400",
+    "year": "2008",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2008iasted_tamada",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada",
+      "Masahide Nakamura",
+      "Akito Monden",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Introducing Dynamic Name Resolution Mechanism for Obfuscating System-Defined Names in Programs",
+    "source": "Proc. IASTED International Conference on Software Engineering ([IASTED SE 2008](http://www.iasted.org/conferences/home-598.html))",
+    "month": "February",
+    "pages": "125--130",
+    "year": "2008",
+    "hide": false,
+    "note": "(Innsbruck, Austria)",
+    "href": "https://dl.acm.org/citation.cfm?id=1722627",
+    "links": [
+      "like",
+      "link",
+      "paper",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2008ijwsr_nakamura",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Masahide Nakamura",
+      "Akihiro Tanaka",
+      "Hiroshi Igaki",
+      "Haruaki Tamada",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Constructing Home Network Systems and Integrated Services Using Legacy Home Appliances and Web Services",
+    "source": "International Journal of Web Services Research",
+    "month": "January",
+    "pages": "82--98",
+    "year": "2008",
+    "hide": false,
+    "href": "https://www.igi-global.com/article/constructing-home-network-systems-integrated/3116",
+    "doi": "10.4018/jwsr.2008010105",
+    "links": [
+      "like",
+      "link",
+      "paper",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007naist_kurosaki",
+    "type": "techreport",
+    "language": "japanese",
+    "authors": [
+      "黒崎 章",
+      "玉田 春昭",
+      "森崎 修司",
+      "角田 雅輝",
+      "松本 健一"
+    ],
+    "title": "WBSデータを用いた工数予実差と終了日予実差の関連分析",
+    "source": "Information Science Technical Report, No. 2007014, Graduate School of Information Science",
+    "month": "November",
+    "year": "2007",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report/2007014.ps",
+    "links": [
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007ieice_tamada",
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "中村 匡秀",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "APIライブラリ名隠ぺいのための動的名前解決を用いた名前難読化",
+    "source": "電子情報通信学会論文誌",
+    "month": "October",
+    "pages": "2723--2735",
+    "year": "2007",
+    "hide": false,
+    "href": "http://search.ieice.org/bin/summary.php?id=j90-d_10_2723&category=D&lang=J&year=2007&abst=",
+    "links": [
+      "like",
+      "link",
+      "paper",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007ipsj_morisaki",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Shuji Morisaki",
+      "Akito Monden",
+      "Haruaki Tamada",
+      "Tomoko Matsumura",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Mining Quantitative Rules in a Software Project Data Set",
+    "source": "情報処理学会論文誌",
+    "month": "August",
+    "pages": "2725--2734",
+    "year": "2007",
+    "hide": false,
+    "href": "https://www.jstage.jst.go.jp/article/ipsjdc/3/0/3_0_518/_article",
+    "doi": "10.2197/ipsjdc.3.518",
+    "links": [
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007msr_morisaki",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Shuji Morisaki",
+      "Akito Monden",
+      "Tomoko Matsumura",
+      "Haruaki Tamada",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Defect Data Analysis Based on Extended Association Rule Mining",
+    "source": "Fourth International Workshop on Mining Software Repositories ([MSR 2007](http://msr.uwaterloo.ca/msr2007/))",
+    "month": "May",
+    "year": "2007",
+    "hide": false,
+    "note": "(Minneapolis, MN)",
+    "href": "https://ieeexplore.ieee.org/document/4228640/",
+    "doi": "10.1109/MSR.2007.5",
+    "links": [
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007sigse_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "森崎 修司",
+      "吉田 則裕",
+      "楠本 真二",
+      "井上 克郎"
+    ],
+    "title": "APIの使用に伴うコードクローンの特徴分析",
+    "source": "情報処理学会研究報告, Vol.2007-SE-156-9/2007-EMB-5-9",
+    "month": "May",
+    "pages": "57--62",
+    "year": "2007",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007naist_tamada",
+    "type": "techreport",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada",
+      "Keiji Okamoto",
+      "Masahide Nakamura",
+      "Akito Monden",
+      "Kenichi Matsumoto"
+    ],
+    "title": "Design and Evaluation of Dynamic Software Birthmarks Based on API Calls",
+    "source": "Information Science Technical Report, No. 2007011, Graduate School of Information Science",
+    "month": "May",
+    "year": "2007",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report/2007011.pdf",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007naist_matsumura",
+    "type": "techreport",
+    "language": "japanese",
+    "authors": [
+      "松村 知子",
+      "大杉 直樹",
+      "森崎 修司",
+      "玉田 春昭",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "設計書の再利用を考慮したレビュー効率の比較方法の提案と事例紹介",
+    "source": "Information Science Technical Report, No. 2007007, Graduate School of Information Science",
+    "month": "March",
+    "year": "2007",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report/2007007.ps",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007naist_matsumura2",
+    "type": "techreport",
+    "language": "japanese",
+    "authors": [
+      "松村 知子",
+      "森崎 修司",
+      "玉田 春昭",
+      "大杉 直樹",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "プロセス改善を目的とするODCを用いた欠陥修正工数分析",
+    "source": "Information Science Technical Report, No. 2007006, Graduate School of Information Science",
+    "month": "March",
+    "year": "2007",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report/2007006.ps",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007naist_matsumura3",
+    "type": "techreport",
+    "language": "japanese",
+    "authors": [
+      "松村 知子",
+      "森崎 修司",
+      "玉田 春昭",
+      "大杉 直樹",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "GQMモデルに基づく設計工程完成度計測手法の提案",
+    "source": "Information Science Technical Report, No. 2007005, Graduate School of Information Science",
+    "month": "March",
+    "year": "2007",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report/2007005.ps",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007naist_morisaki",
+    "type": "techreport",
+    "language": "japanese",
+    "authors": [
+      "森崎 修司",
+      "松村 知子",
+      "玉田 春昭",
+      "大杉 直樹",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "相関ルール分析を用いた障害対応データの特徴分析",
+    "source": "Information Science Technical Report, No. 2007003, Graduate School of Information Science",
+    "month": "March",
+    "year": "2007",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report/2007003.ps",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007naist_tamada2",
+    "type": "techreport",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "松村 知子",
+      "森崎 修司",
+      "松本 健一"
+    ],
+    "title": "プロジェクト遅延リスク検出を目的とするソフトウェア開発プロセス可視化ツール ProStar",
+    "source": "Information Science Technical Report, No. 2007002, Graduate School of Information Science",
+    "month": "March",
+    "year": "2007",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report/2007002.ps",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007naist_matsumura4",
+    "type": "techreport",
+    "language": "japanese",
+    "authors": [
+      "松村 知子",
+      "勝又 敏次",
+      "森崎 修司",
+      "玉田 春昭",
+      "大杉 直樹",
+      "門田 暁人",
+      "楠本 真二",
+      "松本 健一"
+    ],
+    "title": "自動データ収集・可視化ツールを用いたリアルタイムフィードバックシステムの構築と試行",
+    "source": "Information Science Technical Report, No. 2007001, Graduate School of Information Science",
+    "month": "March",
+    "year": "2007",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report/2007001.ps",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2007scis_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "中村 匡秀",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "C言語におけるライブラリ呼び出し隠蔽のための名前難読化手法",
+    "source": "2007年暗号と情報セキュリティシンポジウム予稿集 ([SCIS2007](http://www.oklab.ice.uec.ac.jp/scis2007/))",
+    "month": "January",
+    "year": "2007",
+    "hide": false,
+    "links": [
+      "like",
+      "paper",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2006sepg_matsumoto",
+    "type": "keynote",
+    "language": "japanese",
+    "authors": [
+      "松本 健一",
+      "松村 知子",
+      "森崎 修司",
+      "玉田 春昭",
+      "大杉 直樹"
+    ],
+    "title": "開発データ分析の技術 〜EASEプロジェクトの紹介〜",
+    "source": "東芝 第4回 SEPGワークショップ",
+    "month": "December",
+    "year": "2006",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2006fose_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "中村 匡秀",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "Java クラスファイル難読化ツール DonQuixote",
+    "source": "ソフトウェア工学の基礎XIII, 日本ソフトウェア科学会（[FOSE2006](http://fose2006.media.kyoto-u.ac.jp/)）",
+    "month": "November",
+    "pages": "113--118",
+    "year": "2006",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2006naist_morisaki",
+    "type": "techreport",
+    "language": "english",
+    "authors": [
+      "Shuji Morisaki",
+      "Akito Monden",
+      "Haruaki Tamada",
+      "Tomoko Matsumura",
+      "Kenichi Matsumoto"
+    ],
+    "title": "An Extension of Association Rule Mining for Software Engineering Data Repositories",
+    "source": "Information Science Technical Report, number NAIST-IS-TR2006008, Graduate School of Information Science",
+    "month": "November",
+    "year": "2006",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report/2006008.ps",
+    "links": [
+      "link",
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2006fit_ohsugi",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "大杉 直樹",
+      "大平 雅雄",
+      "松村 知子",
+      "森崎 修司",
+      "玉田 春昭",
+      "松本 健一"
+    ],
+    "title": "産官学連携における参加者の興味についての対応分析",
+    "source": "第5回情報科学技術フォーラム ([FIT2006](http://www.ipsj.or.jp/10jigyo/fit/fit2006/))",
+    "month": "September",
+    "pages": "313--316",
+    "year": "2006",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2006icws_nakamura",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Masahide Nakamura",
+      "Akihiro Tanaka",
+      "Hiroshi Igaki",
+      "Haruaki Tamada",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Adapting Legacy Home Appliances to Home Network Systems Using Web Services",
+    "source": "IEEE International Conference on Web Services ([ICWS2006](http://conferences.computer.org/icws/2006/))",
+    "month": "September",
+    "pages": "849--858",
+    "year": "2006",
+    "hide": false,
+    "note": "(Chicago, USA)",
+    "href": "https://ieeexplore.ieee.org/document/4032102/",
+    "doi": "10.1109/ICWS.2006.23",
+    "links": [
+      "like",
+      "link",
+      "doi",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2006ieice_okamoto",
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "岡本 圭司",
+      "玉田 春昭",
+      "中村 匡秀",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "API呼び出しを用いた動的バースマーク",
+    "source": "電子情報通信学会論文誌",
+    "month": "August",
+    "pages": "1751--1763",
+    "year": "2006",
+    "hide": false,
+    "href": "http://search.ieice.org/bin/summary.php?id=j89-d_8_1751&category=D&lang=J&year=2006&abst=",
+    "links": [
+      "like",
+      "link",
+      "paper",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2006ipsaw_tamada",
+    "type": "presentation",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada"
+    ],
+    "title": "EPM (Empirical Project Monitor): A tool for collecting and analyzing quantitative data",
+    "source": "International Software Project Analysis Workshop 2006 (ISPAW2006)",
+    "month": "May",
+    "year": "2006",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2006msr_kakimoto",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Takesi Kakimoto",
+      "Akito Monden",
+      "Yasutaka Kamei",
+      "Haruaki Tamada",
+      "Masateru Tsunoda",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Using Software Birthmarks to Identify Similar Classes and Major Functionalities",
+    "source": "Proc. the 3rd International Workshop on Mining Software Repositories ([MSR 2006](http://msr.uwaterloo.ca/msr2006/))",
+    "month": "May",
+    "pages": "171--172",
+    "year": "2006",
+    "hide": false,
+    "note": "(Shanghai, China)",
+    "href": "https://dl.acm.org/citation.cfm?id=1138026",
+    "doi": "10.1145/1137983.1138026",
+    "links": [
+      "like",
+      "doi",
+      "link",
+      "paper",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2006sigin_igaki",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "井垣 宏",
+      "三井 康平",
+      "竹村 憲太郎",
+      "玉田 春昭",
+      "中村 匡秀",
+      "松本 健一",
+      "松本 吉央"
+    ],
+    "title": "注視情報に基づくネットワーク家電の状態提示システムの構築",
+    "source": "信学技報 情報ネットワーク研究会, Vol. IN2005-166",
+    "month": "March",
+    "pages": "61--66",
+    "year": "2006",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2005fose_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "井垣 宏",
+      "引地 一将",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "プログラミング実習におけるグループ開発プロセスの分析",
+    "source": "ソフトウェア工学の基礎XII, 日本ソフトウェア科学会 FOSE2005 ([FOSE2005](http://www.sde.cs.titech.ac.jp/fose2005/))",
+    "month": "November",
+    "pages": "123--128",
+    "year": "2005",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2005ieice_tamada",
+    "type": "journal",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada",
+      "Masahide Nakamura",
+      "Akito Monden",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Java Birthmarks --Detecting the Software Theft--",
+    "source": "IEICE Transactions on Information and Systems",
+    "month": "September",
+    "pages": "2148--2158",
+    "year": "2005",
+    "hide": false,
+    "href": "http://search.ieice.org/bin/summary.php?id=e88-d_9_2148&category=D&year=2005&lang=E&abst=",
+    "doi": "10.1093/ietisy/e88-d.9.2148",
+    "links": [
+      "like",
+      "doi",
+      "paper",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2005siget_hamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "浜田 美奈子",
+      "玉田 春昭",
+      "中道 上",
+      "武村 泰宏",
+      "大平 雅雄",
+      "マイク バーカー"
+    ],
+    "title": "プログラミング実習時の学習者の感情に着目した自発性測定手法の検討",
+    "source": "信学技報 教育工学研究会, Vol. ET2005-32",
+    "month": "September",
+    "pages": "29--34",
+    "year": "2005",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2005jsei_hamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "浜田 美奈子",
+      "玉田 春昭",
+      "中道 上",
+      "武村 泰宏",
+      "マイク バーカー"
+    ],
+    "title": "プログラミング実習における自発性測定のための感情と自発性の関連分析",
+    "source": "日本教育情報学会 第21回年会論文集",
+    "month": "August",
+    "pages": "192--195",
+    "year": "2005",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2005ubicns_kimura",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Takahiro Kimura",
+      "Haruaki Tamada",
+      "Hiroshi Igaki",
+      "Masahide Nakamura",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "A Visual Framework for Monitoring and Controlling Distributed Service Components",
+    "source": "Proc. the first Korea/Japan Joint Workshop on Ubiquitous Computing &amp; Networking Systems 2005 ([UbiCNS 2005](http://wwwold.ajou.ac.kr/~ubicns/); IPSJ SIG Technical Reports 2005-UBI-8), Vol.2005, No.60",
+    "month": "June",
+    "pages": "245--250",
+    "year": "2005",
+    "hide": false,
+    "note": "(Jeju, Korea)",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2005ipsj_igaki",
+    "type": "journal",
+    "language": "japanese",
+    "authors": [
+      "井垣 宏",
+      "中村 匡秀",
+      "玉田 春昭",
+      "松本 健一"
+    ],
+    "title": "サービス指向アーキテクチャを用いたネットワーク家電連携サービスの開発",
+    "source": "情報処理学会論文誌",
+    "month": "February",
+    "pages": "314--326",
+    "year": "2005",
+    "hide": false,
+    "href": "https://ipsj.ixsq.nii.ac.jp/ej/?action=pages_view_main&active_action=repository_view_main_item_detail&item_id=10692&item_no=1&page_id=13&block_id=8",
+    "links": [
+      "like",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2005prosym_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "門田 暁人",
+      "中村 匡秀",
+      "松本 健一"
+    ],
+    "title": "Java プログラムの動的解析のためのトレーサ埋め込みツール",
+    "source": "第46回プログラミング・シンポジウム報告集",
+    "month": "January",
+    "pages": "51--62",
+    "year": "2005",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2005prosym_okamoto",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "岡本 圭司",
+      "玉田 春昭",
+      "中村 匡秀",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "ソフトウェア実行時のAPI呼び出し履歴に基づく動的バースマークの実験的評価",
+    "source": "第46回プログラミング・シンポジウム報告集",
+    "month": "January",
+    "pages": "41--50",
+    "year": "2005",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2004icsoc_nakamura",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Masahide Nakamura",
+      "Hiroshi Igaki",
+      "Haruaki Tamada",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Implementing Integrated Services of Networked Home Appliances Using Service Oriented Architecture",
+    "source": "Proc. International Conference of Service Oriented Computing ([ICSOC2004](http://icsoc.dit.unitn.it/))",
+    "month": "November",
+    "pages": "269--278",
+    "year": "2004",
+    "hide": false,
+    "note": "(New York, USA)",
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2004fose_okamoto",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "岡本 圭司",
+      "玉田 春昭",
+      "中村 匡秀",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "ソフトウェア実行時のAPI呼び出し履歴に基づく動的バースマークの提案",
+    "source": "ソフトウェア工学の基礎XI, 日本ソフトウェア科学会 FOSE2004 ([FOSE2004](http://fose2004.it.nanzan-u.ac.jp/))",
+    "month": "November",
+    "pages": "85--88",
+    "year": "2004",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2004isfst_tamada",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada",
+      "Keiji Okamoto",
+      "Masahide Nakamura",
+      "Akito Monden",
+      "Ken-ichi Matsumoto"
+    ],
+    "title": "Dynamic Software Birthmarks to Detect the Theft of Windows Applications",
+    "source": "Proc. International Symposium on Future Software Technology 2004 ([ISFST 2004](http://www.sea.jp/Events/isfst/ISFST2004/))",
+    "month": "October",
+    "year": "2004",
+    "hide": false,
+    "note": "(Xi'an, China)",
+    "links": [
+      "like",
+      "paper",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2004signs_igaki",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "井垣 宏",
+      "玉田 春昭",
+      "中村 匡秀",
+      "松本 健一"
+    ],
+    "title": "サービス指向アーキテクチャを用いたホームネットワークシステムの設計と評価尺度",
+    "source": "信学技報 ネットワークシステム研究会, Vol. NS2003-359",
+    "month": "March",
+    "pages": "333--338",
+    "year": "2004",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2004signs_kushido",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "串戸 洋平",
+      "石井 健一",
+      "山内 寛己",
+      "井垣 宏",
+      "玉田 春昭",
+      "中村 匡秀",
+      "松本 健一"
+    ],
+    "title": "Webサービスアプリケーションのソフトウェアメトリクスに関する考察",
+    "source": "信学技報 ネットワークシステム研究会, Vol. NS2003-316",
+    "month": "March",
+    "pages": "113--118",
+    "year": "2004",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2004signs_ishii",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "石井 健一",
+      "串戸 洋平",
+      "山内 寛己",
+      "井垣 宏",
+      "玉田 春昭",
+      "中村 匡秀",
+      "松本 健一"
+    ],
+    "title": "異なる設計・実装法を用いたWebサービスアプリケーションの開発および比較評価",
+    "source": "信学技報 ネットワークシステム研究会, Vol. NS2003-315",
+    "month": "March",
+    "pages": "107--112",
+    "year": "2004",
+    "hide": false,
+    "links": [
+      "like",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2004iasted_tamada",
+    "type": "conference",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada",
+      "Masahide Nakamura",
+      "Akito Monden",
+      "Kenichi Matsumoto"
+    ],
+    "title": "Design and Evaluation of Birthmarks for Detecting Theft of Java Programs",
+    "source": "Proc. IASTED International Conference on Software Engineering ([IASTED SE 2004](http://www.iasted.org/conferences/2004/Innsbruck/se.htm))",
+    "month": "February",
+    "pages": "569--575",
+    "year": "2004",
+    "hide": false,
+    "note": "(Innsbruck, Austria)",
+    "links": [
+      "like",
+      "paper",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2003naist_tamada",
+    "type": "techreport",
+    "language": "english",
+    "authors": [
+      "Haruaki Tamada",
+      "Masahide Nakamura",
+      "Akito Monden",
+      "Kenichi Matsumoto"
+    ],
+    "title": "Detecting the Theft of Programs Using Birthmarks",
+    "source": "Information Science Technical Report, number NAIST-IS-TR2003014, Graduate School of Information Science",
+    "month": "November",
+    "year": "2003",
+    "hide": false,
+    "href": "http://isw3.naist.jp/IS/TechReport/report-list.html#2003",
+    "links": [
+      "like",
+      "paper",
+      "link",
+      "bibtex"
+    ]
+  },
+  {
+    "id": "2003isec_tamada",
+    "type": "conference",
+    "language": "japanese",
+    "authors": [
+      "玉田 春昭",
+      "神崎 雄一郎",
+      "中村 匡秀",
+      "門田 暁人",
+      "松本 健一"
+    ],
+    "title": "Java クラスファイルからプログラム指紋を抽出する方法の提案",
+    "source": "信学技報 情報セキュリティ研究会, Vol. ISEC2003-29",
+    "month": "July",
+    "pages": "127--133",
+    "year": "2003",
+    "hide": false,
+    "links": [
+      "paper",
+      "like",
+      "bibtex"
+    ]
+  }
+]

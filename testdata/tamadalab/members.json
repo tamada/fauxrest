@@ -1,0 +1,2645 @@
+[
+  {
+    "id": "00-matsumoto",
+    "name": "松本 健一",
+    "ename": "Kenichi Matsumoto",
+    "category": "collaborators",
+    "generation": 0,
+    "affiliation": "[奈良先端科学技術大学院大学（NAIST）](https://www.naist.jp/)",
+    "degrees": [],
+    "icon": {
+      "type": "researchmap",
+      "uid": "KenichiMatsumoto"
+    },
+    "snss": [
+      {
+        "service": "www",
+        "href": "https://naist-se.github.io/ja/",
+        "icon": "fas fa-home"
+      },
+      {
+        "service": "Google Scholar",
+        "href": "https://scholar.google.com/citations?user=-DfBligAAAAJ&hl=ja",
+        "icon": "fas fa-university"
+      }
+    ]
+  },
+  {
+    "id": "00-monden",
+    "name": "門田 暁人",
+    "ename": "Akito Monden",
+    "category": "collaborators",
+    "generation": 0,
+    "affiliation": "[岡山大学（Okayama University）](https://www.okayama-u.ac.jp/)",
+    "degrees": [],
+    "icon": {
+      "type": "googlescholar",
+      "uid": "BFTnBtoAAAAJ"
+    },
+    "snss": [
+      {
+        "service": "www",
+        "href": "https://www.okayama-u.ac.jp/user/salab/",
+        "icon": "fas fa-home"
+      },
+      {
+        "service": "Google Scholar",
+        "href": "https://scholar.google.com/citations?user=BFTnBtoAAAAJ&hl=ja",
+        "icon": "fas fa-university"
+      }
+    ]
+  },
+  {
+    "id": "00-masa-n",
+    "name": "中村 匡秀",
+    "ename": "Masahide Nakamura",
+    "category": "collaborators",
+    "generation": 0,
+    "affiliation": "[神戸大学（Kobe University）](https://www.kobe-u.ac.jp/ja/)",
+    "degrees": [],
+    "icon": {
+      "type": "researchmap",
+      "uid": "read0054710"
+    },
+    "snss": [
+      {
+        "service": "www",
+        "href": "https://www27.cs.kobe-u.ac.jp/~masa-n",
+        "icon": "fas fa-home"
+      },
+      {
+        "service": "Google Scholar",
+        "href": "https://scholar.google.com/citations?user=72-zqhwAAAAJ&hl=ja",
+        "icon": "fas fa-university"
+      }
+    ]
+  },
+  {
+    "id": "00-igaki",
+    "name": "井垣 宏",
+    "ename": "Hiroshi Igaki",
+    "category": "collaborators",
+    "generation": 0,
+    "affiliation": "[大阪工業大学（Osaka Institute of Technology）](https://www.oit.ac.jp/)",
+    "degrees": [],
+    "icon": {
+      "type": "googlescholar",
+      "uid": "ZMlMUgEAAAAJ"
+    },
+    "snss": [
+      {
+        "service": "www",
+        "href": "https://igakilab.github.io/",
+        "icon": "fas fa-home"
+      },
+      {
+        "service": "Google Scholar",
+        "href": "https://scholar.google.com/citations?user=ZMlMUgEAAAAJ&hl=ja",
+        "icon": "fas fa-university"
+      }
+    ]
+  },
+  {
+    "id": "00-kanzaki",
+    "name": "神崎 雄一郎",
+    "ename": "Yuichiro Kanzaki",
+    "category": "collaborators",
+    "generation": 0,
+    "affiliation": "[熊本高等専門学校（Kumamoto National College of Technology）](https://kumamoto-nct.ac.jp/)",
+    "degrees": [],
+    "snss": [
+      {
+        "service": "www",
+        "href": "https://www.hi.kumamoto-nct.ac.jp/~kanzaki/",
+        "icon": "fas fa-home"
+      },
+      {
+        "service": "Google Scholar",
+        "href": "https://scholar.google.com/citations?user=XGGqFS0AAAAJ&hl=ja",
+        "icon": "fas fa-university"
+      }
+    ]
+  },
+  {
+    "id": "00-tsunoda",
+    "name": "角田 雅照",
+    "ename": "Masateru Tsunoda",
+    "category": "collaborators",
+    "generation": 0,
+    "affiliation": "[近畿大学（Kindai University）](https://www.kindai.ac.jp/)",
+    "degrees": [],
+    "icon": {
+      "type": "researchmap",
+      "uid": "read0207245"
+    },
+    "snss": [
+      {
+        "service": "www",
+        "href": "https://www.info.kindai.ac.jp/~tsunoda/",
+        "icon": "fas fa-home"
+      },
+      {
+        "service": "Google Scholar",
+        "href": "https://scholar.google.com/citations?user=_OM4kioAAAAJ&hl=ja",
+        "icon": "fas fa-university"
+      }
+    ]
+  },
+  {
+    "id": "00-toda",
+    "name": "戸田 航史",
+    "ename": "Koji Toda",
+    "category": "collaborators",
+    "generation": 0,
+    "affiliation": "[福岡工業大学（Fukuoka Institute of Technology）](https://www.fit.ac.jp/)",
+    "degrees": [],
+    "snss": [
+      {
+        "service": "www",
+        "href": "https://www.fit.ac.jp/~toda/index_ja.html",
+        "icon": "fas fa-home"
+      }
+    ]
+  },
+  {
+    "id": "00-tamada",
+    "name": "玉田 春昭",
+    "ename": "Haruaki Tamada",
+    "category": "teachers",
+    "generation": 0,
+    "fromYear": 2008,
+    "affiliation": "教授 (Professor)",
+    "degrees": [
+      {
+        "degree": "博士（工学）",
+        "year": 2006,
+        "month": 3,
+        "institution": "奈良先端科学技術大学院大学",
+        "thesis": {
+          "id": "2006dthesis_tamada",
+          "type": "dthesis",
+          "title": "バースマークと動的名前解決によるソフトウェアプロテクション",
+          "year": 2006,
+          "href": "https://library.naist.jp/opac/book/40417",
+          "available": [
+            "like",
+            "link"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "gravatar",
+      "email": "tamada@cafebabe.jp"
+    },
+    "snss": [
+      {
+        "service": "www",
+        "href": "https://tamada.github.io/",
+        "icon": "fas fa-home"
+      },
+      {
+        "service": "twitter",
+        "href": "https://twitter.com/tama5",
+        "icon": "fab fa-twitter"
+      },
+      {
+        "service": "github",
+        "href": "https://github.com/",
+        "icon": "fab fa-github"
+      },
+      {
+        "service": "docker",
+        "href": "https://hub.docker.com/u/tamada/",
+        "icon": "fab fa-docker"
+      },
+      {
+        "service": "instagram",
+        "href": "https://www.instagram.com/htamada/",
+        "icon": "fab fa-instagram"
+      },
+      {
+        "service": "Google Scholar",
+        "href": "https://scholar.google.com/citations?user=Qbslp6UAAAAJ&hl=ja",
+        "icon": "fas fa-university"
+      }
+    ]
+  },
+  {
+    "id": "16-okumura",
+    "name": "奥村 太喜",
+    "ename": "Taiki Okumura",
+    "category": "actives",
+    "generation": 16,
+    "fromYear": 2023,
+    "student_id": "2353261",
+    "affiliation": "4年次生",
+    "degrees": [],
+    "snss": []
+  },
+  {
+    "id": "16-okamoto",
+    "name": "岡本 泰亮",
+    "ename": "Taisuke Okamoto",
+    "category": "actives",
+    "generation": 16,
+    "fromYear": 2023,
+    "student_id": "2353243",
+    "affiliation": "4年次生",
+    "degrees": [],
+    "snss": []
+  },
+  {
+    "id": "16-shuke",
+    "name": "修家 絃喜",
+    "ename": "Genki Shuke",
+    "category": "actives",
+    "generation": 16,
+    "fromYear": 2023,
+    "student_id": "2353801",
+    "affiliation": "4年次生",
+    "degrees": [],
+    "icon": {
+      "type": "github",
+      "user": "NEKO-0726"
+    },
+    "snss": []
+  },
+  {
+    "id": "16-nishizaki",
+    "name": "西崎 吏玖",
+    "ename": "Riku Nishizaki",
+    "category": "actives",
+    "generation": 16,
+    "fromYear": 2023,
+    "student_id": "2354783",
+    "affiliation": "4年次生",
+    "degrees": [],
+    "snss": []
+  },
+  {
+    "id": "16-yamada",
+    "name": "山田 悠太",
+    "ename": "Yuta Yamada",
+    "category": "actives",
+    "generation": 16,
+    "fromYear": 2023,
+    "student_id": "2354693",
+    "affiliation": "4年次生",
+    "degrees": [],
+    "snss": []
+  },
+  {
+    "id": "15-kawaguchi",
+    "name": "川口 秀太",
+    "ename": "Shuto Kawaguchi",
+    "category": "almus",
+    "generation": 15,
+    "fromYear": 2022,
+    "student_id": "2253352",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2026,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2025bthesis_kawaguchi",
+          "type": "bthesis",
+          "title": "大学シラバスを対象とした履修支援の科目関係自動可視化システムの実装",
+          "year": 2026,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/15-kawaguchi.png"
+    },
+    "snss": []
+  },
+  {
+    "id": "15-kondo",
+    "name": "近藤 惇斗",
+    "ename": "Atsuto Kondo",
+    "category": "almus",
+    "generation": 15,
+    "fromYear": 2022,
+    "student_id": "2253550",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2026,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2025bthesis_kondo",
+          "type": "bthesis",
+          "title": "ChatGPT を用いたPython コード難読化と構造的類似度分析ツールの評価",
+          "year": 2026,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/15-kondo.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "15-saito",
+    "name": "齊藤 涼太",
+    "ename": "Ryota Saito",
+    "category": "almus",
+    "generation": 15,
+    "fromYear": 2020,
+    "student_id": "2054740",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2026,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2025bthesis_saito",
+          "type": "bthesis",
+          "title": "WebAssemblyバイナリにおける命令列トリミングがバースマーク解析に与える影響の評価",
+          "year": 2026,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/15-saito.png"
+    },
+    "snss": []
+  },
+  {
+    "id": "15-tachibana",
+    "name": "橘 賀生",
+    "ename": "Yoshiki Tachibana",
+    "category": "almus",
+    "generation": 15,
+    "fromYear": 2022,
+    "student_id": "2253956",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2026,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2025bthesis_tachibana",
+          "type": "bthesis",
+          "title": "BLE (Bluetooth Low Energy) を活用した物理的すれ違いに基づくキャンパス内匿名マッチングアプリケーションの設計と実装",
+          "year": 2026,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/15-tachibana.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "15-hirano",
+    "name": "平野 裕大",
+    "ename": "Yudai Hirano",
+    "category": "actives",
+    "generation": 15,
+    "fromYear": 2022,
+    "student_id": "2254496",
+    "affiliation": "修士1年生",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2026,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2025bthesis_hirano",
+          "type": "bthesis",
+          "title": "初学者の認知的負荷軽減および執筆支援を目的とした特別研究Ⅱ報告書執筆環境の自動構築システム",
+          "year": 2026,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/15-hirano.png"
+    },
+    "snss": []
+  },
+  {
+    "id": "15-mune",
+    "name": "宗 優斗",
+    "ename": "Yuto Mune",
+    "category": "almus",
+    "generation": 15,
+    "fromYear": 2022,
+    "student_id": "2254748",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2026,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2025bthesis_mune",
+          "type": "bthesis",
+          "title": "生成AIとPMDを用いた初学者のJavaソースコードの教育支援とその評価",
+          "year": 2026,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/15-mune.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "15-yamamoto",
+    "name": "山本 仁一",
+    "ename": "Jin'ichi Yamamoto",
+    "category": "almus",
+    "generation": 15,
+    "fromYear": 2022,
+    "student_id": "2254919",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2026,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2025bthesis_yamamoto",
+          "type": "bthesis",
+          "title": "AI生成コード検出手法の設計と評価",
+          "year": 2026,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/15-yamamoto.png"
+    },
+    "snss": []
+  },
+  {
+    "id": "12-konishi",
+    "name": "小西 巧真",
+    "ename": "Takuma Konishi",
+    "category": "actives",
+    "generation": 12,
+    "fromYear": 2019,
+    "student_id": "1953526",
+    "affiliation": "4年次生",
+    "degrees": [],
+    "icon": {
+      "type": "github",
+      "user": "Konyee11"
+    },
+    "snss": []
+  },
+  {
+    "id": "14-hayami",
+    "name": "速水 健杜",
+    "ename": "Kento Hayami",
+    "category": "almus",
+    "generation": 14,
+    "fromYear": 2021,
+    "student_id": "2154217",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2025,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2024bthesis_hayami",
+          "type": "bthesis",
+          "title": "ソフトウェアプロジェクトの時系列変化の可視化によるプロジェクト理解支援",
+          "year": 2025,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/hayami.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "14-tsugihara",
+    "name": "次原 蒼司",
+    "ename": "Soshi Tsugihara",
+    "category": "almus",
+    "generation": 14,
+    "fromYear": 2021,
+    "student_id": "2153939",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2025,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2024bthesis_tsugihara",
+          "type": "bthesis",
+          "title": "CodeAile: バーチャルペットを用いたプログラミング習慣化の試み",
+          "year": 2025,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/tsugihara.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "14-fusano",
+    "name": "房野 悠真",
+    "ename": "Yuuma Fusano",
+    "category": "almus",
+    "generation": 14,
+    "fromYear": 2021,
+    "student_id": "2154785",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2025,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2024bthesis_fusano",
+          "type": "bthesis",
+          "title": "ビルド可能性，依存関係の脆弱性，GitHubメトリクスを用いたOSSプロジェクトの生存性評価",
+          "year": 2025,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/fusano.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "14-shirokoshi",
+    "name": "城越 悠仁",
+    "ename": "Yuto Shirokoshi",
+    "category": "almus",
+    "generation": 14,
+    "fromYear": 2021,
+    "student_id": "2153678",
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2025,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2024bthesis_shirokoshi",
+          "type": "bthesis",
+          "title": "pyrevise: プログラミング教育を対象にした生成AIによるエラー文の理解支援",
+          "year": 2025,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/shirokoshi.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "11-higuchi",
+    "name": "開出 凱斗",
+    "ename": "Kaito Kaide",
+    "category": "almus",
+    "generation": 11,
+    "fromYear": 2018,
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2022,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2021bthesis_higuchi",
+          "type": "bthesis",
+          "title": "GitHub上のリポジトリ分析のためのデータ取得ツール",
+          "year": 2020,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2024,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2023mthesis_kaide",
+          "type": "mthesis",
+          "title": "プロジェクトの成長パターン分析によるプロジェクト管理のベストプラクティスの調査",
+          "author": "樋口 凱斗",
+          "year": 2024,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/kaide.png"
+    },
+    "snss": [
+      {
+        "service": "github",
+        "href": "https://github.com/kyoji63",
+        "icon": "fab fa-github"
+      }
+    ]
+  },
+  {
+    "id": "11-kirito",
+    "name": "桐戸 一弥",
+    "ename": "Kazuya Kirito",
+    "category": "almus",
+    "generation": 11,
+    "fromYear": 2018,
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2024,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2023bthesis_kirito",
+          "type": "bthesis",
+          "title": "ChatGPTを用いたプログラム生成時における手順書の作成",
+          "year": 2024,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "13-kobayashi",
+    "name": "小林 巧明",
+    "ename": "Yoshiaki Kobayashi",
+    "category": "almus",
+    "generation": 13,
+    "fromYear": 2020,
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2024,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2023bthesis_kobayashi",
+          "type": "bthesis",
+          "title": "GitHub上のBadge作成簡易化ツール",
+          "year": 2024,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/kobayashi.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "13-nishi",
+    "name": "西 仁哉",
+    "ename": "Jinya Nishi",
+    "category": "almus",
+    "generation": 13,
+    "fromYear": 2020,
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2024,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2023bthesis_nishi",
+          "type": "bthesis",
+          "title": "停滞したOSSプロジェクトの代替プロジェクトの探索",
+          "year": 2024,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/nishi.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "13-yamazaki",
+    "name": "山崎 駿",
+    "ename": "Shun Yamazaki",
+    "category": "almus",
+    "generation": 13,
+    "fromYear": 2020,
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2024,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2023bthesis_yamazaki",
+          "type": "bthesis",
+          "title": "AIが作成したソースコードであるかの検知とその正確性の調査",
+          "year": 2024,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/yamazaki.png"
+    },
+    "snss": []
+  },
+  {
+    "id": "13-yoshida",
+    "name": "吉田 大介",
+    "ename": "Daisuke Yoshida",
+    "category": "almus",
+    "generation": 13,
+    "fromYear": 2000,
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2024,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2023bthesis_kirito",
+          "type": "bthesis",
+          "title": "コードリーディングを習慣化するためのWebアプリケーションの開発と調査",
+          "year": 2024,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/yoshida.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "12-iseki",
+    "name": "井関 宗馬",
+    "ename": "Soma Iseki",
+    "category": "almus",
+    "generation": 12,
+    "fromYear": 2019,
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2023,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2023bthesis_iseki",
+          "type": "bthesis",
+          "title": "Conventional Commitsに基づいたコミットメッセージの型推薦ツール",
+          "year": 2023,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/iseki.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "12-ogishi",
+    "name": "大岸 玄",
+    "ename": "Gen Ogishi",
+    "category": "almus",
+    "generation": 12,
+    "fromYear": 2019,
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2023,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2023bthesis_ogishi",
+          "type": "bthesis",
+          "title": "提出忘を防ぐタイマーによる期限明確化",
+          "year": 2023,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/oogishi.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "12-cermeno",
+    "name": "セルメニョ・アレハンドロ",
+    "ename": "Cermeño Alejandro",
+    "category": "almus",
+    "generation": 12,
+    "fromYear": 2019,
+    "affiliation": "学士（情報理工学）",
+    "degrees": [
+      {
+        "degree": "学士（情報理工学）",
+        "year": 2023,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2023bthesis_cermeno",
+          "type": "bthesis",
+          "title": "動的バースマークの自動抽出に向けた入力なし実行のシステムコールによる動的バースマークの調査",
+          "year": 2023,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "image",
+      "src": "members/cermeno.jpg"
+    },
+    "snss": []
+  },
+  {
+    "id": "09-otsuki",
+    "name": "大槻 成輝",
+    "ename": "Naruaki Otsuki",
+    "category": "almus",
+    "generation": 9,
+    "fromYear": 2016,
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2022,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2021mthesis_otsuki",
+          "type": "mthesis",
+          "title": "動的名前解決難読化手法の逆難読化の提案と評価",
+          "year": 2022,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2020,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2019bthesis_otsuki",
+          "type": "bthesis",
+          "title": "名前難読化の難読化結果の調査",
+          "year": 2020,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": [
+      {
+        "service": "github",
+        "href": "https://github.com/Shinjirow",
+        "icon": "fab fa-github"
+      },
+      {
+        "service": "twitter",
+        "href": "https://twitter.com/Shinj1row",
+        "icon": "fab fa-twitter"
+      }
+    ]
+  },
+  {
+    "id": "11-tokunaga",
+    "name": "徳永 祥宜",
+    "ename": "Shoki Tokunaga",
+    "category": "almus",
+    "generation": 10,
+    "fromYear": 2017,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2022,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2021bthesis_tokunaga",
+          "type": "bthesis",
+          "title": "GitHub Classroomの導入を支援する正誤判定プログラムの生成ツールnuleteの開発と検証",
+          "year": 2022,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "11-niho",
+    "name": "仁保 叡宥",
+    "ename": "Eisuke Niho",
+    "category": "almus",
+    "generation": 11,
+    "fromYear": 2018,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2022,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2021bthesis_niho",
+          "type": "bthesis",
+          "title": "課題進行に伴う正解例プログラムからの乖離度合いによるプログラミング技術の成長度の計測",
+          "year": 2022,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "11-maruta",
+    "name": "丸田 由鶴羽",
+    "ename": "Yuduha Maruta",
+    "category": "almus",
+    "generation": 11,
+    "fromYear": 2018,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2022,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2021bthesis_maruta",
+          "type": "bthesis",
+          "title": "モバイルアプリケーション市場におけるバースマークを用いた盗用検出手法の提案",
+          "year": 2022,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "10-hatanaka",
+    "name": "畑中 駿助",
+    "ename": "Shunsuke Hatanaka",
+    "category": "almus",
+    "generation": 10,
+    "fromYear": 2017,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2021,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2020bthesis_hatanaka",
+          "type": "bthesis",
+          "title": "単体テストの自動生成を用いた動的バースマークの自動抽出",
+          "year": 2021,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "10-muto",
+    "name": "武藤 真由",
+    "ename": "Mayu Muto",
+    "category": "almus",
+    "generation": 10,
+    "fromYear": 2017,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2021,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2020bthesis_muto",
+          "type": "bthesis",
+          "title": "ライセンスコンフリクトの検出",
+          "year": 2021,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "10-masuda",
+    "name": "増田 亜里紗",
+    "ename": "Arisa Masuda",
+    "category": "almus",
+    "generation": 10,
+    "fromYear": 2017,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2021,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2020bthesis_masuda",
+          "type": "bthesis",
+          "title": "Git初心者向けのCUI操作補助ツールkaniの開発と検証",
+          "year": 2021,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "07-miyazaki",
+    "name": "宮崎 光",
+    "ename": "Ko Miyazaki",
+    "category": "almus",
+    "generation": 7,
+    "fromYear": 2014,
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2020,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2019mthesis_miyazaki",
+          "type": "mthesis",
+          "title": "測定結果の確認コスト削減に向けたプロジェクト品質ツールのオンラインサービス化手法の提案",
+          "year": 2020,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工）",
+        "year": 2018,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2017bthesis_miyazaki",
+          "type": "bthesis",
+          "title": "CUIアプリケーションのWebアプリケーション化 〜品質測定ツール9rulesのREST API化〜",
+          "year": 2018,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "09-imizu",
+    "name": "井水 真也",
+    "ename": "Shinya Imizu",
+    "category": "almus",
+    "generation": 9,
+    "fromYear": 2016,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2020,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2019bthesis_imizu",
+          "type": "bthesis",
+          "title": "プログラム可読性測定システム Noah の提案",
+          "year": 2020,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "09-sasaki",
+    "name": "佐々木 健吾",
+    "ename": "Kengo Sasaki",
+    "category": "almus",
+    "generation": 9,
+    "fromYear": 2016,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2020,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2019bthesis_sasaki",
+          "type": "bthesis",
+          "title": "要求抽出を題材としたアナログゲームの提案",
+          "year": 2020,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "09-nishikawa",
+    "name": "西川 参志郎",
+    "ename": "Sanshiro Nishikawa",
+    "category": "almus",
+    "generation": 9,
+    "fromYear": 2016,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2020,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2019bthesis_nishikawa",
+          "type": "bthesis",
+          "title": "プログラミング向け英単語辞書の作成",
+          "year": 2020,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "06-pika",
+    "name": "磯部 陽介",
+    "ename": "Yosuke Isobe",
+    "category": "almus",
+    "generation": 6,
+    "fromYear": 2013,
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2019,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2018mthesis_isobe",
+          "type": "mthesis",
+          "title": "メソッド名の動詞を対象とした名前難読化手法の逆変換",
+          "year": 2019,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2017,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2016bthesis_isobe",
+          "type": "bthesis",
+          "title": "名前難読化の逆変換を目的とした協調フィルタリングによるメソッド名の推薦",
+          "year": 2017,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "06-mitubaex",
+    "name": "中村 潤",
+    "ename": "Jun Nakamura",
+    "category": "almus",
+    "generation": 6,
+    "fromYear": 2013,
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2019,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2018mthesis_nakamura",
+          "type": "mthesis",
+          "title": "盗用発見技術のスケールアップ 〜全文検索システムを用いた絞り込み処理の導入〜",
+          "year": 2019,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2017,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2016bthesis_nakamura",
+          "type": "bthesis",
+          "title": "盗用発見のためのソフトウェアバースマークを利用した大量のプログラム比較 〜バースマーク手法への検索エンジンを用いた絞り込み段階の導入〜",
+          "year": 2017,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "icon": {
+      "type": "github",
+      "user": "mitubaex"
+    },
+    "snss": []
+  },
+  {
+    "id": "06-sabre",
+    "name": "横井 昂典",
+    "ename": "Takanori Yokoi",
+    "category": "almus",
+    "generation": 6,
+    "fromYear": 2013,
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2019,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2018mthesis_yokoi",
+          "type": "mthesis",
+          "title": "動的バースマークの抽出コストの削減",
+          "year": 2019,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2017,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2016bthesis_yokoi",
+          "type": "bthesis",
+          "title": "難読化前後のプログラムの特徴の比較による評価方法の提案",
+          "year": 2017,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "08-kobayashi",
+    "name": "小林 竜也",
+    "ename": "Tatsuya Kobayashi",
+    "category": "almus",
+    "generation": 8,
+    "fromYear": 2015,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2019,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2018bthesis_kobayashi",
+          "type": "bthesis",
+          "title": "シラバスシステムν-syllabus の開発",
+          "year": 2019,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "08-dokkoi",
+    "name": "田口 翔一",
+    "ename": "Shoichi Taguchi",
+    "category": "almus",
+    "generation": 8,
+    "fromYear": 2015,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2019,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2018bthesis_taguchi",
+          "type": "bthesis",
+          "title": "プログラミング学習補助を目的としたメソッド名の推薦",
+          "year": 2019,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "08-nishio",
+    "name": "西尾 泰介",
+    "ename": "Taisuke Nishio",
+    "category": "almus",
+    "generation": 8,
+    "fromYear": 2015,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2019,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2018bthesis_nishio",
+          "type": "bthesis",
+          "title": "開発初心者向けのGitHub flow学習支援システム",
+          "year": 2019,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "08-yamamoto",
+    "name": "山本 達也",
+    "ename": "Tatsuya Yamamoto",
+    "category": "almus",
+    "generation": 8,
+    "fromYear": 2015,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2019,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2018bthesis_yamamoto",
+          "type": "bthesis",
+          "title": "運指判定式 タイピング練習システムKey-type Skill Upgraderによる タイピング学習支援",
+          "year": 2019,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "08-yanagawa",
+    "name": "柳川 龍太郎",
+    "ename": "Ryutaro Yanagawa",
+    "category": "almus",
+    "generation": 8,
+    "fromYear": 2015,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2019,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2018bthesis_yanagawa",
+          "type": "bthesis",
+          "title": "GitHub flow強制ボットの開発",
+          "year": 2019,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "05-shimaya",
+    "name": "匂坂 勇仁",
+    "ename": "Hayato Sagisaka",
+    "category": "almus",
+    "generation": 5,
+    "fromYear": 2012,
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2018,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2017mthesis_sagisaka",
+          "type": "mthesis",
+          "title": "バースマーク結果の集約による直感的なソフトウェア盗用判定結果の提示",
+          "year": 2018,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2016,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2015bthesis_sagisaka",
+          "type": "bthesis",
+          "title": "バースマーク手法を利用した難読化手法の解析",
+          "year": 2016,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "05-zakimoto",
+    "name": "津崎 豪宏",
+    "ename": "Takehiro Tsuzaki",
+    "category": "almus",
+    "generation": 5,
+    "fromYear": 2012,
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2018,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2017mthesis_tsuzaki",
+          "type": "mthesis",
+          "title": "Git を対象としたチュートリアルシナリオを変更可能なメタチュートリアルの開発",
+          "year": 2018,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2016,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2015bthesis_tsuzaki",
+          "type": "bthesis",
+          "title": "ブラウザでのWebチュートリアルを通じた初学者の振る舞い分析",
+          "year": 2016,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "07-okada",
+    "name": "岡田 幸樹",
+    "ename": "Koki Okada",
+    "category": "almus",
+    "generation": 7,
+    "fromYear": 2014,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2018,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2017bthesis_okada",
+          "type": "bthesis",
+          "title": "学生レポートを対象とした匿名化ツールOKhinderの開発と評価",
+          "year": 2018,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "07-kanegae",
+    "name": "鐘ヶ江 由佳",
+    "ename": "Yuka Kanegae",
+    "category": "almus",
+    "generation": 7,
+    "fromYear": 2014,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2018,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2017bthesis_kanegae",
+          "type": "bthesis",
+          "title": "Javaプロジェクトを対象にしたビルドツールの現状調査",
+          "year": 2018,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "07-nakagawa",
+    "name": "中川 拓哉",
+    "ename": "Takuya Nakagawa",
+    "category": "almus",
+    "generation": 7,
+    "fromYear": 2014,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2018,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2017bthesis_nakagawa",
+          "type": "bthesis",
+          "title": "行動記録システムHakatterの開発と評価",
+          "year": 2018,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "07-mitamura",
+    "name": "三田村 翔一",
+    "ename": "Shoichi Mitamura",
+    "category": "almus",
+    "generation": 7,
+    "fromYear": 2014,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2018,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2017bthesis_mitamura",
+          "type": "bthesis",
+          "title": "バースマークの抽出・比較処理のスクリプト言語による再利用性の向上",
+          "year": 2018,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "06-kirin",
+    "name": "井ノ口 輝",
+    "ename": "Akira Inokuchi",
+    "category": "almus",
+    "generation": 6,
+    "fromYear": 2013,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2017,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2016bthesis_inokuchi",
+          "type": "bthesis",
+          "title": "シーケンシャルパターンマイニングによる開発者のタスクパターンの導出と評価",
+          "year": 2017,
+          "available": [
+            "poster",
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "05-kawabata",
+    "name": "川端 盛志",
+    "ename": "Seiji Kawabata",
+    "category": "almus",
+    "generation": 5,
+    "fromYear": 2012,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2016,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2015bthesis_kawabata",
+          "type": "bthesis",
+          "title": "課題プログラムを対象とした識別子の命名傾向の分析",
+          "year": 2016,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "05-kitokumei",
+    "name": "季 徳明",
+    "ename": "Ki Tokumei",
+    "category": "almus",
+    "generation": 5,
+    "fromYear": 2012,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2016,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2015bthesis_kawabata",
+          "type": "bthesis",
+          "title": "Spheroを利用したXFDの試作",
+          "year": 2016,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "05-yoshioka",
+    "name": "吉岡 和也",
+    "ename": "Kazuya Yoshioka",
+    "category": "almus",
+    "generation": 5,
+    "fromYear": 2012,
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2016,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2015bthesis_okada",
+          "type": "bthesis",
+          "title": "細粒度作業履歴収集を目的としたエディタの開発",
+          "year": 2016,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "02-itsuda",
+    "name": "五田 篤史",
+    "ename": "Atsushi Itsuda",
+    "category": "almus",
+    "generation": 2,
+    "fromYear": 2009,
+    "student_id": "0946155",
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2015mthesis_itsuda",
+          "type": "mthesis",
+          "title": "ソフトウェア開発履歴を利用した開発者特性の定量化",
+          "year": 2015,
+          "available": [],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2013,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2012bthesis_itsuda",
+          "type": "bthesis",
+          "title": "C#プログラムの実行パスに埋め込まれた動的電子透かしの抽出法",
+          "year": 2013,
+          "available": [],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "02-shuma",
+    "name": "福田 收真",
+    "ename": "Kazumasa Fukuda",
+    "category": "almus",
+    "generation": 2,
+    "fromYear": 2009,
+    "student_id": "0947226",
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2015mthesis_fukuda",
+          "type": "mthesis",
+          "title": "メタプログラミング技法による偽装難読化手法",
+          "year": 2015,
+          "available": [],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2013,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2012bthesis_fukuda",
+          "type": "bthesis",
+          "title": "オペランドスタックの挙動に基づいたバースマーク",
+          "year": 2013,
+          "available": [],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "04-arai",
+    "name": "新井 友大",
+    "ename": "Tomohiro Arai",
+    "category": "almus",
+    "generation": 4,
+    "fromYear": 2011,
+    "student_id": "1144038",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2014bthesis_arai",
+          "type": "bthesis",
+          "title": "ヒープグラフに基づいたバースマークに対する攻撃",
+          "year": 2015,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "04-inagaki",
+    "name": "稲垣 賢一",
+    "ename": "Kenichi Inagaki",
+    "category": "almus",
+    "generation": 4,
+    "fromYear": 2011,
+    "student_id": "1144146",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2014bthesis_inagaki",
+          "type": "bthesis",
+          "title": "メソッド呼び出しのフックを用いた動的コールフローグラフの偽装",
+          "year": 2015,
+          "available": [
+            "like",
+            "poster"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "04-kitagawa",
+    "name": "北川 裕基",
+    "ename": "Yuki Kitagawa",
+    "category": "almus",
+    "generation": 4,
+    "fromYear": 2011,
+    "student_id": "1144407",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2014bthesis_kitagawa",
+          "type": "bthesis",
+          "title": "コーディングスタイルの特徴量を用いたクラスタリングによる初心者プログラマを対象にした著者解析",
+          "year": 2015,
+          "available": [
+            "like",
+            "poster"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "04-sakio",
+    "name": "咲尾 昌哉",
+    "ename": "Masaya Sakio",
+    "category": "almus",
+    "generation": 4,
+    "fromYear": 2011,
+    "student_id": "1144560",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2014bthesis_sakio",
+          "type": "bthesis",
+          "title": "Javaソースコード名前難読化の可読性評価指標の提案",
+          "year": 2015,
+          "available": [
+            "like",
+            "poster"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "04-fukumoto",
+    "name": "福本 大",
+    "ename": "Dai Fukumoto",
+    "category": "almus",
+    "generation": 4,
+    "fromYear": 2009,
+    "student_id": "0947235",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2014bthesis_fukumoto",
+          "type": "bthesis",
+          "title": "初心者プログラマを対象としたコーディングスタイルの特徴量を用いた単純ベイズ分類機による著者解析",
+          "year": 2015,
+          "available": [
+            "like",
+            "poster"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "04-yamasaki",
+    "name": "山崎 尚",
+    "ename": "Nao Yamasaki",
+    "category": "almus",
+    "generation": 4,
+    "fromYear": 2011,
+    "student_id": "1145398",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2014bthesis_yamasaki",
+          "type": "bthesis",
+          "title": "開発者特製を考慮したゲーム理論によるチーム構成法の提案",
+          "year": 2015,
+          "available": [
+            "like",
+            "poster"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "04-yamamoto",
+    "name": "山本 照明",
+    "ename": "Teruaki Yamamoto",
+    "category": "almus",
+    "generation": 4,
+    "fromYear": 2009,
+    "student_id": "0947550",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2014bthesis_yamamoto",
+          "type": "bthesis",
+          "title": "大量検索に向けたソフトウェアの盗用の検索方法の提案",
+          "year": 2015,
+          "available": [
+            "like",
+            "poster"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "02-ohdo",
+    "name": "大堂 哲也",
+    "ename": "Tetsuya Ohdo",
+    "category": "almus",
+    "generation": 2,
+    "fromYear": 2009,
+    "student_id": "0946344",
+    "affiliation": "修士（先端情報学）",
+    "degrees": [
+      {
+        "degree": "修士（先端情報学）",
+        "year": 2014,
+        "month": 3,
+        "institution": "京都産業大学大学院",
+        "thesis": {
+          "id": "2014mthesis_ohdo",
+          "type": "mthesis",
+          "title": "Java言語を対象とした畳み込みによる耐タンパ化",
+          "year": 2014,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      },
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2012,
+        "month": 9,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2012mthesis_ohdo",
+          "type": "bthesis",
+          "title": "オペコードの実行系列の抽象化に基づいた動的バースマーク",
+          "year": 2012,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "03-gekka",
+    "name": "大滝 隆貴",
+    "ename": "Ryuki Ohtaki",
+    "category": "almus",
+    "generation": 3,
+    "fromYear": 2010,
+    "student_id": "1044147",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2015,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2013bthesis_ohtaki",
+          "type": "bthesis",
+          "title": "オブジェクト指向言語を対象としたソフトウェア保護機構の不自然さ評価",
+          "year": 2015,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "03-shigemori",
+    "name": "重森 光稀",
+    "ename": "Koki Shigemori",
+    "category": "almus",
+    "generation": 3,
+    "fromYear": 2010,
+    "student_id": "1044552",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2014,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2013bthesis_shigemori",
+          "type": "bthesis",
+          "title": "クラック防止を目的としたPlayStation Vita プログラムに対する動的名前解決難読化手法の研究",
+          "year": 2014,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "03-fujishima",
+    "name": "藤嶋 涼",
+    "ename": "Ryo Fujishima",
+    "category": "almus",
+    "generation": 3,
+    "fromYear": 2010,
+    "student_id": "1044994",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2014,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2013bthesis_fujishima",
+          "type": "bthesis",
+          "title": "AOPによる解析防止のための虫食い実装方式を用いた動的難読化手法の研究",
+          "year": 2014,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "03-fujiwara",
+    "name": "藤原 新",
+    "ename": "Shin Fujiwara",
+    "category": "almus",
+    "generation": 3,
+    "fromYear": 2010,
+    "student_id": "1045001",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2014,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2013bthesis_fujiwara",
+          "type": "bthesis",
+          "title": "ソフトウェア開発履歴を利用した開発者の特性診断",
+          "year": 2014,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "02-marimo",
+    "name": "井上 知奈津",
+    "ename": "Chinatsu Inoue",
+    "category": "almus",
+    "generation": 2,
+    "fromYear": 2009,
+    "student_id": "0946209",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2013,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2012bthesis_inoue",
+          "type": "bthesis",
+          "title": "C#を対象にしたオペコード置換による静的電子透かし法",
+          "year": 2013,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "02-yoshioka",
+    "name": "吉岡 智哉",
+    "ename": "Tomoya Yoshioka",
+    "category": "almus",
+    "generation": 2,
+    "fromYear": 2009,
+    "student_id": "0947587",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2013,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2012bthesis_yoshioka",
+          "type": "bthesis",
+          "title": "C#プログラムの実行パスへの動的電子透かしの埋め込み法",
+          "year": 2013,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "01-karaoka",
+    "name": "片岡 明範",
+    "ename": "Akinori Kataoka",
+    "category": "almus",
+    "generation": 1,
+    "fromYear": 2008,
+    "student_id": "0846327",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2012,
+        "month": 9,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2011bthesis_kataoka",
+          "type": "bthesis",
+          "title": "オペランドスタック振舞バースマークの包含度における保存性評価",
+          "year": 2012,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "01-iwama",
+    "name": "岩間 文也",
+    "ename": "Fumiya Iwama",
+    "category": "almus",
+    "generation": 1,
+    "fromYear": 2008,
+    "student_id": "0846174",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2012,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2011bthesis_iwama",
+          "type": "bthesis",
+          "title": "オペランドスタック振舞バースマークの包含度における弁別性評価",
+          "year": 2012,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "01-obatake",
+    "name": "小畠 良太",
+    "ename": "Ryota Obatake",
+    "category": "almus",
+    "generation": 1,
+    "fromYear": 2008,
+    "student_id": "0846318",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2012,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2011bthesis_obatake",
+          "type": "bthesis",
+          "title": "オペランドスタック振舞バースマークの類似度における弁別性評価",
+          "year": 2012,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "01-kitano",
+    "name": "北野 貴之",
+    "ename": "Takayuki Kitano",
+    "category": "almus",
+    "generation": 1,
+    "fromYear": 2008,
+    "student_id": "0846444",
+    "affiliation": "学士（コンピュータ理工学）",
+    "degrees": [
+      {
+        "degree": "学士（コンピュータ理工学）",
+        "year": 2012,
+        "month": 3,
+        "institution": "京都産業大学",
+        "thesis": {
+          "id": "2011bthesis_kitano",
+          "type": "bthesis",
+          "title": "オペランドスタック振舞バースマークの類似度における保存性評価",
+          "year": 2012,
+          "available": [
+            "like"
+          ],
+          "language": "Japanese"
+        }
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "12-sekimoto",
+    "name": "関本 亜蘭",
+    "ename": "Aran Sekimoto",
+    "category": "non_member",
+    "generation": 12,
+    "fromYear": 2019,
+    "degrees": [
+      {
+        "year": 2023,
+        "month": 2,
+        "status": "Expel"
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "06-taga",
+    "name": "多賀 隼人",
+    "ename": "Hayato Taga",
+    "category": "non_member",
+    "generation": 6,
+    "fromYear": 2013,
+    "degrees": [
+      {
+        "year": 2019,
+        "month": 9,
+        "status": "Withdrawal"
+      }
+    ],
+    "snss": []
+  },
+  {
+    "id": "05-fukukawa",
+    "name": "福川 瑛士",
+    "ename": "Eiji Fukukawa",
+    "category": "non_member",
+    "generation": 5,
+    "fromYear": 2011,
+    "degrees": [
+      {
+        "year": 2015,
+        "month": 3,
+        "status": "Withdrawal"
+      }
+    ],
+    "snss": []
+  }
+]

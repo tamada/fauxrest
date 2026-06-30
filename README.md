@@ -1,29 +1,54 @@
 # fauxrest
 
+[![Version](https://img.shields.io/badge/Version-0.0.1-blue)](https://github.com/tamada/fauxrest/releases/tag/v0.0.1)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?logo=spdx)](LICENSE)
+
+[![Coverage Status](https://coveralls.io/repos/github/tamada/fauxrest/badge.svg?branch=releases/v0.0.1)](https://coveralls.io/github/tamada/fauxrest?branch=main)
+[![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-c45508?logo=rust)](https://www.rust-lang.org/)
+[![Docker](https://img.shields.io/badge/Container-quay.io/tama5/fauxrest:latest-2496ED?logo=docker)](https://quay.io/repository/tama5/fauxrest)
+
+![logo](.github/assets/logo.svg)
+
 > **Pseudo-REST Static API Generator** — Compile raw JSON datasets into structured, production-ready static API endpoints deployable directly to cost-effective, infinitely scalable CDNs (GitHub Pages, Cloudflare Pages, Netlify, AWS S3, etc.).
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/)
-
-`fauxrest` is a zero-maintenance, blazingly fast command-line utility written in Rust. It eliminates the need for dynamic server processes (like Node.js or Python) and databases for read-only APIs, allowing you to achieve infinite scalability and sub-millisecond response times at zero hosting cost.
+`fauxrest` is a zero-maintenance, blazingly fast command-line utility written in Rust. It eliminates the need for dynamic server processes (such as Node.js or Python) and databases for read-only APIs, enabling infinite scalability and sub-millisecond response times at zero hosting cost.
 
 ---
 
 ## 🚀 Features
 
-* **Three Configuration Tiers:** From zero-config auto-inference (Tier 1) to shorthand YAML routes (Tier 2), all the way to native JavaScript/TypeScript config-via-code transformations (Tier 3).
-* **Flexible Routing Patterns:** Supports Single Object, Collections (Lists), Item Details (via URL parameters), and Grouping transformations out of the box.
+* **Two Configuration Tiers:** From zero-config auto-inference (Tier 1) to shorthand JSON routes (Tier 2).
+* **Flexible Routing Patterns:** Support Single Object, Collections (Lists), Item Details (via URL parameters), and Grouping transformations out of the box.
 * **Advanced Data Cleaning:** Deep JSONPath extraction, along with robust sanitization using `pick` (allowlist) and `omit` (denylist).
-* **Multi-Platform Target Formats:** Outputs formats tailored for all static hosting environments, supporting trailing slashes, directory index resolutions, extensionless files, or fully bundled files.
+* **Multi-Platform Target Formats:** Output formats tailored for all static hosting environments, supporting trailing slashes, directory index resolutions, extensionless files, or fully bundled files.
 * **Asset Bundling & Path Rewriting:** Scans compilation output for local asset references (e.g., images), copies them to the distribution folder, and rewrites path links safely.
-* **Out-of-the-Box CORS Support:** Generates native hosting headers (`_headers` for Cloudflare, `vercel.json` for Vercel) and handles CORS headers in local development.
-* **TypeScript Type Generation:** Auto-generates fully accurate `.d.ts` declaration files for your endpoints to provide instant client-side type-safety.
-* **Lightweight Development Server (`serve`):** Run a fast local server that live-rebuilds and reloads as your raw source data changes.
-* **Incremental Builds:** Employs precise source file hashing caching (`.static-api-cache.json`) to rebuild only what changed, slashing CI/CD build times.
 
 ---
 
-## 📦 Installation
+## ⚓️ Installation
+
+### 🍺 Homebrew
+
+To install `fauxrest` into your local environment, type the following command.
+
+```sh
+# install fauxrest
+brew install tamada/tap/faurest
+```
+
+### 🐳 Container image
+
+[![Docker](https://img.shields.io/badge/Container-quay.io/tama5/fauxrest:latest-2496ED?logo=docker)](https://quay.io/repository/tama5/fauxrest)
+
+Fauxrest also supports container images distributed on [Quay.io](https://quay.io/repository/tama5/fauxrest). Use it with the following command (in the following example, we use [`docker`](https://www.docker.com); however, [`podman`](https://podman.io), [`finch,`](https://runfinch.com) and/or [`apple/container`](https://github.com/apple/container) might be supported).
+
+```sh
+docker run -it --rm -v $PWD:/opt quay.io/tama5/faurest:latest 
+```
+
+Options and arguments should follow the above command.
+
+### 💪 Compile yourself
 
 To compile `fauxrest` from source, ensure you have Rust installed.
 
@@ -53,7 +78,7 @@ data/
 Then run `fauxrest`:
 
 ```bash
-fauxrest
+fauxrest data -d dist
 ```
 
 `fauxrest` will scan `./data`, infer the routes, and output:
@@ -76,52 +101,20 @@ dist/
 
 ### Tier 1: Zero-Config (Convention over Configuration)
 *   **Object files (`profile.json`):** Mapped to `/profile`.
-*   **Array files (`users.json`):** Mapped to `/users` (list view), and if elements contain an `id` field, individual items map to `/users/:id` (detail view).
+*   **Array files (`users.json`)** are mapped to `/users/index.json` (list view), and if elements contain an `id` field, individual items map to `/users/:id` (detail view).
 
-### Tier 2: Shorthand Routing (`routes.yml`)
-For basic routing overrides, create a simple `routes.yml` configuration:
-
-```yaml
-"/users/:id": "data/users.json"
-"/blog/posts": "data/db.json$.posts" # JSONPath extraction
-```
-
-### Tier 3: Configuration-via-Code (`api.config.js`)
-For powerful data manipulation without learning a complex DSL, write regular JS/TS files evaluated at build time:
-
-```javascript
-module.exports = {
-  routes: {
-    '/profile': 'data/profile.json',
-    '/job-histories/current': () => {
-      const jobs = require('./data/job-histories.json');
-      return jobs.find(job => job.is_current) || null;
-    }
-  }
-};
-```
+### Tier 2: Shorthand Routing (`_config.json`)
+For basic routing overrides, create a simple `_config.json` configuration in the `data` directory. The files starting with a dot (`.`) or an underscore (`_`) are ignored for the resultant JSON files.
 
 ---
 
-## 🧬 Routing Patterns & Transformations
-
-`fauxrest` provides 4 native REST transformations to format and organize your datasets:
-
-1.  **Single Object (`type: single`):** Copies a single object directly to the route path.
-2.  **Collection (`type: list`):** Outputs a JSON array representing a list of entities.
-3.  **Item Detail (`type: detail`):** Evaluates an array of items and exports a dedicated static file for each item, substituting a dynamic segment (e.g., `:id`) with a specified key.
-4.  **Grouping (`type: group`):** Groups array objects by a specific field value and outputs separate sub-category arrays (e.g., `/users/role/admin`).
-
----
-
-## ⚡ Output Formats (`--format`)
+### ⚡ Output Formats (`--format`)
 
 To ensure seamless routing behavior across different CDN and static hosts:
 
 *   `--format index` (Default): Outputs `/endpoint/index.json`. Perfect for standard servers resolving `/endpoint/`.
-*   `--format file`: Outputs `/endpoint` with no file extension.
+*   `--format file`: Outputs `/endpoint` file with no file extension.
 *   `--format extension`: Outputs `/endpoint.json`. Zero-risk option compatible with every hosting platform.
-*   `--format bundle`: Combines everything into a single, unified `/db.json` file.
 
 ---
 
@@ -143,6 +136,24 @@ For comprehensive technical architecture design, command line args, and subcomma
 
 ---
 
-## 📄 License
+## 😀 About
+
+### 👩‍💼 Developers 👨‍💼
+
+- Haruaki Tamada ([@tamada](https://github.com/tamada))
+- Google Gemini, GitHub Copilot
+
+### 📄 License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+### 📛 The project name (`fauxrest`)
+
+The project name `fauxrest` is pronounced /fɔːrɪst/ or /foʊrɪst/, which is the same as "forest".
+And it is derived from Faux (meaning `fake' in French) and REST.
+
+### 🎃 Icon
+
+![logo](.github/assets/logo.svg)
+
+This logo is based on the one published on [SVGRepo](https://www.svgrepo.com/svg/476993/forest).
