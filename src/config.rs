@@ -4,8 +4,8 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeSet, HashMap};
-use std::fs;
 use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
@@ -211,12 +211,24 @@ impl Config {
         }
     }
 
-    /// Loads configuration from a specific file path
-    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let content = fs::read_to_string(path).map_err(Error::Io)?;
-        let config: Self = serde_json::from_str(&content).map_err(Error::SerdeJson)?;
+    /// Loads configuration from a given string.
+    pub fn load_from_str<S: AsRef<str>>(s: S) -> Result<Self> {
+        let content = s.as_ref();
+        let config: Self = serde_json::from_str(content).map_err(Error::SerdeJson)?;
         config.validate()?;
         Ok(config)
+    }
+
+    pub fn load_from_reader(reader: &mut impl std::io::Read) -> Result<Self> {
+        let mut reader = std::io::BufReader::new(reader);
+        let content = io::read_to_string(&mut reader)?;
+        Self::load_from_str(content)
+    }
+
+    /// Loads configuration from a specific file path
+    pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let content = fs::read_to_string(path).map_err(Error::Io)?;
+        Self::load_from_str(content)
     }
 }
 
@@ -388,7 +400,8 @@ mod tests {
     #[test]
     fn test_parse_advanced_routing_config() {
         let config_path = Path::new("testdata/tamada/_config.json");
-        let config = Config::load(config_path).expect("Failed to load complex configuration");
+        let config =
+            Config::load_from_file(config_path).expect("Failed to load complex configuration");
 
         // Verify parsing of job-histories/current/$filter
         let job_hist = config
@@ -462,7 +475,8 @@ mod tests {
         )
         .unwrap();
 
-        let config = Config::load(tmp.path()).expect("Failed to load derive configuration");
+        let config =
+            Config::load_from_file(tmp.path()).expect("Failed to load derive configuration");
         let activities = config
             .api
             .get("activities")
@@ -492,7 +506,7 @@ mod tests {
         )
         .unwrap();
 
-        let err = match Config::load(tmp.path()) {
+        let err = match Config::load_from_file(tmp.path()) {
             Ok(_) => panic!("config should be rejected"),
             Err(e) => e,
         };
