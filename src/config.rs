@@ -286,13 +286,13 @@ fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
                             child_path
                         )));
                     }
-                    if let Value::String(s) = value {
-                        if s.contains('/') {
-                            return Err(Error::Config(format!(
-                                "{}: $values string must not contain '/'",
-                                child_path
-                            )));
-                        }
+                    if let Value::String(s) = value
+                        && s.contains('/')
+                    {
+                        return Err(Error::Config(format!(
+                            "{}: $values string must not contain '/'",
+                            child_path
+                        )));
                     }
                 }
             }
