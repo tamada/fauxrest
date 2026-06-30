@@ -1,20 +1,26 @@
 [package]
 name = "fauxrest"
+description = "A CLI tool for generating static JSON APIs from local data files"
+license-file = "LICENSE"
+repository = "https://github.com/tamada/fauxrest"
 version = "0.0.1"
-edition = "2021"
+edition = "2024"
+authors = [
+    "Haruaki Tamada <tamada@users.noreply.github.com>",
+]
+categories = ["command-line-utilities", "filesystem"]
+keywords = ["rest-api", "psude REST API"]
 
 [[bin]]
 name = "fauxrest"
 path = "src/cmd/main.rs"
 
 [dependencies]
+clap = { version = "4.4", features = ["derive"] }
+regex = "1"
+rusqlite = { version = "0.40", features = ["bundled"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
-clap = { version = "4.4", features = ["derive"] }
-rusqlite = { version = "0.40", features = ["bundled"] }
 tempfile = "3"
 thiserror = "2.0"
-regex = "1"
-
-[dev-dependencies]
