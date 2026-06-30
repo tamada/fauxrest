@@ -16,6 +16,16 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// Error type for fauxrest
 #[derive(Error, Debug)]
 pub enum Error {
+    #[error("{0}: failed to convert to {1}")]
+    Cast(String, String),
+
+    #[error("{0}")]
+    Clap(#[from] clap::Error),
+
+    /// Configuration error
+    #[error("Configuration error: {0}")]
+    Config(String),
+
     /// IO error
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
@@ -28,16 +38,9 @@ pub enum Error {
     #[error("SQLite error: {0}")]
     Rusqlite(#[from] rusqlite::Error),
 
-    /// Configuration error
-    #[error("Configuration error: {0}")]
-    Config(String),
-
     /// Unknown serializer error
     #[error("{0}: Unknown serializer")]
     UnknownSerializer(String),
-
-    #[error("{0}: failed to convert to {1}")]
-    Cast(String, String),
 }
 
 pub mod config;
