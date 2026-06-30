@@ -1,5 +1,6 @@
 ---
 title: "🏃 Usage"
+date: "2026-06-30"
 ---
 
 `fauxrest` provides a small command surface for build and local verification workflows.

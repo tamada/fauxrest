@@ -1,5 +1,6 @@
 ---
 title: "⚙️  Configuration"
+date: "2026-06-30"
 ---
 
 ## Configuration Tiers
