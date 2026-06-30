@@ -5,9 +5,7 @@ license-file = "LICENSE"
 repository = "https://github.com/tamada/fauxrest"
 version = "0.0.1"
 edition = "2024"
-authors = [
-    "Haruaki Tamada <tamada@users.noreply.github.com>",
-]
+authors = ["Haruaki Tamada <tamada@users.noreply.github.com>"]
 categories = ["command-line-utilities", "filesystem"]
 keywords = ["rest-api", "psude REST API"]
 
@@ -16,7 +14,7 @@ name = "fauxrest"
 path = "src/cmd/main.rs"
 
 [dependencies]
-clap = { version = "4.4", features = ["derive"] }
+clap = { version = "4.6", features = ["derive"] }
 regex = "1"
 rusqlite = { version = "0.40", features = ["bundled"] }
 serde = { version = "1.0", features = ["derive"] }

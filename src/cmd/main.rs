@@ -27,7 +27,7 @@ pub struct Args {
     #[clap(short, long, default_value = "dist")]
     dest: PathBuf,
 
-    #[clap(short, long, default_value_t = String::from("json"))] 
+    #[clap(short, long, default_value_t = String::from("json"))]
     serializer: String,
 
     #[clap(long, default_value_t = false)]
@@ -57,9 +57,9 @@ impl Args {
     /// or falls back to the default configuration.
     pub(crate) fn load_config(&self) -> Result<Config> {
         let config = if let Some(config) = &self.config {
-            fauxrest::Config::load(config)
+            fauxrest::Config::load_from_file(config)
         } else if let Some(discovered_path) = Self::discover(Path::new(&self.inputs)) {
-            fauxrest::Config::load(&discovered_path)
+            fauxrest::Config::load_from_file(&discovered_path)
         } else {
             Ok(fauxrest::Config::default())
         };
@@ -67,13 +67,13 @@ impl Args {
             Ok(config) => {
                 if config.serializers.is_empty() {
                     Ok(fauxrest::Config {
-                        serializers: vec![ self.serializer_config() ],
+                        serializers: vec![self.serializer_config()],
                         api: config.api,
                     })
                 } else {
                     Ok(config)
                 }
-            },
+            }
             Err(e) => Err(e),
         }
     }
@@ -95,8 +95,14 @@ impl Args {
     /// Discovers and loads a configuration file from a directory.
     /// It searches for '_config.json', '_fauxrest.json', '.config.json', and '.fauxrest.json' in order.
     fn discover(dir: &Path) -> Option<PathBuf> {
-        let configs = [ "_config.json", "_fauxrest.json", ".config.json", ".fauxrest.json" ];
-        configs.iter()
+        let configs = [
+            "_config.json",
+            "_fauxrest.json",
+            ".config.json",
+            ".fauxrest.json",
+        ];
+        configs
+            .iter()
             .map(|c| dir.join(c))
             .find(|path| path.exists())
     }
@@ -114,15 +120,19 @@ fn main() -> Result<()> {
         Some(Commands::Serve { args, port }) => {
             // Note: The original 'serve' functionality needs to be implemented.
             // For now, it's a placeholder as requested by the architecture.
-            unimplemented!("Starting server on port {} with inputs {} and config {:?}", port, args.inputs, args.config);
-        },
+            unimplemented!(
+                "Starting server on port {} with inputs {} and config {:?}",
+                port,
+                args.inputs,
+                args.config
+            );
+        }
         None => {
             if let Some(args) = cli.args {
                 perform_build(args)
             } else {
                 Err(fauxrest::Error::Config("missing inputs".into()))
             }
-
         }
     }
 }
