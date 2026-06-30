@@ -1,52 +1,56 @@
-use clap::{Parser, Subcommand};
-use fauxrest::{Config, Layout, Result};
+use clap::{Parser, ValueEnum};
+use fauxrest::{Config, Error, Layout, Result};
 use std::path::{Path, PathBuf};
 
 #[derive(Parser, Debug)]
-#[command(name = "fauxrest", version, about = "Static API Generator", long_about = None)]
-struct Cli {
-    #[command(subcommand)]
-    command: Option<Commands>,
-
-    #[clap(flatten)]
-    args: Option<Args>,
-}
-
-#[derive(Parser, Debug)]
+#[command(name = "fauxrest", version, about, long_about = None)]
 pub struct Args {
     /// Path to the input data directory.
+    #[arg(help = "Path to the input data directory", value_name = "DATA_DIR")]
     inputs: String,
 
-    /// Path to the configuration file.
-    #[arg(short, long)]
+    #[clap(short = 'L', long, help = "Specify the log level", value_enum, default_value_t = LogLevel::Warn, value_name = "LEVEL")]
+    level: LogLevel,
+
+    #[clap(
+        short,
+        long,
+        help = "Path to the configuration file",
+        value_name = "CONFIG_FILE"
+    )]
     config: Option<PathBuf>,
 
-    #[clap(short, long)]
+    #[clap(
+        short,
+        long,
+        help = "Layout to use for the output",
+        value_name = "LAYOUT"
+    )]
     layout: Option<Layout>,
 
-    #[clap(short, long, default_value = "dist")]
+    #[clap(
+        short,
+        long,
+        default_value = "dist",
+        help = "Path to the output directory",
+        value_name = "DEST_DIR"
+    )]
     dest: PathBuf,
 
-    #[clap(short, long, default_value_t = String::from("json"))]
+    #[clap(short, long, help = "Serializer to use for the output. [available: json, typescript, sql]", default_value_t = String::from("json"), value_name = "SERIALIZER")]
     serializer: String,
 
-    #[clap(long, default_value_t = false)]
+    #[clap(long, default_value_t = false, help = "If true, minify the output")]
     minify: bool,
 }
 
-#[derive(Subcommand, Debug)]
-enum Commands {
-    /// Compiles source JSON data into structured static JSON endpoints.
-    Build(Args),
-    /// Starts a lightweight local development server.
-    Serve {
-        #[clap(flatten)]
-        args: Args,
-
-        /// Port to listen on.
-        #[arg(short = 'p', long = "port", default_value = "8080")]
-        port: u16,
-    },
+#[derive(Parser, ValueEnum, Debug, Clone, PartialEq, Eq)]
+pub enum LogLevel {
+    Error,
+    Warn,
+    Info,
+    Debug,
+    Trace,
 }
 
 impl Args {
@@ -114,25 +118,13 @@ fn perform_build(args: Args) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let cli = Cli::parse();
-    match cli.command {
-        Some(Commands::Build(args)) => perform_build(args),
-        Some(Commands::Serve { args, port }) => {
-            // Note: The original 'serve' functionality needs to be implemented.
-            // For now, it's a placeholder as requested by the architecture.
-            unimplemented!(
-                "Starting server on port {} with inputs {} and config {:?}",
-                port,
-                args.inputs,
-                args.config
-            );
-        }
-        None => {
-            if let Some(args) = cli.args {
-                perform_build(args)
-            } else {
-                Err(fauxrest::Error::Config("missing inputs".into()))
-            }
-        }
+    let r = match Args::try_parse() {
+        Ok(args) => perform_build(args),
+        Err(e) => Err(Error::Clap(e)),
+    };
+    if let Err(e) = r {
+        eprint!("{}", e);
+        std::process::exit(1);
     }
+    Ok(())
 }
