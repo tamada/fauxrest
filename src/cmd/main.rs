@@ -6,7 +6,11 @@ use std::path::{Path, PathBuf};
 #[command(name = "fauxrest", version, about, long_about = None)]
 pub struct Args {
     /// Path to the input data directory.
-    #[arg(help = "Path to the input data directory", value_name = "DATA_DIR")]
+    #[arg(
+        help = "Path to the input data directory",
+        value_name = "DATA_DIR",
+        default_value = "data"
+    )]
     inputs: String,
 
     #[clap(short = 'L', long, help = "Specify the log level", value_enum, default_value_t = LogLevel::Warn, value_name = "LEVEL")]
@@ -42,6 +46,10 @@ pub struct Args {
 
     #[clap(long, default_value_t = false, help = "If true, minify the output")]
     minify: bool,
+
+    #[cfg(debug_assertions)]
+    #[clap(long, default_value_t = false, help = "Generate completion files")]
+    gencomp: bool,
 }
 
 #[derive(Parser, ValueEnum, Debug, Clone, PartialEq, Eq)]
@@ -112,7 +120,15 @@ impl Args {
     }
 }
 
+mod gencomp;
+
 fn perform_build(args: Args) -> Result<()> {
+    #[cfg(debug_assertions)]
+    if args.gencomp {
+        gencomp::_generate("assets/completions");
+        return Ok(());
+    }
+
     let config = args.load_config()?;
     fauxrest::run(config, PathBuf::from(args.inputs))
 }
