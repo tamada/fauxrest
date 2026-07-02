@@ -1,29 +1,24 @@
-# About fauxrest
+---
+title: "😀 About"
+date: "2026-06-30"
+---
 
-`fauxrest` is a convention-over-configuration static API generator written in Rust.
-It compiles JSON datasets into production-ready static API endpoints for CDN hosting.
+## 👩‍💼 Developers 👨‍💼
 
-## Why fauxrest
+- Haruaki Tamada ([@tamada](https://github.com/tamada))
+- Google Gemini, GitHub Copilot
 
-1. Infinite scalability through static asset delivery on edge networks.
-2. Low operating cost by removing application servers and databases for read APIs.
-3. Low maintenance with no runtime patching, pooling, or server management.
-4. Strong DX through fast builds, incremental compilation, and generated typings.
+## 📄 License
 
-## Design Philosophy
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-- Convention over configuration: API routes are inferred from data structure by default.
-- Data-source driven: data files define endpoint shape; config only adjusts exceptions.
-- Static-first delivery: output is optimized for static hosts and object storage.
+## 📛 The project name (`fauxrest`)
 
-## Core Conventions
+The project name `fauxrest` is pronounced /fɔːrɪst/ or /foʊrɪst/, which is the same as "forest".
+And it is derived from Faux (meaning `fake' in French) and REST.
 
-- `data/papers.json` produces a collection endpoint at `/api/papers`.
-- Records with `id` also produce item endpoints such as `/api/papers/{id}`.
-- API root (`/api`) acts as a discovery document for available endpoints.
-- Files and directories prefixed with `_` or `.` are ignored by the builder.
+## 🎃 Icon
 
-## Delivery Model
+![logo](/fauxrest.svg)
 
-`fauxrest` can emit multiple outputs in one build, such as JSON for API delivery,
-TypeScript modules for frontend builds, and SQLite for offline query workloads.
+This logo is based on the one published on [SVGRepo](https://www.svgrepo.com/svg/476993/forest).

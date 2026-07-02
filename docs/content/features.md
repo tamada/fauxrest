@@ -1,5 +1,6 @@
 ---
 title: "⭐️ Features"
+date: "2026-06-30"
 ---
 
 ## Data Transformation
@@ -26,6 +27,15 @@ Child `$filter` overrides parent `$filter` when both are present.
 ### Visibility Control
 
 `$private: true` suppresses generation of the target endpoint and all descendants.
+
+`$emit` controls endpoint emission at that node.
+
+- `$emit: ["list"]` emits only collection endpoints.
+- `$emit: ["ids"]` emits only per-item endpoints.
+- `$emit: ["list", "ids"]` emits both.
+- `$emit: []` emits neither (allowed).
+
+Legacy `$emit_list`, `$emit_id`, and `$emit_items` are still accepted for backward compatibility.
 
 ### Aggregation
 

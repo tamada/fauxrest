@@ -42,6 +42,209 @@
 				"-n",
 				"20"
 			]
+		},
+		{
+			"label": "cargo-test-derive-int-fix",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "run-tamadalab-derive-check",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"run",
+				"--",
+				"testdata/tamadalab",
+				"--config",
+				"testdata/tamadalab/_config.json",
+				"--dest",
+				"/tmp/fauxrest-tamadalab-intfix"
+			]
+		},
+		{
+			"label": "check-tamadalab-years-output",
+			"type": "shell",
+			"command": "sh",
+			"args": [
+				"-lc",
+				"find /tmp/fauxrest-tamadalab-intfix/papers/years -maxdepth 2 -type f | head -n 20"
+			]
+		},
+		{
+			"label": "jj-describe-current-final",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"describe",
+				"-r",
+				"@",
+				"-m",
+				"chore: rename prest to fauxrest and improve aggregate/derive behavior\n\n- rename crate/bin, CLI references, tests, and docs/spec branding to fauxrest\n- rename integration test file to tests/test_fauxrest.rs\n- update config filename examples/discovery from *_prest.json to *_fauxrest.json\n- add overlay-only aggregate endpoint emission for config-defined endpoints\n- extend $aggregate to support object form with mode: flat|keyed and sources mapping\n- update testdata/tamada profile aggregate to keyed mode\n- fix $derive pattern handling for numeric/bool scalar fields by stringifying before regex\n- add regression tests for overlay-only aggregate, keyed aggregate, and int-field derive expansion"
+			]
+		},
+		{
+			"label": "jj-new-after-describe",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"new"
+			]
+		},
+		{
+			"label": "jj-status-after-new",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"status"
+			]
+		},
+		{
+			"label": "cargo-test-emit-items",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "cargo-test-emit-list-id",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "cargo-test-emit-directive",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "run-tamadalab-emit-debug",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"run",
+				"--",
+				"testdata/tamadalab",
+				"--config",
+				"testdata/tamadalab/_config.json",
+				"--dest",
+				"/tmp/fauxrest-tamadalab-emit-debug"
+			]
+		},
+		{
+			"label": "list-tamadalab-emit-debug",
+			"type": "shell",
+			"command": "sh",
+			"args": [
+				"-lc",
+				"find /tmp/fauxrest-tamadalab-emit-debug -maxdepth 5 -type f | sort"
+			]
+		},
+		{
+			"label": "cargo-test-type-mismatch-warning",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "run-tamadalab-type-warning-check",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"run",
+				"--",
+				"testdata/tamadalab",
+				"--config",
+				"testdata/tamadalab/_config.json",
+				"--dest",
+				"/tmp/fauxrest-tamadalab-warning-check"
+			]
+		},
+		{
+			"label": "inspect-tamada-config-bytes",
+			"type": "shell",
+			"command": "sh",
+			"args": [
+				"-lc",
+				"nl -ba testdata/tamada/_config.json | sed -n '1,40p' && echo '---' && od -An -tx1 -N 120 testdata/tamada/_config.json"
+			]
+		},
+		{
+			"label": "cargo-test-after-config-check",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "cargo-test-after-warning-and-emit",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "print-tamada-config-numbered",
+			"type": "shell",
+			"command": "sh",
+			"args": [
+				"-lc",
+				"nl -ba testdata/tamada/_config.json | sed -n '1,120p'"
+			]
+		},
+		{
+			"label": "cargo-test-final-type-warning",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"-q"
+			]
+		},
+		{
+			"label": "run-tamadalab-after-warning-fix",
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"run",
+				"--",
+				"testdata/tamadalab",
+				"--config",
+				"testdata/tamadalab/_config.json",
+				"--dest",
+				"/tmp/fauxrest-tamadalab-warning-check2"
+			]
+		},
+		{
+			"label": "jj-describe-noninteractive",
+			"type": "shell",
+			"command": "jj",
+			"args": [
+				"--no-pager",
+				"describe",
+				"-m",
+				"add filter type-mismatch warnings"
+			]
 		}
 	]
 }

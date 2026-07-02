@@ -1,5 +1,6 @@
 ---
 title: "👩‍💻 How to contribute 🧑‍💻"
+date: "2026-06-30"
 ---
 
 ## Crate Architecture

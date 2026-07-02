@@ -1,43 +1,17 @@
-use serde::{Deserialize, Serialize};
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::collections::{BTreeSet, HashMap};
-use serde_json::Value;
-use regex::Regex;
+pub use crate::filter::{FilterCondition, FilterOp};
 use crate::{Error, Result};
+use regex::Regex;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::collections::{BTreeSet, HashMap};
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
-/// This operation targets the `$filter` directive.
-/// All operations use `op` to process the value of `field` and the given `value`.
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
-pub enum FilterOp {
-    /// `field` equals to `value`
-    Eq,
-    /// `field` not equals to `value`
-    Neq,
-    /// `field` is greater than `value`
-    Gt,
-    /// `field` is greater than or equals to `value`
-    Gte,
-    /// `field` is less than `value`
-    Lt,
-    /// `field` is less than or equals to `value`
-    Lte,
-    /// `field` contains `value`.
-    Contains,
-    /// `field` is exists or not (`value` should be `true` or `false`, `true` means exists)
-    Exists,
-    /// `field` is matched by `value`.
-    RegEq,
-    /// `field` is not matched by `value`.
-    RegNeq,
-}
-
-#[derive(Deserialize, Debug, Clone, PartialEq)]
-pub struct FilterCondition {
-    pub field: String,
-    pub op: FilterOp,
-    pub value: Value,
+pub enum EmitTarget {
+    List,
+    Ids,
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq)]
@@ -131,8 +105,8 @@ pub struct ApiNode {
     #[serde(rename = "$omit")]
     pub omit: Option<Vec<String>>,
 
-    #[serde(rename = "$private")]
-    pub private: Option<bool>,
+    #[serde(rename = "$emit")]
+    pub emit: Option<Vec<EmitTarget>>,
 
     #[serde(rename = "$values")]
     pub values: Option<Vec<Value>>,
@@ -142,6 +116,17 @@ pub struct ApiNode {
 
     #[serde(flatten)]
     pub sub_paths: HashMap<String, ApiNode>,
+    // #[serde(rename = "$private")]
+    // pub private: Option<bool>,
+    // #[serde(rename = "$emit_list")]
+    // pub emit_list: Option<bool>,
+
+    // #[serde(rename = "$emit_id")]
+    // pub emit_id: Option<bool>,
+
+    // // Backward-compatible alias of $emit_id.
+    // #[serde(rename = "$emit_items")]
+    // pub emit_items: Option<bool>,
 }
 
 #[derive(Deserialize, Debug, Clone, PartialEq)]
@@ -164,7 +149,7 @@ pub struct DeriveConfig {
 pub enum Layout {
     /// Outputs endpoints as `/endpoint/index.[ext]`. Highly compatible with all static web servers, maintaining clean URLs.
     Index,
-    /// Outputs endpoints as extensionless files (`/endpoint`). 
+    /// Outputs endpoints as extensionless files (`/endpoint`).
     /// **Smart Fallback Specification**: To avoid physical file-directory collisions,
     /// collections that contain sub-paths are automatically replaced (fallback) by `.../index.[ext]` files during compilation.
     File,
@@ -190,7 +175,7 @@ pub struct SerializerConfig {
 #[derive(Deserialize)]
 pub struct Config {
     /// List of serializer configurations
-    #[serde(default)]
+    #[serde(default, rename = "$config")]
     pub serializers: Vec<SerializerConfig>,
 
     /// Advanced routing overlay
@@ -200,15 +185,13 @@ pub struct Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Self { 
-            serializers: vec![
-                SerializerConfig { 
-                    serializer: "json".into(),
-                    layout: Layout::Index,
-                    dest: "dist".into(),
-                    minify: false,
-                }
-            ],
+        Self {
+            serializers: vec![SerializerConfig {
+                serializer: "json".into(),
+                layout: Layout::Index,
+                dest: "dist".into(),
+                minify: false,
+            }],
             api: HashMap::new(),
         }
     }
@@ -217,25 +200,35 @@ impl Default for Config {
 impl Config {
     pub fn new<P: AsRef<Path>>(serializer: String, layout: Layout, dest: P) -> Self {
         let dest = dest.as_ref().to_path_buf();
-        Self { 
-            serializers: vec![
-                SerializerConfig{
-                    serializer,
-                    layout,
-                    dest,
-                    minify: false,
-                }
-            ],
+        Self {
+            serializers: vec![SerializerConfig {
+                serializer,
+                layout,
+                dest,
+                minify: false,
+            }],
             api: HashMap::new(),
         }
     }
 
-    /// Loads configuration from a specific file path
-    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let content = fs::read_to_string(path).map_err(Error::Io)?;
-        let config: Self = serde_json::from_str(&content).map_err(Error::SerdeJson)?;
+    /// Loads configuration from a given string.
+    pub fn load_from_str<S: AsRef<str>>(s: S) -> Result<Self> {
+        let content = s.as_ref();
+        let config: Self = serde_json::from_str(content).map_err(Error::SerdeJson)?;
         config.validate()?;
         Ok(config)
+    }
+
+    pub fn load_from_reader(reader: &mut impl std::io::Read) -> Result<Self> {
+        let mut reader = std::io::BufReader::new(reader);
+        let content = io::read_to_string(&mut reader)?;
+        Self::load_from_str(content)
+    }
+
+    /// Loads configuration from a specific file path
+    pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let content = fs::read_to_string(path).map_err(Error::Io)?;
+        Self::load_from_str(content)
     }
 }
 
@@ -260,7 +253,9 @@ fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
     let mut keys = node.sub_paths.keys().cloned().collect::<Vec<_>>();
     keys.sort();
     for key in keys {
-        let child = node.sub_paths.get(&key)
+        let child = node
+            .sub_paths
+            .get(&key)
             .ok_or_else(|| Error::Config(format!("{}: missing child node {}", path, key)))?;
         let child_path = format!("{}/{}", path, key);
         if template_var_from_key(&key).is_some() {
@@ -279,7 +274,10 @@ fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
 
             if let Some(values) = child.values.as_ref() {
                 if values.is_empty() {
-                    return Err(Error::Config(format!("{}: $values must not be empty", child_path)));
+                    return Err(Error::Config(format!(
+                        "{}: $values must not be empty",
+                        child_path
+                    )));
                 }
                 for value in values {
                     if !is_scalar(value) {
@@ -288,13 +286,13 @@ fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
                             child_path
                         )));
                     }
-                    if let Value::String(s) = value {
-                        if s.contains('/') {
-                            return Err(Error::Config(format!(
-                                "{}: $values string must not contain '/'",
-                                child_path
-                            )));
-                        }
+                    if let Value::String(s) = value
+                        && s.contains('/')
+                    {
+                        return Err(Error::Config(format!(
+                            "{}: $values string must not contain '/'",
+                            child_path
+                        )));
                     }
                 }
             }
@@ -316,14 +314,20 @@ fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
 fn validate_aggregate(path: &str, aggregate: &AggregateSpec) -> Result<()> {
     let entries = aggregate.entries();
     if entries.is_empty() {
-        return Err(Error::Config(format!("{}: $aggregate must not be empty", path)));
+        return Err(Error::Config(format!(
+            "{}: $aggregate must not be empty",
+            path
+        )));
     }
 
     let mode = aggregate.mode();
     let mut keyed_names = BTreeSet::new();
     for entry in entries {
         if entry.from.trim().is_empty() {
-            return Err(Error::Config(format!("{}: $aggregate source must not be empty", path)));
+            return Err(Error::Config(format!(
+                "{}: $aggregate source must not be empty",
+                path
+            )));
         }
 
         if mode == AggregateMode::Keyed {
@@ -360,11 +364,17 @@ fn is_scalar(value: &Value) -> bool {
 fn validate_derive(path: &str, derive: &DeriveSource) -> Result<()> {
     let cfg = derive.to_config();
     if cfg.field.trim().is_empty() {
-        return Err(Error::Config(format!("{}: $derive.field must not be empty", path)));
+        return Err(Error::Config(format!(
+            "{}: $derive.field must not be empty",
+            path
+        )));
     }
     if let Some(pattern) = cfg.pattern.as_ref() {
         Regex::new(pattern).map_err(|e| {
-            Error::Config(format!("{}: invalid $derive.pattern '{}': {}", path, pattern, e))
+            Error::Config(format!(
+                "{}: invalid $derive.pattern '{}': {}",
+                path, pattern, e
+            ))
         })?;
     }
     Ok(())
@@ -390,37 +400,46 @@ mod tests {
     #[test]
     fn test_parse_advanced_routing_config() {
         let config_path = Path::new("testdata/tamada/_config.json");
-        let config = Config::load(config_path)
-            .expect("Failed to load complex configuration");
+        let config =
+            Config::load_from_file(config_path).expect("Failed to load complex configuration");
 
         // Verify parsing of job-histories/current/$filter
-        let job_hist = config.api.get("job-histories").expect("Missing job-histories node");
-        let current = job_hist.sub_paths.get("current").expect("Missing current sub-path");
+        let job_hist = config
+            .api
+            .get("job-histories")
+            .expect("Missing job-histories node");
+        let current = job_hist
+            .sub_paths
+            .get("current")
+            .expect("Missing current sub-path");
         let filter = current.filter.as_ref().expect("Missing filter array");
         assert_eq!(filter.len(), 1);
         assert_eq!(filter[0].field, "to");
         assert_eq!(filter[0].op, FilterOp::Eq);
         assert_eq!(filter[0].value, Value::String("Present".to_string()));
 
-        // Verify parsing of activities/$filter
-        let activities = config.api.get("activities").expect("Missing activities node");
-        let filter2 = activities.filter.as_ref().expect("Missing filter array for activities");
-        assert_eq!(filter2[0].field, "public");
-        assert_eq!(filter2[0].op, FilterOp::Eq);
-        assert_eq!(filter2[0].value, Value::Bool(true));
+        // Verify parsing of activities template and $emit
+        let activities = config
+            .api
+            .get("activities")
+            .expect("Missing activities node");
+        assert_eq!(activities.filter, None);
+        assert_eq!(activities.emit, None);
         let by_year = activities
             .sub_paths
             .get("${year}")
             .expect("Missing ${year} sub-path");
-        let values = by_year.values.as_ref().expect("Missing template values");
-        assert_eq!(values, &vec![
-            Value::String("2026".to_string()),
-            Value::String("2025".to_string()),
-            Value::String("2024".to_string()),
-        ]);
+        let derive_config = by_year
+            .derive
+            .as_ref()
+            .expect("Missing $derive")
+            .to_config();
+        assert_eq!(derive_config.field, "from");
+        assert_eq!(derive_config.pattern, Some("^(\\d{4}).*".to_string()));
 
         // Verify parsing of profile/$aggregate
         let profile = config.api.get("profile").expect("Missing profile node");
+        assert_eq!(profile.emit, None);
         let agg = profile.aggregate.as_ref().expect("Missing aggregate array");
         assert_eq!(agg.mode(), AggregateMode::Keyed);
         let entries = agg.entries();
@@ -431,53 +450,66 @@ mod tests {
 
         // Verify parsing of secret/$private
         let secret = config.api.get("secret").expect("Missing secret node");
-        assert_eq!(secret.private, Some(true));
+        assert_eq!(secret.emit, Some(vec![]));
+        // assert_eq!(secret.private, Some(true));
+
+        // Verify optional parsing of $emit_items
+        // assert_eq!(profile.emit_items, None);
+        // assert_eq!(profile.emit_list, None);
+        // assert_eq!(profile.emit_id, None);
     }
 
-        #[test]
-        fn test_parse_template_derive_config() {
-                let mut tmp = tempfile::NamedTempFile::new().unwrap();
-                write!(
-                        tmp,
-                        r#"{{
-    "serializers": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    #[test]
+    fn test_parse_template_derive_config() {
+        let mut tmp = tempfile::NamedTempFile::new().unwrap();
+        write!(
+            tmp,
+            r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
     "activities": {{
         "${{year}}": {{
             "$derive": {{"field":"from", "pattern":"^(\\d{{4}})"}}
         }}
     }}
 }}"#
-                )
-                .unwrap();
+        )
+        .unwrap();
 
-                let config = Config::load(tmp.path()).expect("Failed to load derive configuration");
-                let activities = config.api.get("activities").expect("Missing activities node");
-                let by_year = activities.sub_paths.get("${year}").expect("Missing template node");
-                let derive = by_year.derive.as_ref().expect("Missing derive").to_config();
-                assert_eq!(derive.field, "from");
-                assert_eq!(derive.pattern, Some("^(\\d{4})".to_string()));
-        }
+        let config =
+            Config::load_from_file(tmp.path()).expect("Failed to load derive configuration");
+        let activities = config
+            .api
+            .get("activities")
+            .expect("Missing activities node");
+        let by_year = activities
+            .sub_paths
+            .get("${year}")
+            .expect("Missing template node");
+        let derive = by_year.derive.as_ref().expect("Missing derive").to_config();
+        assert_eq!(derive.field, "from");
+        assert_eq!(derive.pattern, Some("^(\\d{4})".to_string()));
+    }
 
-        #[test]
-        fn test_non_template_derive_is_rejected() {
-                let mut tmp = tempfile::NamedTempFile::new().unwrap();
-                write!(
-                        tmp,
-                        r#"{{
-    "serializers": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    #[test]
+    fn test_non_template_derive_is_rejected() {
+        let mut tmp = tempfile::NamedTempFile::new().unwrap();
+        write!(
+            tmp,
+            r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
     "activities": {{
         "by-year": {{
             "$derive": "from"
         }}
     }}
 }}"#
-                )
-                .unwrap();
+        )
+        .unwrap();
 
-                let err = match Config::load(tmp.path()) {
-                    Ok(_) => panic!("config should be rejected"),
-                    Err(e) => e,
-                };
-                assert!(format!("{}", err).contains("$values/$derive are only allowed"));
-        }
+        let err = match Config::load_from_file(tmp.path()) {
+            Ok(_) => panic!("config should be rejected"),
+            Err(e) => e,
+        };
+        assert!(format!("{}", err).contains("$values/$derive are only allowed"));
+    }
 }

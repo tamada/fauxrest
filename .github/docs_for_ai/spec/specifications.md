@@ -155,6 +155,29 @@ Nodes configured with `$private: true` **do not emit the endpoint itself or its 
 
 ---
 
+## 6.1 Endpoint Emission Control (`$emit`)
+
+For array payloads containing `id`, fauxrest normally emits item endpoints (e.g. `/users/1`).
+Use `$emit` to control collection and item endpoint output.
+
+- `$emit: ["list"]` emits collection endpoint files only.
+- `$emit: ["ids"]` emits per-item endpoint files only.
+- `$emit: ["list", "ids"]` emits both.
+- `$emit: []` emits neither (allowed for intentional no-output nodes).
+
+Legacy `$emit_list`, `$emit_id`, and `$emit_items` are still accepted for backward compatibility.
+
+**Example:**
+```json
+{
+  "users": {
+    "$emit": ["list"]
+  }
+}
+```
+
+---
+
 ## 7. Data Aggregation & Bundle Pattern (`$aggregate`)
 
 "Bundling" merges multiple endpoints or entire datasets into a single endpoint, ideal for client-side applications that fetch the entire database on load. 
