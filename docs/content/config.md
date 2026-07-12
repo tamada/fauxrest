@@ -48,10 +48,9 @@ with an error instead of clobbering the existing output. Set it to `true`
 
 Command-line options take precedence over the configuration file
 (**CLI > config > default**). When you pass `-d/--dest`, `-s/--serializer`,
-`-l/--layout`, `--minify`, or `--overwrite` explicitly, that value overrides the
-corresponding field of every serializer entry defined here. Options you omit keep
-the values from this file.
-
+`-l/--layout`, `--minify`, `--no-minify`, or `--overwrite` explicitly, that value
+overrides the corresponding field of every serializer entry defined here. Options
+you omit keep the values from this file.
 
 ## Layout Configuration
 

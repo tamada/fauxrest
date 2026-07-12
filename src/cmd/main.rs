@@ -54,9 +54,18 @@ pub struct Args {
     #[clap(
         long,
         default_value_t = false,
+        conflicts_with = "minify",
+        help = "If set, disable minification (overrides config)"
+    )]
+    no_minify: bool,
+
+    #[clap(
+        long,
+        default_value_t = false,
         help = "If true, overwrite existing files in the destination directory"
     )]
     overwrite: bool,
+
 
     #[cfg(debug_assertions)]
     #[clap(long, default_value_t = false, help = "Generate completion files")]
@@ -82,8 +91,8 @@ impl Args {
     /// precedence over the loaded configuration file, which in turn takes
     /// precedence over the built-in defaults (CLI > config > default). When the
     /// loaded configuration provides serializers, every explicitly given CLI
-    /// option (`--dest`, `--serializer`, `--layout`, `--minify`, `--overwrite`)
-    /// overrides the matching field of each serializer entry.
+    /// option (`--dest`, `--serializer`, `--layout`, `--minify`, `--no-minify`,
+    /// `--overwrite`) overrides the matching field of each serializer entry.
     pub(crate) fn load_config(&self) -> Result<Config> {
         let config = if let Some(config) = &self.config {
             fauxrest::Config::load_from_file(config)
@@ -121,6 +130,8 @@ impl Args {
             }
             if self.minify {
                 serializer.minify = true;
+            } else if self.no_minify {
+                serializer.minify = false;
             }
             // When `--overwrite` is passed on the command line it forces
             // every serializer to allow overwriting, regardless of the
@@ -278,6 +289,36 @@ mod tests {
         .unwrap();
         let config = args.load_config().unwrap();
         assert!(config.serializers[0].minify);
+    }
+
+    #[test]
+    fn no_minify_flag_overrides_config() {
+        // config has minify=true, CLI passes --no-minify.
+        let (_dir, path) = write_config(CONFIG_BODY);
+        let args = Args::try_parse_from([
+            "fauxrest",
+            "data",
+            "-c",
+            path.to_str().unwrap(),
+            "--no-minify",
+        ])
+        .unwrap();
+        let config = args.load_config().unwrap();
+        assert!(!config.serializers[0].minify);
+    }
+
+    #[test]
+    fn minify_and_no_minify_conflict() {
+        let result = Args::try_parse_from(["fauxrest", "data", "--minify", "--no-minify"]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn no_config_with_no_minify_stays_unminified() {
+        // Without a config file, --no-minify keeps the default (false).
+        let args = Args::try_parse_from(["fauxrest", "no-such-dir", "--no-minify"]).unwrap();
+        let config = args.load_config().unwrap();
+        assert!(!config.serializers[0].minify);
     }
 
     #[test]

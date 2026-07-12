@@ -22,6 +22,7 @@ Options:
   -d, --dest <DEST_DIR>          Path to the output directory [default: dist]
   -s, --serializer <SERIALIZER>  Serializer to use for the output. [available: json, typescript, sql] [default: json]
       --minify                   If true, minify the output
+      --no-minify                If set, disable minification (overrides config)
       --overwrite                If true, overwrite existing files in the destination directory
   -h, --help                     Print help (see more with '--help')
   -V, --version                  Print version
@@ -50,9 +51,11 @@ Also, config files can be located in `data_dir` and can specify the output direc
 
 Options resolve as **CLI > config file > built-in defaults**.
 When a configuration file is loaded, any option you pass explicitly on the command
-line (`-d/--dest`, `-s/--serializer`, `-l/--layout`, `--minify`, `--overwrite`)
-overrides the matching field of every serializer entry in that config. Options you do not pass
-keep the values from the config file (or the defaults when no config provides them).
+line (`-d/--dest`, `-s/--serializer`, `-l/--layout`, `--minify`, `--no-minify`,
+`--overwrite`) overrides the matching field of every serializer entry in that
+config. Options you do not pass keep the values from the config file (or the
+defaults when no config provides them). `--minify` and `--no-minify` are mutually
+exclusive: use `--no-minify` to turn minification off when the config enables it.
 
 
 ### Typical Local Loop
