@@ -46,6 +46,14 @@ Note that if no `dest` directory is specified,
 `fauxrest` will write to the `dist` directory by default with the `index` layout.
 Also, config files can be located in `data_dir` and can specify the output directory, layout, and serializer.
 
+### Option precedence
+
+Options resolve as **CLI > config file > built-in defaults**.
+When a configuration file is loaded, any option you pass explicitly on the command
+line (`-d/--dest`, `-s/--serializer`, `-l/--layout`, `--minify`, `--overwrite`)
+overrides the matching field of every serializer entry in that config. Options you do not pass
+keep the values from the config file (or the defaults when no config provides them).
+
 
 ### Typical Local Loop
 
