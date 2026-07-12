@@ -611,6 +611,50 @@ fn test_overlay_only_keyed_aggregate_endpoint_is_generated() {
 }
 
 #[test]
+fn test_run_fails_when_dest_is_not_empty_without_overwrite() {
+    let tmp = tempfile::tempdir().unwrap();
+    let dist_dir = tmp.path().join("dist");
+    fs::create_dir(&dist_dir).unwrap();
+    // Pre-existing file makes the destination non-empty.
+    fs::write(dist_dir.join("stale.json"), "{}").unwrap();
+
+    let config = Config::new("json".into(), Layout::Index, &dist_dir);
+    let err = fauxrest::run(config, "testdata/example1")
+        .expect_err("run should fail when dest is not empty and overwrite is disabled");
+    let msg = format!("{}", err);
+    assert!(
+        msg.contains("dest is not empty") && msg.contains("--overwrite"),
+        "unexpected error message: {}",
+        msg
+    );
+    // Nothing should have been generated.
+    assert!(!dist_dir.join("index.json").exists());
+}
+
+#[test]
+fn test_run_succeeds_when_dest_is_not_empty_with_overwrite() {
+    let tmp = tempfile::tempdir().unwrap();
+    let dist_dir = tmp.path().join("dist");
+    fs::create_dir(&dist_dir).unwrap();
+    fs::write(dist_dir.join("stale.json"), "{}").unwrap();
+
+    let config = Config {
+        serializers: vec![fauxrest::SerializerConfig {
+            serializer: "json".into(),
+            layout: Layout::Index,
+            dest: dist_dir.clone(),
+            minify: false,
+            overwrite: true,
+        }],
+        api: std::collections::HashMap::new(),
+    };
+    fauxrest::run(config, "testdata/example1")
+        .expect("run should succeed when overwrite is enabled");
+    assert_file(&dist_dir, "index.json");
+    assert_file(&dist_dir, "profile/index.json");
+}
+
+#[test]
 fn test_json_minify_flag_compacts_output() {
     let tmp = tempfile::tempdir().unwrap();
     let data_dir = tmp.path().join("data");
@@ -630,6 +674,7 @@ fn test_json_minify_flag_compacts_output() {
             layout: Layout::Index,
             dest: pretty_dir.clone(),
             minify: false,
+            overwrite: false,
         }],
         api: std::collections::HashMap::new(),
     };
@@ -639,6 +684,7 @@ fn test_json_minify_flag_compacts_output() {
             layout: Layout::Index,
             dest: minify_dir.clone(),
             minify: true,
+            overwrite: false,
         }],
         api: std::collections::HashMap::new(),
     };
@@ -673,6 +719,7 @@ fn test_typescript_minify_flag_compacts_embedded_json() {
             layout: Layout::Index,
             dest: pretty_dir.clone(),
             minify: false,
+            overwrite: false,
         }],
         api: std::collections::HashMap::new(),
     };
@@ -682,6 +729,7 @@ fn test_typescript_minify_flag_compacts_embedded_json() {
             layout: Layout::Index,
             dest: minify_dir.clone(),
             minify: true,
+            overwrite: false,
         }],
         api: std::collections::HashMap::new(),
     };

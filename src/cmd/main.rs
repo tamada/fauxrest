@@ -47,6 +47,13 @@ pub struct Args {
     #[clap(long, default_value_t = false, help = "If true, minify the output")]
     minify: bool,
 
+    #[clap(
+        long,
+        default_value_t = false,
+        help = "If true, overwrite existing files in the destination directory"
+    )]
+    overwrite: bool,
+
     #[cfg(debug_assertions)]
     #[clap(long, default_value_t = false, help = "Generate completion files")]
     gencomp: bool,
@@ -77,14 +84,23 @@ impl Args {
         };
         match config {
             Ok(config) => {
-                if config.serializers.is_empty() {
-                    Ok(fauxrest::Config {
+                let mut config = if config.serializers.is_empty() {
+                    fauxrest::Config {
                         serializers: vec![self.serializer_config()],
                         api: config.api,
-                    })
+                    }
                 } else {
-                    Ok(config)
+                    config
+                };
+                // When `--overwrite` is passed on the command line it forces
+                // every serializer to allow overwriting, regardless of the
+                // value present in the loaded configuration file.
+                if self.overwrite {
+                    for s in &mut config.serializers {
+                        s.overwrite = true;
+                    }
                 }
+                Ok(config)
             }
             Err(e) => Err(e),
         }
@@ -101,6 +117,7 @@ impl Args {
             serializer: self.serializer.clone(),
             dest: self.dest.clone(),
             minify: self.minify,
+            overwrite: self.overwrite,
         }
     }
 

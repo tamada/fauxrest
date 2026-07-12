@@ -26,6 +26,10 @@ pub enum Error {
     #[error("Configuration error: {0}")]
     Config(String),
 
+    /// Destination directory already contains files and overwrite is disabled
+    #[error("{0}: dest is not empty, use --overwrite to overwrite existing files")]
+    DestNotEmpty(String),
+
     /// IO error
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),

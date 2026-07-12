@@ -41,6 +41,11 @@ Supported serializers:
 
 `minify` is configurable per serializer.
 
+`overwrite` is configurable per serializer (defaults to `false`). When `false`
+and the serializer `dest` directory already contains files, the build aborts
+with an error instead of clobbering the existing output. Set it to `true`
+(or pass `--overwrite` on the command line) to allow overwriting.
+
 ## Layout Configuration
 
 Supported layouts:

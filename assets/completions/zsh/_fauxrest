@@ -30,6 +30,8 @@ extension\:"Outputs endpoints with explicit extensions (\`/endpoint.\[ext\]\`). 
 '-s+[Serializer to use for the output. \[available\: json, typescript, sql\]]:SERIALIZER:_default' \
 '--serializer=[Serializer to use for the output. \[available\: json, typescript, sql\]]:SERIALIZER:_default' \
 '--minify[If true, minify the output]' \
+'--overwrite[If true, overwrite existing files in the destination directory]' \
+'--gencomp[Generate completion files]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
 '-V[Print version]' \
