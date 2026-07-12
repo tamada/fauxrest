@@ -142,6 +142,59 @@ pub struct DeriveConfig {
     pub pattern: Option<String>,
 }
 
+/// Declares which non-JSON static files (images, CSS, …) found in the input
+/// data directory should be copied verbatim into each serializer destination.
+///
+/// Two shapes are accepted from configuration under the top-level `$static` key:
+///
+/// - Shorthand (include only): `"$static": ["*.png", "css/**"]`
+/// - Full form: `"$static": {"include": ["..."], "exclude": ["..."]}`
+///
+/// # Priority
+///
+/// Copying is **deny by default**: without an `include` glob (or the
+/// `--copy-static` command line flag) nothing is copied. `exclude` (deny)
+/// always wins: a file that matches an `exclude` glob is never copied, even
+/// when copying is forced on for every file via `--copy-static`.
+#[derive(Deserialize, Debug, Clone, PartialEq)]
+#[serde(untagged)]
+pub enum StaticSpec {
+    /// Shorthand form: a list of include (allow) globs.
+    Include(Vec<String>),
+    /// Full form with explicit `include` (allow) and `exclude` (deny) globs.
+    Detailed(StaticConfig),
+}
+
+/// Full static-copy configuration with explicit include/exclude glob lists.
+#[derive(Deserialize, Debug, Clone, PartialEq, Default)]
+pub struct StaticConfig {
+    /// Glob patterns that allow a static file to be copied.
+    #[serde(default)]
+    pub include: Vec<String>,
+    /// Glob patterns that deny a static file from being copied. `exclude`
+    /// always wins over any allow decision, including `--copy-static`.
+    #[serde(default)]
+    pub exclude: Vec<String>,
+}
+
+impl StaticSpec {
+    /// Returns the configured include (allow) glob patterns.
+    pub fn include(&self) -> &[String] {
+        match self {
+            StaticSpec::Include(patterns) => patterns,
+            StaticSpec::Detailed(cfg) => &cfg.include,
+        }
+    }
+
+    /// Returns the configured exclude (deny) glob patterns.
+    pub fn exclude(&self) -> &[String] {
+        match self {
+            StaticSpec::Include(_) => &[],
+            StaticSpec::Detailed(cfg) => &cfg.exclude,
+        }
+    }
+}
+
 /// Represents the relationship between endpoint URL resolution and
 /// physical file placement.
 #[derive(Deserialize, Serialize, Debug, Clone, clap::ValueEnum)]
@@ -183,6 +236,18 @@ pub struct Config {
     #[serde(default, rename = "$config")]
     pub serializers: Vec<SerializerConfig>,
 
+    /// Static-file copy policy (allow/deny globs). `None` means the feature is
+    /// unconfigured; combined with the default deny policy nothing is copied
+    /// unless `copy_static_all` is set from the command line.
+    #[serde(default, rename = "$static")]
+    pub static_files: Option<StaticSpec>,
+
+    /// When `true`, every static file is treated as allowed regardless of the
+    /// `include` globs. Set from the `--copy-static` command line flag and never
+    /// deserialized from the configuration file. `exclude` globs still win.
+    #[serde(skip)]
+    pub copy_static_all: bool,
+
     /// Advanced routing overlay
     #[serde(flatten)]
     pub api: HashMap<String, ApiNode>,
@@ -198,6 +263,8 @@ impl Default for Config {
                 minify: false,
                 overwrite: false,
             }],
+            static_files: None,
+            copy_static_all: false,
             api: HashMap::new(),
         }
     }
@@ -214,6 +281,8 @@ impl Config {
                 minify: false,
                 overwrite: false,
             }],
+            static_files: None,
+            copy_static_all: false,
             api: HashMap::new(),
         }
     }
@@ -241,6 +310,9 @@ impl Config {
 
 impl Config {
     fn validate(&self) -> Result<()> {
+        if let Some(spec) = self.static_files.as_ref() {
+            validate_static(spec)?;
+        }
         let mut keys = self.api.keys().cloned().collect::<Vec<_>>();
         keys.sort();
         for key in keys {
@@ -250,6 +322,17 @@ impl Config {
         }
         Ok(())
     }
+}
+
+/// Validates every `$static` glob pattern, reporting malformed patterns as a
+/// [`Error::Config`] with the offending pattern and the underlying reason.
+fn validate_static(spec: &StaticSpec) -> Result<()> {
+    for pattern in spec.include().iter().chain(spec.exclude().iter()) {
+        globset::Glob::new(pattern).map_err(|e| {
+            Error::Config(format!("invalid $static glob pattern '{}': {}", pattern, e))
+        })?;
+    }
+    Ok(())
 }
 
 fn validate_node(path: &str, node: &ApiNode) -> Result<()> {

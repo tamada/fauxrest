@@ -23,6 +23,7 @@ pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
     for s_conf in &config.serializers {
         ensure_dest_writable(s_conf)?;
     }
+    let data_dir = data_dir.as_ref();
     let mut endpoints = Vec::new();
     let dataset = DataSource::new(data_dir)?;
     for s_conf in &config.serializers {
@@ -30,6 +31,7 @@ pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
         endpoints.extend(run_serializer(context, &dataset, &config.api)?);
     }
     generate_discovery(&config, &endpoints)?;
+    crate::static_files::copy_static_files(&config, data_dir)?;
     Ok(())
 }
 

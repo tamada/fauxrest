@@ -32,6 +32,7 @@ extension\:"Outputs endpoints with explicit extensions (\`/endpoint.\[ext\]\`). 
 '--minify[If true, minify the output]' \
 '(--minify)--no-minify[If set, disable minification (overrides config)]' \
 '--overwrite[If true, overwrite existing files in the destination directory]' \
+'--copy-static[Copy all non-JSON static files from the data directory into each destination (allow all). \$static exclude globs still take precedence.]' \
 '--gencomp[Generate completion files]' \
 '-h[Print help (see more with '\''--help'\'')]' \
 '--help[Print help (see more with '\''--help'\'')]' \
