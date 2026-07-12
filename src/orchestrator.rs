@@ -20,6 +20,9 @@ const DERIVE_CARDINALITY_WARN_THRESHOLD: usize = 1000;
 
 /// Executes the API build process
 pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
+    for s_conf in &config.serializers {
+        ensure_dest_writable(s_conf)?;
+    }
     let mut endpoints = Vec::new();
     let dataset = DataSource::new(data_dir)?;
     for s_conf in &config.serializers {
@@ -27,6 +30,22 @@ pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
         endpoints.extend(run_serializer(context, &dataset, &config.api)?);
     }
     generate_discovery(&config, &endpoints)?;
+    Ok(())
+}
+
+/// Aborts the build when the serializer destination already contains files
+/// and overwriting has not been explicitly permitted.
+fn ensure_dest_writable(s_conf: &crate::SerializerConfig) -> Result<()> {
+    if s_conf.overwrite {
+        return Ok(());
+    }
+    let dest = &s_conf.dest;
+    if dest.is_dir() {
+        let is_empty = fs::read_dir(dest).map_err(Error::Io)?.next().is_none();
+        if !is_empty {
+            return Err(Error::DestNotEmpty(dest.display().to_string()));
+        }
+    }
     Ok(())
 }
 

@@ -29,6 +29,8 @@ set edit:completion:arg-completer[fauxrest] = {|@words|
             cand -s 'Serializer to use for the output. [available: json, typescript, sql]'
             cand --serializer 'Serializer to use for the output. [available: json, typescript, sql]'
             cand --minify 'If true, minify the output'
+            cand --overwrite 'If true, overwrite existing files in the destination directory'
+            cand --gencomp 'Generate completion files'
             cand -h 'Print help (see more with ''--help'')'
             cand --help 'Print help (see more with ''--help'')'
             cand -V 'Print version'

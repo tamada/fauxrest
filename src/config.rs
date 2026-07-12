@@ -169,6 +169,11 @@ pub struct SerializerConfig {
     /// Whether output should be compact (minified)
     #[serde(default)]
     pub minify: bool,
+    /// Whether existing files in `dest` may be overwritten.
+    /// When false (the default) and `dest` already contains files,
+    /// the build aborts with an error.
+    #[serde(default)]
+    pub overwrite: bool,
 }
 
 /// Global configuration
@@ -191,6 +196,7 @@ impl Default for Config {
                 layout: Layout::Index,
                 dest: "dist".into(),
                 minify: false,
+                overwrite: false,
             }],
             api: HashMap::new(),
         }
@@ -206,6 +212,7 @@ impl Config {
                 layout,
                 dest,
                 minify: false,
+                overwrite: false,
             }],
             api: HashMap::new(),
         }

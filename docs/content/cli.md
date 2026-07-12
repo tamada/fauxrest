@@ -22,6 +22,7 @@ Options:
   -d, --dest <DEST_DIR>          Path to the output directory [default: dist]
   -s, --serializer <SERIALIZER>  Serializer to use for the output. [available: json, typescript, sql] [default: json]
       --minify                   If true, minify the output
+      --overwrite                If true, overwrite existing files in the destination directory
   -h, --help                     Print help (see more with '--help')
   -V, --version                  Print version
 ```

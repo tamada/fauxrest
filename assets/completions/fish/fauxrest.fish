@@ -10,5 +10,7 @@ extension\t'Outputs endpoints with explicit extensions (`/endpoint.[ext]`). 100%
 complete -c fauxrest -s d -l dest -d 'Path to the output directory' -r -F
 complete -c fauxrest -s s -l serializer -d 'Serializer to use for the output. [available: json, typescript, sql]' -r
 complete -c fauxrest -l minify -d 'If true, minify the output'
+complete -c fauxrest -l overwrite -d 'If true, overwrite existing files in the destination directory'
+complete -c fauxrest -l gencomp -d 'Generate completion files'
 complete -c fauxrest -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c fauxrest -s V -l version -d 'Print version'

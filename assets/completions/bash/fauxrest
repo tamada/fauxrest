@@ -23,29 +23,49 @@ _fauxrest() {
 
     case "${cmd}" in
         fauxrest)
-            opts="-L -c -l -d -s -h -V --level --config --layout --dest --serializer --minify --help --version"
+            opts="-L -c -l -d -s -h -V --level --config --layout --dest --serializer --minify --overwrite --gencomp --help --version"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
-                --level | -L)
+                --level)
                     COMPREPLY=($(compgen -W "error warn info debug trace" -- "${cur}"))
                     return 0
                     ;;
-                --config | -c)
+                -L)
+                    COMPREPLY=($(compgen -W "error warn info debug trace" -- "${cur}"))
+                    return 0
+                    ;;
+                --config)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
-                --layout | -l)
+                -c)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --layout)
                     COMPREPLY=($(compgen -W "index file extension" -- "${cur}"))
                     return 0
                     ;;
-                --dest | -d)
+                -l)
+                    COMPREPLY=($(compgen -W "index file extension" -- "${cur}"))
+                    return 0
+                    ;;
+                --dest)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
-                --serializer | -s)
+                -d)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                --serializer)
+                    COMPREPLY=($(compgen -f "${cur}"))
+                    return 0
+                    ;;
+                -s)
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;

@@ -32,6 +32,8 @@ Register-ArgumentCompleter -Native -CommandName 'fauxrest' -ScriptBlock {
             [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'Serializer to use for the output. [available: json, typescript, sql]')
             [CompletionResult]::new('--serializer', '--serializer', [CompletionResultType]::ParameterName, 'Serializer to use for the output. [available: json, typescript, sql]')
             [CompletionResult]::new('--minify', '--minify', [CompletionResultType]::ParameterName, 'If true, minify the output')
+            [CompletionResult]::new('--overwrite', '--overwrite', [CompletionResultType]::ParameterName, 'If true, overwrite existing files in the destination directory')
+            [CompletionResult]::new('--gencomp', '--gencomp', [CompletionResultType]::ParameterName, 'Generate completion files')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('-V', '-V ', [CompletionResultType]::ParameterName, 'Print version')
