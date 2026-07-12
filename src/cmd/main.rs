@@ -66,6 +66,12 @@ pub struct Args {
     )]
     overwrite: bool,
 
+    #[clap(
+        long,
+        default_value_t = false,
+        help = "Copy all non-JSON static files from the data directory into each destination (allow all). $static exclude globs still take precedence."
+    )]
+    copy_static: bool,
 
     #[cfg(debug_assertions)]
     #[clap(long, default_value_t = false, help = "Generate completion files")]
@@ -107,6 +113,12 @@ impl Args {
                     config.serializers = vec![self.serializer_config()];
                 } else {
                     self.apply_cli_overrides(&mut config);
+                }
+                // `--copy-static` forces every non-JSON static file to be
+                // treated as allowed. Any `$static` exclude globs from the
+                // configuration file still take precedence (deny wins).
+                if self.copy_static {
+                    config.copy_static_all = true;
                 }
                 Ok(config)
             }

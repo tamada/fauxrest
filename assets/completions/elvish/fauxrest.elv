@@ -31,6 +31,7 @@ set edit:completion:arg-completer[fauxrest] = {|@words|
             cand --minify 'If true, minify the output'
             cand --no-minify 'If set, disable minification (overrides config)'
             cand --overwrite 'If true, overwrite existing files in the destination directory'
+            cand --copy-static 'Copy all non-JSON static files from the data directory into each destination (allow all). $static exclude globs still take precedence.'
             cand --gencomp 'Generate completion files'
             cand -h 'Print help (see more with ''--help'')'
             cand --help 'Print help (see more with ''--help'')'

@@ -52,8 +52,9 @@ mod context;
 pub mod filter;
 pub mod orchestrator;
 pub mod serializers;
+mod static_files;
 
-pub use config::{Config, Layout, SerializerConfig};
+pub use config::{Config, Layout, SerializerConfig, StaticConfig, StaticSpec};
 pub use orchestrator::run;
 pub use serializers::{JSONSerializer, Serializer, SqliteSerializer, TypescriptSerializer};
 

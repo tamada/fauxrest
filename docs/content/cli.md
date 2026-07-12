@@ -24,9 +24,26 @@ Options:
       --minify                   If true, minify the output
       --no-minify                If set, disable minification (overrides config)
       --overwrite                If true, overwrite existing files in the destination directory
+      --copy-static              Copy all non-JSON static files from the data directory into each destination (allow all). $static exclude globs still take precedence.
   -h, --help                     Print help (see more with '--help')
   -V, --version                  Print version
 ```
+
+### Copying static files
+
+By default `fauxrest` ignores every non-JSON file in the input data directory.
+Static assets (images, CSS, fonts, …) can be copied verbatim into each
+serializer destination — preserving sub-directory structure — in two ways:
+
+- Configure an allow list with the `$static` config key (see the configuration
+  reference).
+- Pass `--copy-static` to copy **all** static files (allow all).
+
+Copying is **deny by default**, and **`exclude` (deny) always wins**: files
+matching a `$static` `exclude` glob are never copied, even when `--copy-static`
+forces allow-all. Data (`.json`) files and configuration files
+(`_config.json`, `_fauxrest.json`, `.config.json`, `.fauxrest.json`) are always
+excluded.
 
 ### Build psuede REST data
 

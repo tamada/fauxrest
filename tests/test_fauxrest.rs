@@ -647,6 +647,7 @@ fn test_run_succeeds_when_dest_is_not_empty_with_overwrite() {
             overwrite: true,
         }],
         api: std::collections::HashMap::new(),
+        ..Default::default()
     };
     fauxrest::run(config, "testdata/example1")
         .expect("run should succeed when overwrite is enabled");
@@ -677,6 +678,7 @@ fn test_json_minify_flag_compacts_output() {
             overwrite: false,
         }],
         api: std::collections::HashMap::new(),
+        ..Default::default()
     };
     let minified = Config {
         serializers: vec![fauxrest::SerializerConfig {
@@ -687,6 +689,7 @@ fn test_json_minify_flag_compacts_output() {
             overwrite: false,
         }],
         api: std::collections::HashMap::new(),
+        ..Default::default()
     };
 
     assert!(fauxrest::run(pretty, &data_dir).is_ok());
@@ -722,6 +725,7 @@ fn test_typescript_minify_flag_compacts_embedded_json() {
             overwrite: false,
         }],
         api: std::collections::HashMap::new(),
+        ..Default::default()
     };
     let minified = Config {
         serializers: vec![fauxrest::SerializerConfig {
@@ -732,6 +736,7 @@ fn test_typescript_minify_flag_compacts_embedded_json() {
             overwrite: false,
         }],
         api: std::collections::HashMap::new(),
+        ..Default::default()
     };
 
     assert!(fauxrest::run(pretty, &data_dir).is_ok());
@@ -745,4 +750,99 @@ fn test_typescript_minify_flag_compacts_embedded_json() {
         minified_text
             .contains("export const data = [{\"id\":1,\"name\":\"Bob\",\"team\":\"R&D\"}];")
     );
+}
+
+/// Sets up a data directory containing a JSON dataset alongside some static
+/// files (in the root and a sub-directory) and returns the data/dest dirs.
+fn setup_static_data(tmp: &Path) -> (std::path::PathBuf, std::path::PathBuf) {
+    let data_dir = tmp.join("data");
+    let dest_dir = tmp.join("dist");
+    fs::create_dir_all(data_dir.join("css")).unwrap();
+    fs::create_dir_all(data_dir.join("secret")).unwrap();
+    fs::write(data_dir.join("users.json"), r#"[{"id": 1, "name": "Bob"}]"#).unwrap();
+    fs::write(data_dir.join("logo.png"), "PNGDATA").unwrap();
+    fs::write(data_dir.join("notes.txt"), "hello").unwrap();
+    fs::write(data_dir.join("css/site.css"), "body{}").unwrap();
+    fs::write(data_dir.join("secret/key.pem"), "TOPSECRET").unwrap();
+    (data_dir, dest_dir)
+}
+
+#[test]
+fn test_static_files_are_not_copied_by_default() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir) = setup_static_data(tmp.path());
+
+    let config = Config::new("json".into(), Layout::Index, &dest_dir);
+    fauxrest::run(config, &data_dir).expect("run should succeed");
+
+    // The JSON dataset is generated ...
+    assert!(dest_dir.join("users/index.json").exists());
+    // ... but no static file is copied by default (deny by default).
+    assert!(!dest_dir.join("logo.png").exists());
+    assert!(!dest_dir.join("notes.txt").exists());
+    assert!(!dest_dir.join("css/site.css").exists());
+}
+
+#[test]
+fn test_static_files_copied_when_config_include_matches() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir) = setup_static_data(tmp.path());
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "$static": ["*.png", "css/**"]
+}}"#,
+        dest_dir.display()
+    );
+    let config = Config::load_from_str(&config_json).unwrap();
+    fauxrest::run(config, &data_dir).expect("run should succeed");
+
+    // Included globs are copied, preserving sub-directory structure.
+    assert!(dest_dir.join("logo.png").exists());
+    assert!(dest_dir.join("css/site.css").exists());
+    // Non-matching static files are not copied.
+    assert!(!dest_dir.join("notes.txt").exists());
+    // JSON files are never copied as static assets.
+    assert!(!dest_dir.join("users.json").exists());
+}
+
+#[test]
+fn test_static_exclude_wins_over_cli_allow_all() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir) = setup_static_data(tmp.path());
+
+    // Full form: no include, but an exclude for the secret directory. The CLI
+    // allow-all flag (copy_static_all) is simulated by setting it on Config.
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "$static": {{"include": [], "exclude": ["secret/**"]}}
+}}"#,
+        dest_dir.display()
+    );
+    let mut config = Config::load_from_str(&config_json).unwrap();
+    config.copy_static_all = true; // as if --copy-static was passed
+
+    fauxrest::run(config, &data_dir).expect("run should succeed");
+
+    // allow-all copies ordinary static files ...
+    assert!(dest_dir.join("logo.png").exists());
+    assert!(dest_dir.join("notes.txt").exists());
+    assert!(dest_dir.join("css/site.css").exists());
+    // ... but the exclude glob always wins, even under allow-all.
+    assert!(!dest_dir.join("secret/key.pem").exists());
+}
+
+#[test]
+fn test_static_invalid_glob_is_rejected() {
+    let config_json = r#"{
+    "$config": [{"serializer": "json", "layout": "index", "dest": "dist"}],
+    "$static": ["a[b"]
+}"#;
+    let err = match Config::load_from_str(config_json) {
+        Ok(_) => panic!("config with invalid $static glob should be rejected"),
+        Err(e) => e,
+    };
+    assert!(format!("{}", err).contains("invalid $static glob"));
 }

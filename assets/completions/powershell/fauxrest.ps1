@@ -34,6 +34,7 @@ Register-ArgumentCompleter -Native -CommandName 'fauxrest' -ScriptBlock {
             [CompletionResult]::new('--minify', '--minify', [CompletionResultType]::ParameterName, 'If true, minify the output')
             [CompletionResult]::new('--no-minify', '--no-minify', [CompletionResultType]::ParameterName, 'If set, disable minification (overrides config)')
             [CompletionResult]::new('--overwrite', '--overwrite', [CompletionResultType]::ParameterName, 'If true, overwrite existing files in the destination directory')
+            [CompletionResult]::new('--copy-static', '--copy-static', [CompletionResultType]::ParameterName, 'Copy all non-JSON static files from the data directory into each destination (allow all). $static exclude globs still take precedence.')
             [CompletionResult]::new('--gencomp', '--gencomp', [CompletionResultType]::ParameterName, 'Generate completion files')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help (see more with ''--help'')')

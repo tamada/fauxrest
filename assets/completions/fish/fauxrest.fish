@@ -12,6 +12,7 @@ complete -c fauxrest -s s -l serializer -d 'Serializer to use for the output. [a
 complete -c fauxrest -l minify -d 'If true, minify the output'
 complete -c fauxrest -l no-minify -d 'If set, disable minification (overrides config)'
 complete -c fauxrest -l overwrite -d 'If true, overwrite existing files in the destination directory'
+complete -c fauxrest -l copy-static -d 'Copy all non-JSON static files from the data directory into each destination (allow all). $static exclude globs still take precedence.'
 complete -c fauxrest -l gencomp -d 'Generate completion files'
 complete -c fauxrest -s h -l help -d 'Print help (see more with \'--help\')'
 complete -c fauxrest -s V -l version -d 'Print version'
