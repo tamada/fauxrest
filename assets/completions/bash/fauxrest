@@ -23,7 +23,7 @@ _fauxrest() {
 
     case "${cmd}" in
         fauxrest)
-            opts="-L -c -l -d -s -h -V --level --config --layout --dest --serializer --minify --overwrite --gencomp --help --version"
+            opts="-L -c -l -d -s -h -V --level --config --layout --dest --serializer --minify --no-minify --overwrite --gencomp --help --version"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0

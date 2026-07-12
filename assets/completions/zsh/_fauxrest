@@ -25,11 +25,12 @@ extension\:"Outputs endpoints with explicit extensions (\`/endpoint.\[ext\]\`). 
 '--layout=[Layout to use for the output]:LAYOUT:((index\:"Outputs endpoints as \`/endpoint/index.\[ext\]\`. Highly compatible with all static web servers, maintaining clean URLs"
 file\:"Outputs endpoints as extensionless files (\`/endpoint\`). **Smart Fallback Specification**\: To avoid physical file-directory collisions, collections that contain sub-paths are automatically replaced (fallback) by \`.../index.\[ext\]\` files during compilation"
 extension\:"Outputs endpoints with explicit extensions (\`/endpoint.\[ext\]\`). 100% web server compatible"))' \
-'-d+[Path to the output directory]:DEST_DIR:_files' \
-'--dest=[Path to the output directory]:DEST_DIR:_files' \
-'-s+[Serializer to use for the output. \[available\: json, typescript, sql\]]:SERIALIZER:_default' \
-'--serializer=[Serializer to use for the output. \[available\: json, typescript, sql\]]:SERIALIZER:_default' \
+'-d+[Path to the output directory \[default\: dist\]]:DEST_DIR:_files' \
+'--dest=[Path to the output directory \[default\: dist\]]:DEST_DIR:_files' \
+'-s+[Serializer to use for the output. \[available\: json, typescript, sql\] \[default\: json\]]:SERIALIZER:_default' \
+'--serializer=[Serializer to use for the output. \[available\: json, typescript, sql\] \[default\: json\]]:SERIALIZER:_default' \
 '--minify[If true, minify the output]' \
+'(--minify)--no-minify[If set, disable minification (overrides config)]' \
 '--overwrite[If true, overwrite existing files in the destination directory]' \
 '--gencomp[Generate completion files]' \
 '-h[Print help (see more with '\''--help'\'')]' \
