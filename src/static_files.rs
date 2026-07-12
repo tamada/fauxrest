@@ -35,9 +35,15 @@ const CONFIG_FILE_NAMES: [&str; 4] = [
 /// A resolved static-copy policy combining the configured include/exclude
 /// globs with the command line allow-all flag.
 struct StaticPolicy {
+    /// Compiled include (allow) glob set.
     include: GlobSet,
+    /// Whether any include glob was configured (an empty [`GlobSet`] cannot
+    /// distinguish "no patterns" from "no match").
     has_include: bool,
+    /// Compiled exclude (deny) glob set; matches here always win.
     exclude: GlobSet,
+    /// Treat every file as allowed (set by `--copy-static`); excludes still
+    /// apply.
     allow_all: bool,
 }
 
@@ -186,10 +192,13 @@ mod tests {
     use super::*;
     use crate::config::StaticConfig;
 
+    /// Builds a shorthand [`StaticSpec::Include`] from string literals.
     fn spec_include(patterns: &[&str]) -> StaticSpec {
         StaticSpec::Include(patterns.iter().map(|s| s.to_string()).collect())
     }
 
+    /// Builds a full [`StaticSpec::Detailed`] from include/exclude string
+    /// literals.
     fn spec_detailed(include: &[&str], exclude: &[&str]) -> StaticSpec {
         StaticSpec::Detailed(StaticConfig {
             include: include.iter().map(|s| s.to_string()).collect(),
@@ -197,6 +206,8 @@ mod tests {
         })
     }
 
+    /// Without any configuration or `--copy-static`, the policy is a no-op
+    /// and copies nothing.
     #[test]
     fn test_default_policy_copies_nothing() {
         let policy = StaticPolicy::build(None, false).unwrap();
@@ -204,6 +215,7 @@ mod tests {
         assert!(!policy.should_copy("logo.png"));
     }
 
+    /// Include globs allow matching files and leave others uncopied.
     #[test]
     fn test_include_glob_allows_matching_files() {
         let spec = spec_include(&["*.png", "css/**"]);
@@ -214,6 +226,7 @@ mod tests {
         assert!(!policy.should_copy("notes.txt"));
     }
 
+    /// An exclude glob denies a file even when `--copy-static` allows all.
     #[test]
     fn test_exclude_wins_over_allow_all() {
         let spec = spec_detailed(&[], &["secret/**"]);
@@ -222,6 +235,7 @@ mod tests {
         assert!(!policy.should_copy("secret/key.pem"));
     }
 
+    /// An exclude glob denies a file even when an include glob matches it.
     #[test]
     fn test_exclude_wins_over_include() {
         let spec = spec_detailed(&["**/*.png"], &["private/**"]);
@@ -230,6 +244,7 @@ mod tests {
         assert!(!policy.should_copy("private/logo.png"));
     }
 
+    /// JSON data files and well-known config file names are never copied.
     #[test]
     fn test_always_excluded_files() {
         assert!(is_always_excluded("users.json"));
@@ -239,6 +254,7 @@ mod tests {
         assert!(!is_always_excluded("style.css"));
     }
 
+    /// An invalid glob pattern is reported as a configuration error.
     #[test]
     fn test_invalid_glob_reports_config_error() {
         let spec = spec_include(&["a[b"]);

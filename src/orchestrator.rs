@@ -16,9 +16,32 @@ use crate::config::{
 use crate::context::SerializerContext;
 use crate::{Config, Error, JSONSerializer, Serializer, SqliteSerializer, TypescriptSerializer};
 
+/// Number of unique `$derive`d values above which [`derive_values_from_data`]
+/// prints a stderr warning, as a guard against accidentally generating an
+/// enormous number of template sub-paths.
 const DERIVE_CARDINALITY_WARN_THRESHOLD: usize = 1000;
 
-/// Executes the API build process
+/// Executes the API build process.
+///
+/// First verifies that every serializer destination is empty or allowed to
+/// be overwritten (returning [`Error::DestNotEmpty`] otherwise). Then reads
+/// every `*.json`
+/// dataset from `data_dir`, and for each serializer listed in
+/// `config.serializers` materializes the full routing tree (applying
+/// `$filter`/`$aggregate`/`$pick`/`$omit`/`$emit`/template expansion from
+/// `config.api`) and writes the resulting static files. Finally, a
+/// discovery index listing every generated endpoint is written, and any
+/// static assets allowed by the `$static` policy are copied into each
+/// destination.
+///
+/// # Examples
+///
+/// ```no_run
+/// use fauxrest::{Config, run};
+///
+/// let config = Config::load_from_file("_config.json").expect("valid config");
+/// run(config, "data").expect("build should succeed");
+/// ```
 pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
     for s_conf in &config.serializers {
         ensure_dest_writable(s_conf)?;
@@ -35,8 +58,10 @@ pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
     Ok(())
 }
 
-/// Aborts the build when the serializer destination already contains files
-/// and overwriting has not been explicitly permitted.
+/// Aborts the build with [`Error::DestNotEmpty`] when the serializer
+/// destination already contains files and overwriting has not been
+/// explicitly permitted (via the `overwrite` config field or the
+/// `--overwrite` CLI flag). A missing or empty destination is always fine.
 fn ensure_dest_writable(s_conf: &crate::SerializerConfig) -> Result<()> {
     if s_conf.overwrite {
         return Ok(());
@@ -51,21 +76,30 @@ fn ensure_dest_writable(s_conf: &crate::SerializerConfig) -> Result<()> {
     Ok(())
 }
 
+/// In-memory collection of raw JSON datasets loaded from the input data
+/// directory, keyed by dataset/endpoint name (the file name without the
+/// `.json` extension).
 struct DataSource {
     entries: HashMap<String, Value>,
 }
 
 impl DataSource {
+    /// Loads all top-level `*.json` files from `dir` into a new `DataSource`
+    /// (see [`collect_datasets`] for the file selection rules).
     pub fn new<P: AsRef<Path>>(dir: P) -> Result<Self> {
         collect_datasets(dir.as_ref()).map(|entries| Self { entries })
     }
 
+    /// Returns the names of all loaded datasets, sorted alphabetically.
     pub fn names(&self) -> Vec<String> {
         let mut names = self.entries.keys().cloned().collect::<Vec<_>>();
         names.sort();
         names
     }
 
+    /// Returns the keys of `api_overlay` that do not correspond to a loaded
+    /// dataset (i.e. virtual endpoints defined only via the routing
+    /// overlay, such as `$aggregate`-only endpoints), sorted alphabetically.
     pub fn overlay_names<'a>(&self, api_overlay: &'a HashMap<String, ApiNode>) -> Vec<&'a String> {
         let mut result = api_overlay
             .keys()
@@ -75,6 +109,9 @@ impl DataSource {
         result
     }
 
+    /// Looks up the raw data for dataset/endpoint `name`.
+    ///
+    /// Returns [`Error::Config`] if no such dataset was loaded.
     pub fn get(&self, name: &str) -> Result<&Value> {
         self.entries
             .get(name)
@@ -82,6 +119,9 @@ impl DataSource {
     }
 }
 
+/// A single endpoint being materialized: its URL path (`endpoint`), the
+/// underlying dataset (`data`), and the optional overlay [`ApiNode`]
+/// (`node`) carrying directives that apply to it.
 struct Target<'a> {
     endpoint: &'a str,
     data: &'a Value,
@@ -89,6 +129,7 @@ struct Target<'a> {
 }
 
 impl<'a> Target<'a> {
+    /// Builds a `Target` directly from its parts.
     pub fn new(endpoint: &'a str, data: &'a Value, node: Option<&'a ApiNode>) -> Self {
         Target {
             endpoint,
@@ -97,6 +138,8 @@ impl<'a> Target<'a> {
         }
     }
 
+    /// Builds a top-level `Target` for `endpoint`, looking up its raw data
+    /// in `source` and its overlay node (if any) in `api_overlay`.
     pub fn build(
         endpoint: &'a str,
         source: &'a DataSource,
@@ -107,6 +150,8 @@ impl<'a> Target<'a> {
         Ok(Target::new(endpoint, data, node))
     }
 
+    /// Returns this target's overlay sub-paths as `(key, node)` pairs,
+    /// sorted by key. Returns an empty list if there is no overlay node.
     pub fn subpaths(&self) -> Vec<(&str, &ApiNode)> {
         if let Some(current) = self.node {
             let mut items = current
@@ -121,6 +166,10 @@ impl<'a> Target<'a> {
         }
     }
 
+    /// Applies `mapper` to this target's overlay node, if present, flattening
+    /// the result. Used to read optional per-node directives (e.g.
+    /// `n.filter.as_ref()`) without repeating the `Option` dance at each
+    /// call site.
     pub fn map_node<F, R>(&'a self, mapper: F) -> Option<&'a R>
     where
         F: FnOnce(&'a ApiNode) -> Option<&'a R>,
@@ -128,6 +177,12 @@ impl<'a> Target<'a> {
         self.node.and_then(mapper)
     }
 
+    /// Computes this target's endpoint data in two stages: an unfiltered
+    /// "base" value (after applying `$aggregate`, if any) used for child
+    /// template resolution, and the final `$filter`/`$pick`/`$omit`-applied
+    /// value that gets written out.
+    ///
+    /// Returns `(base, result)`.
     pub fn build_endpoint_data(
         &self,
         filters: &Option<&Vec<FilterCondition>>,
@@ -152,6 +207,10 @@ impl<'a> Target<'a> {
         Ok((endpoint_base, result))
     }
 
+    /// If `data` is an array, writes one file per item under
+    /// `{endpoint}/{id}` (using each item's `id` field), returning the
+    /// list of written endpoint paths. Items without an `id` field are
+    /// skipped. Returns an empty list if `data` is not an array.
     pub fn emmit_ids(&self, data: &Value, context: &SerializerContext) -> Result<Vec<String>> {
         let mut results = Vec::new();
         if let Value::Array(arr) = data {
@@ -171,6 +230,10 @@ impl<'a> Target<'a> {
     }
 }
 
+/// Materializes every endpoint for a single [`SerializerContext`]: all
+/// loaded datasets, plus any overlay-only `$aggregate` endpoints that have
+/// no backing dataset file. Returns the sorted, deduplicated list of
+/// written endpoint paths.
 fn run_serializer(
     context: SerializerContext,
     source: &DataSource,
@@ -196,6 +259,12 @@ fn run_serializer(
     Ok(endpoints)
 }
 
+/// Loads every top-level `*.json` file in `data_dir` into a map of dataset
+/// name (file stem) to parsed [`Value`].
+///
+/// Files and directories whose name starts with `_` or `.` are skipped
+/// (allowing config files like `_config.json` to live alongside data), as
+/// are any non-`.json` entries.
 fn collect_datasets(data_dir: &Path) -> Result<HashMap<String, Value>> {
     let mut datasets = HashMap::new();
     let entries = fs::read_dir(data_dir).map_err(Error::Io)?;
@@ -221,6 +290,16 @@ fn collect_datasets(data_dir: &Path) -> Result<HashMap<String, Value>> {
     Ok(datasets)
 }
 
+/// Recursively writes output files for `target` and all of its overlay
+/// sub-paths.
+///
+/// Applies the effective `$filter` (the target's own filter, or the
+/// inherited `filter` from its parent if it has none), then writes the
+/// list/id outputs selected by `$emit` (see [`resolve_emit_flags`]). For
+/// each sub-path, expands `${name}` template keys into one child target per
+/// resolved value (see [`resolve_template_values`]) or descends into a
+/// plain named child, recursing in both cases. Returns the combined list of
+/// endpoint paths written by this call and all of its descendants.
 fn materialize_node(
     target: &Target,
     filter: Option<&Vec<FilterCondition>>,
@@ -282,6 +361,10 @@ fn materialize_node(
     Ok(endpoints)
 }
 
+/// Resolves the `$emit` directive of `node` into `(emit_list, emit_id)`
+/// flags. Absent a node or an explicit `$emit`, both default to `true`
+/// (emit everything); an explicit `$emit` list enables exactly the targets
+/// it names.
 fn resolve_emit_flags(node: Option<&ApiNode>) -> (bool, bool) {
     let Some(node) = node else {
         return (true, true);
@@ -296,6 +379,14 @@ fn resolve_emit_flags(node: Option<&ApiNode>) -> (bool, bool) {
     }
 }
 
+/// Executes a `$aggregate` directive: reads each source dataset from
+/// `source` and combines them according to `aggregate`'s mode.
+///
+/// In [`AggregateMode::Flat`] mode, array sources are concatenated and
+/// non-array sources are appended as single elements, producing a
+/// [`Value::Array`]. In [`AggregateMode::Keyed`] mode, each source is
+/// inserted whole under its resolved key, producing a [`Value::Object`];
+/// returns [`Error::Config`] if two sources resolve to the same key.
 fn aggregate_values2(aggregate: &AggregateSpec, source: &DataSource) -> Result<Value> {
     match aggregate.mode() {
         AggregateMode::Flat => {
@@ -328,6 +419,10 @@ fn aggregate_values2(aggregate: &AggregateSpec, source: &DataSource) -> Result<V
     }
 }
 
+/// Applies `filters` to `data`: for an array, keeps only the items that
+/// satisfy every condition (see [`matches_all_conditions`]); for a scalar
+/// or object, returns it unchanged if it matches, or [`Value::Null`]
+/// otherwise.
 fn apply_filters(data: &Value, filters: &[FilterCondition]) -> Result<Value> {
     match data {
         Value::Array(arr) => {
@@ -349,6 +444,12 @@ fn apply_filters(data: &Value, filters: &[FilterCondition]) -> Result<Value> {
     }
 }
 
+/// Returns whether `item` satisfies every condition in `filters` (a
+/// logical AND). Only an explicit `Ok(false)` from
+/// [`FilterCondition::apply`] short-circuits to "does not match"; an `Err`
+/// (e.g. an invalid regex) is treated as if that condition matched and
+/// evaluation continues with the remaining conditions. This function itself
+/// never returns `Err`.
 fn matches_all_conditions(item: &Value, filters: &[FilterCondition]) -> Result<bool> {
     for cond in filters {
         if let Ok(false) = cond.apply(item) {
@@ -358,6 +459,10 @@ fn matches_all_conditions(item: &Value, filters: &[FilterCondition]) -> Result<b
     Ok(true)
 }
 
+/// Applies `node`'s `$pick` (keep only listed fields) and then `$omit`
+/// (remove listed fields) directives to `value`. Works on both a single
+/// object and an array of objects (each element is transformed
+/// independently); non-object values pass through unchanged.
 fn apply_pick_omit(mut value: Value, node: &ApiNode) -> Value {
     if let Some(pick) = &node.pick {
         value = match value {
@@ -390,11 +495,13 @@ fn apply_pick_omit(mut value: Value, node: &ApiNode) -> Value {
     value
 }
 
+/// Retains only the keys of `obj` that appear in `pick`.
 fn apply_pick_map(mut obj: Map<String, Value>, pick: &[String]) -> Map<String, Value> {
     obj.retain(|k, _| pick.contains(k));
     obj
 }
 
+/// Removes each key in `omit` from `obj`.
 fn apply_omit_map(mut obj: Map<String, Value>, omit: &[String]) -> Map<String, Value> {
     for key in omit {
         obj.remove(key);
@@ -402,6 +509,11 @@ fn apply_omit_map(mut obj: Map<String, Value>, omit: &[String]) -> Map<String, V
     obj
 }
 
+/// Resolves the set of values used to expand a `${var}` template sub-path
+/// named `key` under `endpoint`: either `child`'s literal `$values` list,
+/// or values derived from `source_data` via `$derive` (see
+/// [`derive_values_from_data`]). Config validation guarantees one of the
+/// two is present, but this is re-checked defensively.
 fn resolve_template_values(
     endpoint: &str,
     key: &str,
@@ -423,6 +535,15 @@ fn resolve_template_values(
     )))
 }
 
+/// Extracts the deduplicated set of `$derive` values from `source_data`
+/// (an array of items, or a single object), reading `cfg.field` from each
+/// item and applying `cfg.pattern` if set (see [`derive_scalar_value`]).
+///
+/// Values are deduplicated by their [`scalar_deterministic_key`] and
+/// returned in a stable (sorted) order. Prints a warning to stderr,
+/// tagged with `context`, if the number of unique values exceeds
+/// [`DERIVE_CARDINALITY_WARN_THRESHOLD`] or if any items were skipped
+/// because their value could not be derived.
 fn derive_values_from_data(
     source_data: &Value,
     cfg: &DeriveConfig,
@@ -477,6 +598,16 @@ fn derive_values_from_data(
     Ok(unique.into_values().collect())
 }
 
+/// Extracts a single derived scalar from `value` according to `cfg`.
+///
+/// If `cfg.pattern` is set, `value` is stringified (string/number/bool
+/// only) and matched against the compiled pattern; the first capture group
+/// (or, absent one, the whole match) becomes the result. Without a
+/// pattern, `value` itself is used. Returns `Ok(None)` (meaning: skip this
+/// item) if `value` is not a scalar, the pattern does not match, or the
+/// extracted string is empty or contains `/` (which would make it unusable
+/// as a path segment). Returns `Err` only if `cfg.pattern` fails to
+/// compile.
 fn derive_scalar_value(value: &Value, cfg: &DeriveConfig) -> Result<Option<Value>> {
     let extracted = if let Some(pattern) = cfg.pattern.as_ref() {
         let s = match value {
@@ -516,6 +647,9 @@ fn derive_scalar_value(value: &Value, cfg: &DeriveConfig) -> Result<Option<Value
     Ok(Some(extracted))
 }
 
+/// Builds a type-tagged string key for `value` (e.g. `"s:foo"`, `"n:1"`)
+/// suitable for use in a `BTreeMap` to deduplicate scalars while keeping
+/// values of different kinds (a string `"1"` vs. the number `1`) distinct.
 fn scalar_deterministic_key(value: &Value) -> String {
     match value {
         Value::String(s) => format!("s:{}", s),
@@ -525,6 +659,8 @@ fn scalar_deterministic_key(value: &Value) -> String {
     }
 }
 
+/// If `key` has the `${name}` template sub-path syntax, returns `name`;
+/// otherwise returns `None`.
 fn template_var_from_key(key: &str) -> Option<&str> {
     if key.starts_with("${") && key.ends_with('}') && key.len() > 3 {
         Some(&key[2..key.len() - 1])
@@ -533,6 +669,10 @@ fn template_var_from_key(key: &str) -> Option<&str> {
     }
 }
 
+/// Produces the per-value overlay node used when expanding a `${var}`
+/// template sub-path: clones `node`, clears its `$values`/`$derive` (they
+/// don't apply to the expanded child), and substitutes `{var}` tokens in
+/// its `$filter` conditions with `value` (see [`replace_template_token`]).
 fn expand_template_node(node: &ApiNode, var: &str, value: &Value) -> ApiNode {
     let mut out = node.clone();
     out.values = None;
@@ -553,6 +693,12 @@ fn expand_template_node(node: &ApiNode, var: &str, value: &Value) -> ApiNode {
     out
 }
 
+/// Recursively substitutes occurrences of `token` (e.g. `"{year}"`) inside
+/// `input` with `replacement`. A string that equals `token` exactly is
+/// replaced with `replacement`'s own value (preserving its JSON type, e.g.
+/// a number); a string that merely contains `token` has that substring
+/// replaced with `replacement`'s stringified form. Arrays and objects are
+/// walked recursively; other value kinds pass through unchanged.
 fn replace_template_token(input: &Value, token: &str, replacement: &Value) -> Value {
     match input {
         Value::String(s) => {
@@ -580,6 +726,8 @@ fn replace_template_token(input: &Value, token: &str, replacement: &Value) -> Va
     }
 }
 
+/// Converts a resolved template `value` into a URL path segment, rejecting
+/// values that stringify to an empty string or contain `/`.
 fn scalar_to_path_segment(value: &Value) -> Result<String> {
     let segment = scalar_to_string(value);
     if segment.is_empty() || segment.contains('/') {
@@ -591,6 +739,9 @@ fn scalar_to_path_segment(value: &Value) -> Result<String> {
     Ok(segment)
 }
 
+/// Stringifies a scalar JSON value without surrounding quotes (strings are
+/// returned as-is; numbers and bools use their `Display` form). Non-scalar
+/// values fall back to their JSON representation.
 fn scalar_to_string(value: &Value) -> String {
     match value {
         Value::String(s) => s.clone(),
@@ -600,6 +751,9 @@ fn scalar_to_string(value: &Value) -> String {
     }
 }
 
+/// Serializes `data` with `context` and writes it to the output path for
+/// endpoint `name` (per [`SerializerContext::full_path`]), creating any
+/// necessary parent directories first.
 fn write_data2(name: &str, data: &Value, context: &SerializerContext) -> Result<()> {
     let is_coll = data.is_array();
     let full_path = context.full_path(name, is_coll);
@@ -609,6 +763,9 @@ fn write_data2(name: &str, data: &Value, context: &SerializerContext) -> Result<
     Ok(())
 }
 
+/// Writes a discovery index (`{ "endpoints": [...] }`) listing every
+/// generated endpoint path, once per configured serializer, as
+/// `index.[ext]` directly under each serializer's `dest` directory.
 fn generate_discovery(config: &Config, endpoints: &[String]) -> Result<()> {
     let discovery = json!({ "endpoints": endpoints });
     for s_conf in &config.serializers {
@@ -620,6 +777,11 @@ fn generate_discovery(config: &Config, endpoints: &[String]) -> Result<()> {
     Ok(())
 }
 
+/// Looks up the [`Serializer`] implementation matching the given name, used
+/// by [`generate_discovery`] to serialize the discovery index with each
+/// configured serializer.
+///
+/// Returns [`Error::UnknownSerializer`] for any unrecognized name.
 fn get_serializer(s: &str, minify: bool) -> Result<Box<dyn Serializer>> {
     match s {
         "typescript" | "javascript" | "ts" | "js" => Ok(Box::new(TypescriptSerializer { minify })),
@@ -629,14 +791,19 @@ fn get_serializer(s: &str, minify: bool) -> Result<Box<dyn Serializer>> {
     }
 }
 
-/// Trait for physical data serialization
+/// Strategy for mapping an endpoint name to a physical output file path,
+/// selected by the [`crate::Layout`] configuration value.
 pub(crate) trait LayoutTrait {
+    /// Computes the output path for `endpoint`, given the serializer's file
+    /// extension and whether the data being written is a collection
+    /// (array).
     fn determine_path(&self, endpoint: &str, file_ext: &str, is_coll: bool) -> PathBuf;
 }
 
 /// Layout that places files in `index.[ext]`
 pub(crate) struct IndexLayout;
 impl LayoutTrait for IndexLayout {
+    /// Always writes to `{endpoint}/index.{ext}`.
     fn determine_path(&self, endpoint: &str, ext: &str, _: bool) -> PathBuf {
         Path::new(endpoint).join(format!("index.{}", ext))
     }
@@ -645,6 +812,7 @@ impl LayoutTrait for IndexLayout {
 /// Layout that appends the extension directly
 pub(crate) struct ExtensionLayout;
 impl LayoutTrait for ExtensionLayout {
+    /// Always writes to `{endpoint}.{ext}`.
     fn determine_path(&self, endpoint: &str, ext: &str, _: bool) -> PathBuf {
         PathBuf::from(format!("{}.{}", endpoint, ext))
     }
@@ -653,11 +821,17 @@ impl LayoutTrait for ExtensionLayout {
 /// Layout that avoids extensions where possible (supports smart fallback)
 pub(crate) struct FileLayout;
 impl FileLayout {
+    /// Returns `true` when `endpoint` needs the `index.[ext]` fallback:
+    /// it's a non-root collection, which would otherwise collide with its
+    /// own sub-path directory.
     fn is_coll_path(&self, endpoint: &str, is_coll: bool) -> bool {
         is_coll && !endpoint.is_empty()
     }
 }
 impl LayoutTrait for FileLayout {
+    /// Writes non-root collections to `{endpoint}/index.{ext}` (the smart
+    /// fallback, avoiding a file/directory name collision with sub-paths)
+    /// and everything else to the extensionless `{endpoint}`.
     fn determine_path(&self, endpoint: &str, ext: &str, is_coll: bool) -> PathBuf {
         if self.is_coll_path(endpoint, is_coll) {
             Path::new(endpoint).join(format!("index.{}", ext))
