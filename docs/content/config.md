@@ -41,6 +41,65 @@ Supported serializers:
 
 `minify` is configurable per serializer.
 
+`overwrite` is configurable per serializer (defaults to `false`). When `false`
+and the serializer `dest` directory already contains files, the build aborts
+with an error instead of clobbering the existing output. Set it to `true`
+(or pass `--overwrite` on the command line) to allow overwriting.
+
+Command-line options take precedence over the configuration file
+(**CLI > config > default**). When you pass `-d/--dest`, `-s/--serializer`,
+`-l/--layout`, `--minify`, `--no-minify`, or `--overwrite` explicitly, that value
+overrides the corresponding field of every serializer entry defined here. Options
+you omit keep the values from this file.
+
+## Static File Copying
+
+By default, non-JSON files in the input data directory (images, CSS, fonts, …)
+are ignored. The top-level `$static` key opts them into being copied verbatim
+into every serializer `dest`, preserving sub-directory structure.
+
+Two shapes are accepted:
+
+Shorthand (include globs only):
+
+```json
+{
+	"$static": ["*.png", "css/**"]
+}
+```
+
+Full form with explicit allow/deny lists:
+
+```json
+{
+	"$static": {
+		"include": ["*.png", "css/**"],
+		"exclude": ["**/*.secret.png", "private/**"]
+	}
+}
+```
+
+- `include`: glob patterns that **allow** a static file to be copied.
+- `exclude`: glob patterns that **deny** a static file from being copied.
+
+Globs are matched against each file's path relative to the data directory
+(using `/` separators). Invalid glob patterns are rejected at load time with a
+configuration error.
+
+### Priority
+
+- **Deny by default.** Without an `include` glob (or the `--copy-static` command
+  line flag), nothing is copied.
+- **`exclude` (deny) always wins.** A file matching an `exclude` glob is never
+  copied, even when `--copy-static` forces every file to be allowed.
+- Data (`.json`) files and configuration files (`_config.json`,
+  `_fauxrest.json`, `.config.json`, `.fauxrest.json`) are **always excluded** —
+  they are treated as inputs, never as static assets.
+
+The `--copy-static` command line flag sets allow-all: every static file is
+treated as allowed regardless of `include`, but `exclude` globs still take
+precedence.
+
 ## Layout Configuration
 
 Supported layouts:

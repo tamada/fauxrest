@@ -11,20 +11,27 @@ use std::{
 use serde_json::Value;
 use thiserror::Error;
 
+/// Convenience alias for `Result<T, Error>` used throughout this crate.
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type for fauxrest
 #[derive(Error, Debug)]
 pub enum Error {
+    /// A value could not be converted from the first type name to the second.
     #[error("{0}: failed to convert to {1}")]
     Cast(String, String),
 
+    /// Command-line argument parsing failed (propagated from `clap`).
     #[error("{0}")]
     Clap(#[from] clap::Error),
 
     /// Configuration error
     #[error("Configuration error: {0}")]
     Config(String),
+
+    /// Destination directory already contains files and overwrite is disabled
+    #[error("{0}: dest is not empty, use --overwrite to overwrite existing files")]
+    DestNotEmpty(String),
 
     /// IO error
     #[error("IO error: {0}")]
@@ -43,20 +50,37 @@ pub enum Error {
     UnknownSerializer(String),
 }
 
+/// Configuration parsing and validation (`_config.json` schema).
 pub mod config;
+/// Internal serializer/layout wiring shared by the orchestrator.
 mod context;
+/// `$filter` directive types and evaluation logic.
 pub mod filter;
+/// Compilation orchestrator: reads raw JSON data and writes static endpoints.
 pub mod orchestrator;
+/// Output serializers (JSON, TypeScript, SQLite).
 pub mod serializers;
+/// Internal `$static` copy support: copies allowed non-JSON static files
+/// from the data directory into each serializer destination.
+mod static_files;
 
-pub use config::{Config, Layout, SerializerConfig};
+pub use config::{Config, Layout, SerializerConfig, StaticConfig, StaticSpec};
 pub use orchestrator::run;
 pub use serializers::{JSONSerializer, Serializer, SqliteSerializer, TypescriptSerializer};
 
 use crate::config::FilterOp;
 
+/// Process-wide set of already-emitted `$filter` type-mismatch warning keys,
+/// used to deduplicate repeated warnings printed to stderr.
 static TYPE_MISMATCH_WARNINGS: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
 
+/// Prints a one-time warning to stderr when a `$filter` comparison mixes
+/// incompatible JSON value types (e.g. comparing a string field against a
+/// numeric literal).
+///
+/// The warning is deduplicated per `(field, op, lhs kind, rhs kind)` tuple
+/// via [`TYPE_MISMATCH_WARNINGS`], so the same mismatch is only reported once
+/// per process even if it occurs for many items.
 pub(crate) fn emit_type_mismatch_warning(op: &FilterOp, field: &str, lhs: &Value, rhs: &Value) {
     let lhs_kind = value_kind(lhs);
     let rhs_kind = value_kind(rhs);
@@ -75,6 +99,8 @@ pub(crate) fn emit_type_mismatch_warning(op: &FilterOp, field: &str, lhs: &Value
     }
 }
 
+/// Returns a short, human-readable name for the kind of a `serde_json::Value`
+/// (e.g. `"string"`, `"number"`), used for diagnostics and type-compatibility checks.
 pub(crate) fn value_kind(v: &Value) -> &'static str {
     match v {
         Value::Null => "null",

@@ -22,9 +22,28 @@ Options:
   -d, --dest <DEST_DIR>          Path to the output directory [default: dist]
   -s, --serializer <SERIALIZER>  Serializer to use for the output. [available: json, typescript, sql] [default: json]
       --minify                   If true, minify the output
+      --no-minify                If set, disable minification (overrides config)
+      --overwrite                If true, overwrite existing files in the destination directory
+      --copy-static              Copy all non-JSON static files from the data directory into each destination (allow all). $static exclude globs still take precedence.
   -h, --help                     Print help (see more with '--help')
   -V, --version                  Print version
 ```
+
+### Copying static files
+
+By default `fauxrest` ignores every non-JSON file in the input data directory.
+Static assets (images, CSS, fonts, …) can be copied verbatim into each
+serializer destination — preserving sub-directory structure — in two ways:
+
+- Configure an allow list with the `$static` config key (see the configuration
+  reference).
+- Pass `--copy-static` to copy **all** static files (allow all).
+
+Copying is **deny by default**, and **`exclude` (deny) always wins**: files
+matching a `$static` `exclude` glob are never copied, even when `--copy-static`
+forces allow-all. Data (`.json`) files and configuration files
+(`_config.json`, `_fauxrest.json`, `.config.json`, `.fauxrest.json`) are always
+excluded.
 
 ### Build psuede REST data
 
@@ -44,6 +63,16 @@ Typical behavior:
 Note that if no `dest` directory is specified,
 `fauxrest` will write to the `dist` directory by default with the `index` layout.
 Also, config files can be located in `data_dir` and can specify the output directory, layout, and serializer.
+
+### Option precedence
+
+Options resolve as **CLI > config file > built-in defaults**.
+When a configuration file is loaded, any option you pass explicitly on the command
+line (`-d/--dest`, `-s/--serializer`, `-l/--layout`, `--minify`, `--no-minify`,
+`--overwrite`) overrides the matching field of every serializer entry in that
+config. Options you do not pass keep the values from the config file (or the
+defaults when no config provides them). `--minify` and `--no-minify` are mutually
+exclusive: use `--no-minify` to turn minification off when the config enables it.
 
 
 ### Typical Local Loop
