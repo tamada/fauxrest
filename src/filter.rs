@@ -1,3 +1,7 @@
+//! `$filter` directive support: the [`FilterOp`] comparison operators and
+//! [`FilterCondition`](crate::filter::FilterCondition) evaluation used to
+//! keep or drop items when materializing an endpoint.
+
 use std::fmt::Display;
 
 use regex::Regex;
@@ -34,6 +38,8 @@ pub enum FilterOp {
 }
 
 impl Display for FilterOp {
+    /// Formats this operator using its lowercase JSON name (e.g. `"eq"`,
+    /// `"regeq"`), matching the strings used in `_config.json`.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             FilterOp::Eq => write!(f, "eq"),
@@ -50,14 +56,43 @@ impl Display for FilterOp {
     }
 }
 
+/// A single `$filter` condition: `field <op> value`, evaluated against each
+/// candidate item.
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct FilterCondition {
+    /// Name of the object field to read from each item.
     pub field: String,
+    /// Comparison operator to apply.
     pub op: FilterOp,
+    /// Right-hand side value to compare the field against.
     pub value: Value,
 }
 
 impl FilterCondition {
+    /// Evaluates this condition against `item`, returning whether it
+    /// matches.
+    ///
+    /// If `item` does not have `field`, the condition is considered
+    /// unmatched for every operator except [`FilterOp::Exists`] (which
+    /// checks for the field's presence) and [`FilterOp::RegNeq`] (which
+    /// treats a missing field as not matching the pattern, i.e. `true`).
+    /// Returns an error if [`FilterOp::RegEq`]/[`FilterOp::RegNeq`] is used
+    /// with a non-string `value` or an invalid regex pattern.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::filter::{FilterCondition, FilterOp};
+    /// use serde_json::json;
+    ///
+    /// let cond = FilterCondition {
+    ///     field: "status".to_string(),
+    ///     op: FilterOp::Eq,
+    ///     value: json!("active"),
+    /// };
+    /// let item = json!({ "status": "active" });
+    /// assert!(cond.apply(&item).unwrap());
+    /// ```
     pub fn apply(&self, item: &Value) -> Result<bool> {
         let target = item.get(&self.field);
         warn_if_type_mismatch(&self.op, &self.field, target, &self.value);
@@ -80,12 +115,17 @@ impl FilterCondition {
     }
 }
 
+/// Returns `true` if `left` and `right` have the same JSON value kind (both
+/// strings, both numbers, etc.).
 fn is_match_type(left: &Value, right: &Value) -> bool {
     let left_type = crate::value_kind(left);
     let right_type = crate::value_kind(right);
     left_type == right_type
 }
 
+/// Implements the ordering operators (`gt`, `gte`, `lt`, `lte`) by comparing
+/// `target` and `rhs` as `f64` values, but only when they are the same JSON
+/// kind; returns `false` if `target` is absent or the kinds differ.
 fn compare_ord<F>(target: Option<&Value>, rhs: &Value, cmp: F) -> bool
 where
     F: Fn(f64, f64) -> bool,
@@ -100,6 +140,10 @@ where
     }
 }
 
+/// Implements the `contains` operator: for a string `target`, checks for a
+/// substring match against `rhs`; for an array `target`, checks whether any
+/// element equals `rhs`. Returns `false` for any other target kind or if
+/// `target` is absent.
 fn contains_value(target: Option<&Value>, rhs: &Value) -> bool {
     let Some(target) = target else {
         return false;
@@ -114,6 +158,11 @@ fn contains_value(target: Option<&Value>, rhs: &Value) -> bool {
     }
 }
 
+/// Implements the `regeq`/`regneq` operators: compiles `rhs` as a regex and
+/// matches it against `target` (which must be a string). `positive`
+/// selects between `regeq` semantics (`true` = matched) and `regneq`
+/// semantics (`true` = not matched). A missing or non-string `target` is
+/// treated as "did not match".
 fn regex_match(target: Option<&Value>, rhs: &Value, positive: bool) -> Result<bool> {
     let Some(value) = target.and_then(Value::as_str) else {
         return Ok(!positive);
@@ -127,6 +176,10 @@ fn regex_match(target: Option<&Value>, rhs: &Value, positive: bool) -> Result<bo
     Ok(if positive { matched } else { !matched })
 }
 
+/// Emits a one-time diagnostic warning (via
+/// [`crate::emit_type_mismatch_warning`]) when `target` is present but its
+/// JSON kind is incompatible with `right` for the given operator. No-op if
+/// `target` is absent.
 fn warn_if_type_mismatch(op: &FilterOp, field: &str, target: Option<&Value>, right: &Value) {
     let Some(left) = target else {
         return;
@@ -136,6 +189,10 @@ fn warn_if_type_mismatch(op: &FilterOp, field: &str, target: Option<&Value>, rig
     }
 }
 
+/// Returns whether `lhs` and `rhs` have JSON kinds that make sense to
+/// compare under `op` (e.g. both numeric for ordering operators, both
+/// strings for regex operators). Operators without a specific kind
+/// requirement (like `exists`) are always considered compatible.
 fn is_type_compatible(op: &FilterOp, lhs: &Value, rhs: &Value) -> bool {
     use FilterOp::*;
     match op {

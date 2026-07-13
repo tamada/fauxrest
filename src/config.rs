@@ -1,3 +1,12 @@
+//! Configuration model for `fauxrest`.
+//!
+//! This module defines the `_config.json` schema: the top-level [`Config`]
+//! (which lists output [`SerializerConfig`]s and an optional routing
+//! overlay), the [`ApiNode`](crate::config::ApiNode) overlay tree that
+//! drives `$filter`, `$aggregate`, `$pick`, `$omit`, `$emit`, `$values`,
+//! and `$derive` directives, and the validation logic that rejects
+//! malformed overlays before the orchestrator runs.
+
 pub use crate::filter::{FilterCondition, FilterOp};
 use crate::{Error, Result};
 use regex::Regex;
@@ -7,56 +16,101 @@ use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
+/// Selects which physical outputs are produced for a collection endpoint via
+/// the `$emit` directive.
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum EmitTarget {
+    /// Emit the collection itself (e.g. `/endpoint`).
     List,
+    /// Emit one file per item, keyed by its `id` field (e.g. `/endpoint/{id}`).
     Ids,
 }
 
+/// The value of a `$aggregate` directive: either a plain list of source
+/// paths (flat mode) or a full [`AggregateConfig`] with an explicit mode and
+/// per-source key mapping.
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum AggregateSpec {
+    /// Shorthand form: `"$aggregate": ["a", "b"]`, equivalent to flat mode
+    /// with each entry as an unkeyed source.
     Paths(Vec<String>),
+    /// Full form: `"$aggregate": { "mode": ..., "sources": [...] }`.
     Config(AggregateConfig),
 }
 
+/// Full form of an `$aggregate` directive, specifying the merge [`AggregateMode`]
+/// and the list of [`AggregateSource`]s to combine.
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct AggregateConfig {
+    /// How the sources are combined (defaults to [`AggregateMode::Flat`]).
     #[serde(default)]
     pub mode: AggregateMode,
+    /// The datasets/endpoints to combine, in order.
     pub sources: Vec<AggregateSource>,
 }
 
+/// How multiple datasets are combined by an `$aggregate` directive.
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum AggregateMode {
+    /// Concatenate all source arrays (or push scalar/object sources as a
+    /// single element) into one flat array.
     #[default]
     Flat,
+    /// Merge sources into a single object keyed by source name (or an
+    /// explicit `as` alias); duplicate keys are a configuration error.
     Keyed,
 }
 
+/// A single entry of an `$aggregate.sources` list: either a bare path string
+/// or a [`AggregateSourceMapping`] that renames the key used in keyed mode.
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum AggregateSource {
+    /// A bare source path, e.g. `"job-histories"`.
     Path(String),
+    /// A source path with an explicit `as` key alias.
     Mapping(AggregateSourceMapping),
 }
 
+/// Maps a source dataset/endpoint path to an alternate key name, used in
+/// [`AggregateMode::Keyed`] aggregation (`{ "from": "...", "as": "..." }`).
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct AggregateSourceMapping {
+    /// The source dataset or endpoint path to read from.
     pub from: String,
+    /// Optional alias used as the output key instead of `from` (serialized
+    /// as `"as"` in JSON).
     #[serde(rename = "as")]
     pub as_key: Option<String>,
 }
 
+/// A normalized `$aggregate` source entry, produced by [`AggregateSpec::entries`],
+/// combining a source path with its resolved output key (if any).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AggregateEntry {
+    /// The source dataset or endpoint path to read from.
     pub from: String,
+    /// The resolved output key to use in keyed mode, if explicitly set.
     pub key: Option<String>,
 }
 
 impl AggregateSpec {
+    /// Returns the effective [`AggregateMode`] for this spec.
+    ///
+    /// The shorthand [`AggregateSpec::Paths`] form is always flat mode; the
+    /// full [`AggregateSpec::Config`] form uses its configured `mode`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::config::{AggregateMode, AggregateSpec};
+    ///
+    /// let spec = AggregateSpec::Paths(vec!["a".to_string(), "b".to_string()]);
+    /// assert_eq!(spec.mode(), AggregateMode::Flat);
+    /// ```
     pub fn mode(&self) -> AggregateMode {
         match self {
             AggregateSpec::Paths(_) => AggregateMode::Flat,
@@ -64,6 +118,21 @@ impl AggregateSpec {
         }
     }
 
+    /// Normalizes this spec into a flat list of [`AggregateEntry`] values,
+    /// resolving `Path` and `Mapping` sources (and the shorthand `Paths`
+    /// form) into a uniform `(from, key)` representation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::config::AggregateSpec;
+    ///
+    /// let spec = AggregateSpec::Paths(vec!["skills".to_string()]);
+    /// let entries = spec.entries();
+    /// assert_eq!(entries.len(), 1);
+    /// assert_eq!(entries[0].from, "skills");
+    /// assert_eq!(entries[0].key, None);
+    /// ```
     pub fn entries(&self) -> Vec<AggregateEntry> {
         match self {
             AggregateSpec::Paths(paths) => paths
@@ -91,29 +160,49 @@ impl AggregateSpec {
     }
 }
 
+/// A single node of the advanced routing overlay tree.
+///
+/// Each key in [`Config::api`] (and recursively, each key of `sub_paths`)
+/// maps to an `ApiNode` that may carry directives (`$filter`, `$aggregate`,
+/// `$pick`, `$omit`, `$emit`, `$values`, `$derive`) describing how the
+/// corresponding endpoint's data should be transformed, plus nested
+/// `sub_paths` for deeper routes.
 #[derive(Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct ApiNode {
+    /// `$filter`: conditions that items must satisfy to be included.
     #[serde(rename = "$filter")]
     pub filter: Option<Vec<FilterCondition>>,
 
+    /// `$aggregate`: combines one or more other datasets/endpoints into this
+    /// endpoint's data.
     #[serde(rename = "$aggregate")]
     pub aggregate: Option<AggregateSpec>,
 
+    /// `$pick`: restricts object fields to only those listed.
     #[serde(rename = "$pick")]
     pub pick: Option<Vec<String>>,
 
+    /// `$omit`: removes the listed object fields.
     #[serde(rename = "$omit")]
     pub omit: Option<Vec<String>>,
 
+    /// `$emit`: selects which physical outputs (list and/or per-id files)
+    /// are produced for this node. `None` means "emit everything" (the
+    /// default); an empty list means "emit nothing".
     #[serde(rename = "$emit")]
     pub emit: Option<Vec<EmitTarget>>,
 
+    /// `$values`: explicit list of scalar values used to expand a
+    /// `${name}` template sub-path.
     #[serde(rename = "$values")]
     pub values: Option<Vec<Value>>,
 
+    /// `$derive`: derives the list of values used to expand a `${name}`
+    /// template sub-path from a field of the parent dataset.
     #[serde(rename = "$derive")]
     pub derive: Option<DeriveSource>,
 
+    /// All other (non-`$`-prefixed) keys, forming the nested routing tree.
     #[serde(flatten)]
     pub sub_paths: HashMap<String, ApiNode>,
     // #[serde(rename = "$private")]
@@ -129,16 +218,27 @@ pub struct ApiNode {
     // pub emit_items: Option<bool>,
 }
 
+/// The value of a `$derive` directive: either a bare field-name shorthand or
+/// a full [`DeriveConfig`] with an extraction pattern.
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum DeriveSource {
+    /// Shorthand form: `"$derive": "field"`, deriving template values
+    /// directly from the named field's raw value.
     Field(String),
+    /// Full form: `"$derive": { "field": ..., "pattern": ... }`.
     Config(DeriveConfig),
 }
 
+/// Full form of a `$derive` directive: the source `field` to read from each
+/// item, and an optional regex `pattern` whose first capture group (or,
+/// absent a group, the whole match) is used as the derived value.
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct DeriveConfig {
+    /// Name of the field to read from each item in the parent dataset.
     pub field: String,
+    /// Optional regular expression applied to the field's stringified value
+    /// to extract the derived scalar.
     pub pattern: Option<String>,
 }
 
@@ -179,6 +279,15 @@ pub struct StaticConfig {
 
 impl StaticSpec {
     /// Returns the configured include (allow) glob patterns.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::StaticSpec;
+    ///
+    /// let spec = StaticSpec::Include(vec!["*.png".to_string()]);
+    /// assert_eq!(spec.include(), ["*.png".to_string()]);
+    /// ```
     pub fn include(&self) -> &[String] {
         match self {
             StaticSpec::Include(patterns) => patterns,
@@ -187,6 +296,21 @@ impl StaticSpec {
     }
 
     /// Returns the configured exclude (deny) glob patterns.
+    ///
+    /// The shorthand [`StaticSpec::Include`] form has no deny globs, so it
+    /// always returns an empty slice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::{StaticConfig, StaticSpec};
+    ///
+    /// let spec = StaticSpec::Detailed(StaticConfig {
+    ///     include: vec!["**/*.css".to_string()],
+    ///     exclude: vec!["secret/**".to_string()],
+    /// });
+    /// assert_eq!(spec.exclude(), ["secret/**".to_string()]);
+    /// ```
     pub fn exclude(&self) -> &[String] {
         match self {
             StaticSpec::Include(_) => &[],
@@ -254,6 +378,9 @@ pub struct Config {
 }
 
 impl Default for Config {
+    /// Returns the fallback configuration used when no `_config.json` is
+    /// found: a single JSON serializer with [`Layout::Index`] writing to
+    /// `dist/`, and no routing overlay.
     fn default() -> Self {
         Self {
             serializers: vec![SerializerConfig {
@@ -271,6 +398,18 @@ impl Default for Config {
 }
 
 impl Config {
+    /// Builds a `Config` with a single serializer entry and an empty routing
+    /// overlay, without needing a `_config.json` file.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::{Config, Layout};
+    ///
+    /// let config = Config::new("json".to_string(), Layout::Index, "dist");
+    /// assert_eq!(config.serializers.len(), 1);
+    /// assert_eq!(config.serializers[0].serializer, "json");
+    /// ```
     pub fn new<P: AsRef<Path>>(serializer: String, layout: Layout, dest: P) -> Self {
         let dest = dest.as_ref().to_path_buf();
         Self {
@@ -288,6 +427,18 @@ impl Config {
     }
 
     /// Loads configuration from a given string.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::Config;
+    ///
+    /// let json = r#"{
+    ///     "$config": [{"serializer": "json", "layout": "index", "dest": "dist"}]
+    /// }"#;
+    /// let config = Config::load_from_str(json).expect("valid config");
+    /// assert_eq!(config.serializers.len(), 1);
+    /// ```
     pub fn load_from_str<S: AsRef<str>>(s: S) -> Result<Self> {
         let content = s.as_ref();
         let config: Self = serde_json::from_str(content).map_err(Error::SerdeJson)?;
@@ -295,6 +446,22 @@ impl Config {
         Ok(config)
     }
 
+    /// Loads configuration by reading and parsing the full contents of a
+    /// [`std::io::Read`] implementor (e.g. a file handle or in-memory buffer).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::Config;
+    /// use std::io::Cursor;
+    ///
+    /// let json = r#"{
+    ///     "$config": [{"serializer": "json", "layout": "index", "dest": "dist"}]
+    /// }"#;
+    /// let mut reader = Cursor::new(json);
+    /// let config = Config::load_from_reader(&mut reader).expect("valid config");
+    /// assert_eq!(config.serializers.len(), 1);
+    /// ```
     pub fn load_from_reader(reader: &mut impl std::io::Read) -> Result<Self> {
         let mut reader = std::io::BufReader::new(reader);
         let content = io::read_to_string(&mut reader)?;
@@ -302,6 +469,15 @@ impl Config {
     }
 
     /// Loads configuration from a specific file path
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use fauxrest::Config;
+    ///
+    /// let config = Config::load_from_file("_config.json").expect("valid config file");
+    /// assert!(!config.serializers.is_empty());
+    /// ```
     pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
         let content = fs::read_to_string(path).map_err(Error::Io)?;
         Self::load_from_str(content)
@@ -309,6 +485,9 @@ impl Config {
 }
 
 impl Config {
+    /// Recursively validates every node of the routing overlay, checking
+    /// `$aggregate` well-formedness and the `${name}` template sub-path
+    /// rules (see [`validate_node`]).
     fn validate(&self) -> Result<()> {
         if let Some(spec) = self.static_files.as_ref() {
             validate_static(spec)?;
@@ -335,6 +514,12 @@ fn validate_static(spec: &StaticSpec) -> Result<()> {
     Ok(())
 }
 
+/// Validates a single overlay node and recurses into its `sub_paths`.
+///
+/// Checks that any `$aggregate` directive is well-formed (via
+/// [`validate_aggregate`]), and that `${name}` template sub-path keys have
+/// exactly one of `$values`/`$derive` set (and that non-template keys have
+/// neither).
 fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
     if let Some(aggregate) = node.aggregate.as_ref() {
         validate_aggregate(path, aggregate)?;
@@ -401,6 +586,9 @@ fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
     Ok(())
 }
 
+/// Validates a `$aggregate` directive: it must have at least one entry, no
+/// entry's source path may be blank, and in [`AggregateMode::Keyed`] mode
+/// every resolved key must be non-empty and unique.
 fn validate_aggregate(path: &str, aggregate: &AggregateSpec) -> Result<()> {
     let entries = aggregate.entries();
     if entries.is_empty() {
@@ -439,6 +627,8 @@ fn validate_aggregate(path: &str, aggregate: &AggregateSpec) -> Result<()> {
     Ok(())
 }
 
+/// If `key` has the `${name}` template sub-path syntax, returns `name`;
+/// otherwise returns `None`.
 fn template_var_from_key(key: &str) -> Option<&str> {
     if key.starts_with("${") && key.ends_with('}') && key.len() > 3 {
         Some(&key[2..key.len() - 1])
@@ -447,10 +637,14 @@ fn template_var_from_key(key: &str) -> Option<&str> {
     }
 }
 
+/// Returns `true` if `value` is a JSON scalar (string, number, or bool) as
+/// opposed to null, an array, or an object.
 fn is_scalar(value: &Value) -> bool {
     matches!(value, Value::String(_) | Value::Number(_) | Value::Bool(_))
 }
 
+/// Validates a `$derive` directive: the target `field` must be non-empty,
+/// and if a `pattern` is given it must be a valid regular expression.
 fn validate_derive(path: &str, derive: &DeriveSource) -> Result<()> {
     let cfg = derive.to_config();
     if cfg.field.trim().is_empty() {
@@ -471,6 +665,22 @@ fn validate_derive(path: &str, derive: &DeriveSource) -> Result<()> {
 }
 
 impl DeriveSource {
+    /// Normalizes this `$derive` value into a full [`DeriveConfig`].
+    ///
+    /// The shorthand [`DeriveSource::Field`] form is expanded to a
+    /// `DeriveConfig` with no pattern; the full [`DeriveSource::Config`]
+    /// form is returned as-is.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::config::DeriveSource;
+    ///
+    /// let derive = DeriveSource::Field("from".to_string());
+    /// let cfg = derive.to_config();
+    /// assert_eq!(cfg.field, "from");
+    /// assert_eq!(cfg.pattern, None);
+    /// ```
     pub fn to_config(&self) -> DeriveConfig {
         match self {
             DeriveSource::Field(field) => DeriveConfig {
@@ -487,6 +697,9 @@ mod tests {
     use super::*;
     use std::io::Write;
 
+    /// Loads `testdata/tamada/_config.json` and checks that `$filter`,
+    /// `$derive`, `$aggregate` (keyed), and `$emit` directives across
+    /// several overlay nodes are parsed as expected.
     #[test]
     fn test_parse_advanced_routing_config() {
         let config_path = Path::new("testdata/tamada/_config.json");
@@ -549,6 +762,8 @@ mod tests {
         // assert_eq!(profile.emit_id, None);
     }
 
+    /// Checks that a full `$derive` object (`{ "field": ..., "pattern": ... }`)
+    /// on a `${year}` template sub-path is parsed correctly.
     #[test]
     fn test_parse_template_derive_config() {
         let mut tmp = tempfile::NamedTempFile::new().unwrap();
@@ -580,6 +795,8 @@ mod tests {
         assert_eq!(derive.pattern, Some("^(\\d{4})".to_string()));
     }
 
+    /// Checks that `$derive` on a non-template (plain) sub-path key is
+    /// rejected by validation with the expected error message.
     #[test]
     fn test_non_template_derive_is_rejected() {
         let mut tmp = tempfile::NamedTempFile::new().unwrap();

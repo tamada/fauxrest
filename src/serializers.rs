@@ -1,4 +1,8 @@
 //! Serializer implementation module
+//!
+//! Provides the [`Serializer`] trait and its concrete implementations
+//! ([`JSONSerializer`], [`TypescriptSerializer`], [`SqliteSerializer`]) that
+//! turn a `serde_json::Value` into the bytes written for each endpoint.
 
 use serde_json::Value;
 use rusqlite::{params, Connection};
@@ -8,13 +12,34 @@ use crate::Error;
 /// Trait for physical data serialization
 pub trait Serializer {
     /// Serializes data into bytes
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::{JSONSerializer, Serializer};
+    /// use serde_json::json;
+    ///
+    /// let serializer = JSONSerializer { minify: true };
+    /// let bytes = serializer.serialize(&json!({ "id": 1 })).unwrap();
+    /// assert_eq!(bytes, br#"{"id":1}"#);
+    /// ```
     fn serialize(&self, data: &Value) -> Result<Vec<u8>, Error>;
     /// Returns the file extension
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use fauxrest::{JSONSerializer, Serializer};
+    ///
+    /// let serializer = JSONSerializer { minify: false };
+    /// assert_eq!(serializer.extension(), "json");
+    /// ```
     fn extension(&self) -> &str;
 }
 
 /// Serializes data in JSON format
 pub struct JSONSerializer {
+    /// If `true`, output compact (minified) JSON; otherwise pretty-print.
     pub minify: bool,
 }
 impl Serializer for JSONSerializer {
@@ -32,6 +57,8 @@ impl Serializer for JSONSerializer {
 
 /// Serializes data in TypeScript/JavaScript (ESM) format
 pub struct TypescriptSerializer {
+    /// If `true`, output compact (minified) JSON inside the module;
+    /// otherwise pretty-print.
     pub minify: bool,
 }
 impl Serializer for TypescriptSerializer {
@@ -63,6 +90,10 @@ impl Serializer for SqliteSerializer {
 }
 
 impl SqliteSerializer {
+    /// Creates a `data(id INTEGER PRIMARY KEY, value TEXT)` table in `conn`
+    /// and inserts one row per array element of `d` (its JSON string form
+    /// as `value`, its index as `id`). If `d` is not an array, no rows are
+    /// inserted and only the empty table is created.
     fn populate_db(&self, conn: &Connection, d: &Value) -> Result<(), Error> {
         conn.execute("CREATE TABLE data (id INTEGER PRIMARY KEY, value TEXT)", [])?;
         if let Some(arr) = d.as_array() {

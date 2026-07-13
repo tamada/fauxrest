@@ -1,7 +1,14 @@
+//! `fauxrest` command-line entry point.
+//!
+//! Parses CLI arguments into [`Args`], resolves the effective [`Config`]
+//! (explicit `--config`, a discovered `_config.json`, CLI flags, or the
+//! built-in default), and runs the build via [`fauxrest::run`].
+
 use clap::{Parser, ValueEnum};
 use fauxrest::{Config, Error, Layout, Result};
 use std::path::{Path, PathBuf};
 
+/// Command-line arguments for the `fauxrest` binary.
 #[derive(Parser, Debug)]
 #[command(name = "fauxrest", version, about, long_about = None)]
 pub struct Args {
@@ -13,9 +20,12 @@ pub struct Args {
     )]
     inputs: String,
 
+    /// Specify the log level.
     #[clap(short = 'L', long, help = "Specify the log level", value_enum, default_value_t = LogLevel::Warn, value_name = "LEVEL")]
     level: LogLevel,
 
+    /// Path to the configuration file. When unset, [`Args::load_config`]
+    /// falls back to discovering one in the input data directory.
     #[clap(
         short,
         long,
@@ -24,6 +34,8 @@ pub struct Args {
     )]
     config: Option<PathBuf>,
 
+    /// Delivery layout to use for the output, when building the
+    /// configuration from CLI flags instead of a config file.
     #[clap(
         short,
         long,
@@ -32,6 +44,7 @@ pub struct Args {
     )]
     layout: Option<Layout>,
 
+    /// Path to the output directory.
     #[clap(
         short,
         long,
@@ -40,6 +53,8 @@ pub struct Args {
     )]
     dest: Option<PathBuf>,
 
+    /// Serializer to use for the output (`json`, `typescript`, or `sql`).
+    /// Defaults to `json` when neither this flag nor a config file sets one.
     #[clap(
         short,
         long,
@@ -48,9 +63,12 @@ pub struct Args {
     )]
     serializer: Option<String>,
 
+    /// If `true`, minify the serialized output.
     #[clap(long, default_value_t = false, help = "If true, minify the output")]
     minify: bool,
 
+    /// If set, disable minification, overriding any `minify: true` in the
+    /// loaded configuration. Conflicts with `--minify`.
     #[clap(
         long,
         default_value_t = false,
@@ -59,6 +77,8 @@ pub struct Args {
     )]
     no_minify: bool,
 
+    /// If `true`, allow writing into a non-empty destination directory
+    /// (overwriting existing files).
     #[clap(
         long,
         default_value_t = false,
@@ -66,6 +86,9 @@ pub struct Args {
     )]
     overwrite: bool,
 
+    /// If `true`, copy all non-JSON static files from the data directory
+    /// into each destination (allow all); `$static` exclude globs still
+    /// take precedence.
     #[clap(
         long,
         default_value_t = false,
@@ -73,32 +96,48 @@ pub struct Args {
     )]
     copy_static: bool,
 
+    /// If `true` (debug builds only), generate shell completion files
+    /// instead of running the build.
     #[cfg(debug_assertions)]
     #[clap(long, default_value_t = false, help = "Generate completion files")]
     gencomp: bool,
 }
 
+/// Verbosity level for CLI logging output.
 #[derive(Parser, ValueEnum, Debug, Clone, PartialEq, Eq)]
 pub enum LogLevel {
+    /// Only report errors.
     Error,
+    /// Report warnings and errors (the default).
     Warn,
+    /// Report informational messages, warnings, and errors.
     Info,
+    /// Report debug-level details in addition to `Info`.
     Debug,
+    /// Report the most verbose, low-level tracing output.
     Trace,
 }
 
 impl Args {
     /// Loads the configuration based on the command line options.
-    /// If an explicit config path is provided, it attempts to load it.
-    /// Otherwise, it attempts to discover the config in the inputs directory,
-    /// or falls back to the default configuration.
+    ///
+    /// Resolution order:
+    /// 1. If `--config` is set, load that file.
+    /// 2. Otherwise, try to [`discover`](Self::discover) a config file in
+    ///    the input data directory.
+    /// 3. Otherwise, fall back to [`Config::default`].
     ///
     /// Options that the user explicitly passes on the command line always take
     /// precedence over the loaded configuration file, which in turn takes
     /// precedence over the built-in defaults (CLI > config > default). When the
     /// loaded configuration provides serializers, every explicitly given CLI
     /// option (`--dest`, `--serializer`, `--layout`, `--minify`, `--no-minify`,
-    /// `--overwrite`) overrides the matching field of each serializer entry.
+    /// `--overwrite`) overrides the matching field of each serializer entry
+    /// (see [`Args::apply_cli_overrides`]); when it provides none, a single
+    /// entry is synthesized from the CLI flags (see
+    /// [`Args::serializer_config`]), keeping the loaded routing overlay (if
+    /// any). `--copy-static` additionally enables copying of all non-JSON
+    /// static files.
     pub(crate) fn load_config(&self) -> Result<Config> {
         let config = if let Some(config) = &self.config {
             fauxrest::Config::load_from_file(config)
@@ -154,8 +193,10 @@ impl Args {
         }
     }
 
-    /// Builds a single serializer configuration from the command line options,
-    /// falling back to the built-in defaults for any option that was not given.
+    /// Builds a single [`fauxrest::SerializerConfig`] from the command line
+    /// options (`--serializer`/`--layout`/`--dest`/`--minify`/`--overwrite`),
+    /// falling back to the built-in defaults (`json`, [`Layout::Index`],
+    /// `dist`) for any option that was not given.
     fn serializer_config(&self) -> fauxrest::SerializerConfig {
         fauxrest::SerializerConfig {
             layout: self.layout.clone().unwrap_or(Layout::Index),
@@ -185,8 +226,13 @@ impl Args {
     }
 }
 
+/// Shell completion file generation (debug builds only); see
+/// [`gencomp::_generate`].
 mod gencomp;
 
+/// Runs the requested action for parsed CLI `args`: in debug builds, generates
+/// shell completion files if `--gencomp` was passed; otherwise resolves the
+/// configuration and runs the static API build via [`fauxrest::run`].
 fn perform_build(args: Args) -> Result<()> {
     #[cfg(debug_assertions)]
     if args.gencomp {
@@ -198,6 +244,8 @@ fn perform_build(args: Args) -> Result<()> {
     fauxrest::run(config, PathBuf::from(args.inputs))
 }
 
+/// Binary entry point: parses CLI arguments, runs [`perform_build`], and on
+/// error prints the error to stderr and exits the process with status 1.
 fn main() -> Result<()> {
     let r = match Args::try_parse() {
         Ok(args) => perform_build(args),
@@ -229,6 +277,7 @@ mod tests {
     const CONFIG_BODY: &str =
         r#"{"$config": [{"serializer": "typescript", "layout": "file", "dest": "from-config", "minify": true}]}"#;
 
+    /// Without CLI overrides, every serializer field comes from the config file.
     #[test]
     fn config_values_used_when_no_cli_override() {
         let (_dir, path) = write_config(CONFIG_BODY);
@@ -242,6 +291,7 @@ mod tests {
         assert!(s.minify);
     }
 
+    /// An explicit `--dest` overrides the config file; other fields are kept.
     #[test]
     fn explicit_dest_overrides_config() {
         let (_dir, path) = write_config(CONFIG_BODY);
@@ -263,6 +313,7 @@ mod tests {
         assert!(s.minify);
     }
 
+    /// Explicit `--serializer`/`--layout` override the config file; `dest` is kept.
     #[test]
     fn explicit_serializer_and_layout_override_config() {
         let (_dir, path) = write_config(CONFIG_BODY);
@@ -285,6 +336,7 @@ mod tests {
         assert_eq!(s.dest, PathBuf::from("from-config"));
     }
 
+    /// `--minify` turns minification on even when the config file leaves it off.
     #[test]
     fn minify_flag_overrides_config() {
         // config has minify=false, CLI passes --minify.
@@ -303,6 +355,7 @@ mod tests {
         assert!(config.serializers[0].minify);
     }
 
+    /// `--no-minify` turns minification off even when the config file enables it.
     #[test]
     fn no_minify_flag_overrides_config() {
         // config has minify=true, CLI passes --no-minify.
@@ -319,12 +372,14 @@ mod tests {
         assert!(!config.serializers[0].minify);
     }
 
+    /// `--minify` and `--no-minify` are mutually exclusive at parse time.
     #[test]
     fn minify_and_no_minify_conflict() {
         let result = Args::try_parse_from(["fauxrest", "data", "--minify", "--no-minify"]);
         assert!(result.is_err());
     }
 
+    /// Without a config file, `--no-minify` keeps the default (unminified).
     #[test]
     fn no_config_with_no_minify_stays_unminified() {
         // Without a config file, --no-minify keeps the default (false).
@@ -333,6 +388,7 @@ mod tests {
         assert!(!config.serializers[0].minify);
     }
 
+    /// CLI overrides are applied to every `$config` serializer entry, not just the first.
     #[test]
     fn overrides_apply_to_every_serializer_entry() {
         let (_dir, path) = write_config(
@@ -357,6 +413,7 @@ mod tests {
         }
     }
 
+    /// Without a config file or CLI options, the built-in defaults are used.
     #[test]
     fn no_config_uses_defaults_without_cli_options() {
         // "no-such-dir" has no discoverable config, so the default config is used.
@@ -369,6 +426,7 @@ mod tests {
         assert!(!s.minify);
     }
 
+    /// Without a config file, explicitly given CLI options are still honored.
     #[test]
     fn no_config_honors_explicit_cli_options() {
         // Even without a config file, an explicit --dest must be honored.
