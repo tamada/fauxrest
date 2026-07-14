@@ -7,7 +7,7 @@ version = "0.0.2"
 edition = "2024"
 authors = ["Haruaki Tamada <tamada@users.noreply.github.com>"]
 categories = ["command-line-utilities", "filesystem"]
-keywords = ["rest-api", "psude REST API"]
+keywords = ["rest-api", "pseudo-rest-api"]
 
 [[bin]]
 name = "fauxrest"
