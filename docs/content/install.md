@@ -32,7 +32,7 @@ The binary is generated at `target/release/fauxrest`.
 ## 🐳 Docker
 
 Fauxrest can run on docker like container runner.
-In this example, it uses `docker` command, you can replace your favorit container runner such as [podman](https://podman.io), [finch](https://github.com/runfinch/finch), and/or [apple/container](https://github.com/apple/container).
+This example uses `docker` command, however, you can replace it to your favorit container runner such as [podman](https://podman.io), [finch](https://github.com/runfinch/finch), [apple/container](https://github.com/apple/container), and/or [WSL Container](https://learn.microsoft.com/windows/wsl/wsl-container).
 
 ```sh
 docker run -it --rm -v $PWD:/opt quay.io/tama5/fauxrest:latest data
@@ -40,7 +40,7 @@ docker run -it --rm -v $PWD:/opt quay.io/tama5/fauxrest:latest data
 
 ## Quick Start
 
-1. Create a `data/` directory with JSON files.
+1. Create a `data` directory with JSON files.
 2. Prepare a config file (for example `fauxrest.json`) if you need explicit serializer/layout settings.
 3. Build outputs:
 
