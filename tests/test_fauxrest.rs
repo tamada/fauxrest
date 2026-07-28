@@ -420,6 +420,296 @@ fn test_template_subpath_expansion_with_derive_from_int_field() {
     assert_file(&dest_dir, "papers/years/2025/index.json");
 }
 
+/// `$derive.type: "int"` lets a pattern-extracted value be compared against
+/// a genuinely numeric field with `eq`. Without the conversion the derived
+/// value would be the string `"2024"`, which never equals the number `2024`,
+/// so every generated endpoint would be an empty collection.
+#[test]
+fn test_derive_int_type_matches_numeric_field() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("papers.json"),
+        r#"[
+    {"id": 1, "year": 2024, "title": "p1"},
+    {"id": 2, "year": 2025, "title": "p2"},
+    {"id": 3, "year": 2024, "title": "p3"}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "papers": {{
+        "${{year}}": {{
+            "$derive": {{ "field": "year", "pattern": "^(\\d{{4}})", "type": "int" }},
+            "$filter": [{{"field": "year", "op": "eq", "value": "{{year}}"}}],
+            "$emit": ["list"]
+        }}
+    }}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_contains(&dest_dir, "papers/2024/index.json", "p1");
+    assert_contains(&dest_dir, "papers/2024/index.json", "p3");
+    assert_contains(&dest_dir, "papers/2025/index.json", "p2");
+
+    let y2024 = fs::read_to_string(dest_dir.join("papers/2024/index.json")).unwrap();
+    assert!(
+        !y2024.contains("p2"),
+        "2024 must not include the 2025 paper"
+    );
+    let y2025 = fs::read_to_string(dest_dir.join("papers/2025/index.json")).unwrap();
+    assert!(
+        !y2025.contains("p1"),
+        "2025 must not include the 2024 paper"
+    );
+}
+
+/// A numeric `$derive.type` also makes the ordering operators usable, since
+/// `compare_ord` only compares values of the same JSON kind.
+#[test]
+fn test_derive_int_type_supports_ordering_filter() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("papers.json"),
+        r#"[
+    {"id": 1, "year": 2023, "title": "old"},
+    {"id": 2, "year": 2024, "title": "mid"},
+    {"id": 3, "year": 2025, "title": "new"}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "papers": {{
+        "since": {{
+            "${{year}}": {{
+                "$derive": {{ "field": "year", "type": "int" }},
+                "$filter": [{{"field": "year", "op": "gte", "value": "{{year}}"}}],
+                "$emit": ["list"]
+            }}
+        }}
+    }}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    let since2024 = fs::read_to_string(dest_dir.join("papers/since/2024/index.json")).unwrap();
+    assert!(since2024.contains("mid"), "gte 2024 should keep 2024");
+    assert!(since2024.contains("new"), "gte 2024 should keep 2025");
+    assert!(!since2024.contains("old"), "gte 2024 should drop 2023");
+}
+
+/// `$derive.type: "string"` goes the other way, stringifying a numeric field
+/// so it can be matched against string-typed data.
+#[test]
+fn test_derive_string_type_stringifies_numeric_field() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("papers.json"),
+        r#"[
+    {"id": 1, "year": 2024, "label": "2024"},
+    {"id": 2, "year": 2025, "label": "2025"}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "papers": {{
+        "${{year}}": {{
+            "$derive": {{ "field": "year", "type": "string" }},
+            "$filter": [{{"field": "label", "op": "eq", "value": "{{year}}"}}],
+            "$emit": ["list"]
+        }}
+    }}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    let y2024 = fs::read_to_string(dest_dir.join("papers/2024/index.json")).unwrap();
+    assert!(
+        y2024.contains("\"id\": 1"),
+        "2024 should keep the id 1 item"
+    );
+    assert!(
+        !y2024.contains("\"id\": 2"),
+        "2024 should drop the id 2 item"
+    );
+}
+
+/// `$derive.type: "auto"` converts values that round-trip losslessly and
+/// leaves identifier-like strings such as `"007"` untouched, so the
+/// generated path keeps its leading zeros.
+#[test]
+fn test_derive_auto_type_preserves_identifier_like_strings() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("rooms.json"),
+        r#"[
+    {"id": 1, "code": "007"},
+    {"id": 2, "code": "42"}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "rooms": {{
+        "${{code}}": {{
+            "$derive": {{ "field": "code", "type": "auto" }},
+            "$filter": [{{"field": "code", "op": "eq", "value": "{{code}}"}}],
+            "$emit": ["list"]
+        }}
+    }}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    // "007" stays a string, so the path keeps its leading zeros and still
+    // matches the string field it came from.
+    assert_contains(&dest_dir, "rooms/007/index.json", "\"id\": 1");
+    // "42" becomes the number 42. The path is unchanged, but the substituted
+    // filter value is now numeric and no longer equals the string field it
+    // was derived from, leaving the endpoint empty. This is the sharp edge of
+    // "auto" -- $filter reports it via a type-mismatch warning on stderr.
+    let numeric = fs::read_to_string(dest_dir.join("rooms/42/index.json")).unwrap();
+    assert_eq!(
+        numeric.split_whitespace().collect::<String>(),
+        "[]",
+        "auto turns \"42\" into a number, which no longer matches the string field"
+    );
+}
+
+/// Values that cannot be converted to the requested `$derive.type` are
+/// skipped rather than aborting the build, matching how non-derivable values
+/// are already handled.
+#[test]
+fn test_derive_type_conversion_failure_skips_value() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("papers.json"),
+        r#"[
+    {"id": 1, "year": 2024},
+    {"id": 2, "year": "unknown"}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "papers": {{
+        "${{year}}": {{
+            "$derive": {{ "field": "year", "type": "int" }},
+            "$filter": [{{"field": "year", "op": "eq", "value": "{{year}}"}}],
+            "$emit": ["list"]
+        }}
+    }}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_file(&dest_dir, "papers/2024/index.json");
+    assert!(
+        !dest_dir.join("papers/unknown").exists(),
+        "non-convertible value should not produce an endpoint"
+    );
+}
+
+/// A `$derive` without `type` keeps the pre-0.0.4 behavior: a `pattern`
+/// extracts a string, and the raw field value is otherwise passed through
+/// unchanged.
+#[test]
+fn test_derive_without_type_keeps_legacy_behavior() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("papers.json"),
+        r#"[
+    {"id": 1, "year": 2024, "from": "2024-04-01"},
+    {"id": 2, "year": 2025, "from": "2025-04-01"}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "papers": {{
+        "${{year}}": {{
+            "$derive": {{ "field": "from", "pattern": "^(\\d{{4}}).*" }},
+            "$filter": [{{"field": "from", "op": "contains", "value": "{{year}}"}}],
+            "$emit": ["list"]
+        }}
+    }}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_contains(&dest_dir, "papers/2024/index.json", "2024-04-01");
+    assert_contains(&dest_dir, "papers/2025/index.json", "2025-04-01");
+}
+
 #[test]
 fn test_template_with_values_and_derive_is_rejected() {
     let tmp = tempfile::tempdir().unwrap();
