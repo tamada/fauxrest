@@ -127,3 +127,34 @@ Template sub-paths like `${year}` support:
 - `$derive`: expansion derived from data.
 
 `$values` and `$derive` are mutually exclusive at the same template node.
+
+### Typed `$derive` values
+
+A `$derive.pattern` extracts a regular expression capture, so the derived
+value is always a string. Because `$filter` compares strictly by type, such a
+value never matches a numeric field — `"2024"` does not equal `2024`. The
+optional `type` key converts the derived value before it is used:
+
+```json
+{
+  "papers": {
+    "${year}": {
+      "$derive": { "field": "year", "pattern": "^(\\d{4})", "type": "int" },
+      "$filter": [{ "field": "year", "op": "eq", "value": "{year}" }]
+    }
+  }
+}
+```
+
+Supported types are `string`, `int`, `float`, `bool`, and `auto`. Omitting
+`type` performs no conversion, which is how `$derive` behaved before 0.0.4.
+
+- Conversion applies to the whole derived value, so it also decides the
+  generated path segment: `"type": "int"` on `"007"` produces `/7`.
+- Values that cannot be converted are skipped and reported as non-derivable
+  rather than failing the build.
+- `auto` is deliberately conservative: it converts `true`/`false` and
+  integers that round-trip losslessly, leaving `"007"` and `"+7"` as strings,
+  and never inferring floats. Be aware that a value derived from a *string*
+  field and inferred as a number will no longer match that field under `eq`;
+  prefer an explicit type when in doubt.

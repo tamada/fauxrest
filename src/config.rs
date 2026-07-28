@@ -231,8 +231,9 @@ pub enum DeriveSource {
 }
 
 /// Full form of a `$derive` directive: the source `field` to read from each
-/// item, and an optional regex `pattern` whose first capture group (or,
-/// absent a group, the whole match) is used as the derived value.
+/// item, an optional regex `pattern` whose first capture group (or, absent a
+/// group, the whole match) is used as the derived value, and an optional
+/// `type` that converts the extracted value to another JSON scalar kind.
 #[derive(Deserialize, Debug, Clone, PartialEq)]
 pub struct DeriveConfig {
     /// Name of the field to read from each item in the parent dataset.
@@ -240,6 +241,39 @@ pub struct DeriveConfig {
     /// Optional regular expression applied to the field's stringified value
     /// to extract the derived scalar.
     pub pattern: Option<String>,
+    /// Optional target type for the derived value (serialized as `"type"`).
+    ///
+    /// A `pattern` always extracts a string, so without this the derived
+    /// value can never match a numeric or boolean field under `$filter`.
+    /// `None` keeps the extracted value as-is, which is the behavior of
+    /// releases before 0.0.4.
+    #[serde(default, rename = "type")]
+    pub value_type: Option<DeriveType>,
+}
+
+/// Target scalar type of a `$derive` directive's `type` field, applied to the
+/// derived value before it is deduplicated, turned into a path segment, and
+/// substituted into `$filter` conditions.
+///
+/// The conversion runs on the value's stringified form, so it applies equally
+/// to values extracted by a `pattern` and to raw field values.
+#[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum DeriveType {
+    /// Stringify the value (e.g. the number `2024` becomes `"2024"`).
+    String,
+    /// Parse the value as a 64-bit integer. Values that do not parse
+    /// exactly (including floats such as `2024.5`) are skipped.
+    Int,
+    /// Parse the value as a floating point number.
+    Float,
+    /// Parse the literals `true` and `false`; anything else is skipped.
+    Bool,
+    /// Infer the type conservatively: `true`/`false` become booleans, and a
+    /// string becomes an integer only when the conversion round-trips
+    /// losslessly (so `"007"` and `"+7"` stay strings). Floats are never
+    /// inferred — request [`DeriveType::Float`] explicitly for those.
+    Auto,
 }
 
 /// Declares which non-JSON static files (images, CSS, …) found in the input
@@ -680,12 +714,14 @@ impl DeriveSource {
     /// let cfg = derive.to_config();
     /// assert_eq!(cfg.field, "from");
     /// assert_eq!(cfg.pattern, None);
+    /// assert_eq!(cfg.value_type, None);
     /// ```
     pub fn to_config(&self) -> DeriveConfig {
         match self {
             DeriveSource::Field(field) => DeriveConfig {
                 field: field.clone(),
                 pattern: None,
+                value_type: None,
             },
             DeriveSource::Config(c) => c.clone(),
         }
@@ -793,6 +829,67 @@ mod tests {
         let derive = by_year.derive.as_ref().expect("Missing derive").to_config();
         assert_eq!(derive.field, "from");
         assert_eq!(derive.pattern, Some("^(\\d{4})".to_string()));
+    }
+
+    /// Checks that a `$derive` object carrying an explicit `"type"` parses
+    /// into the matching [`DeriveType`], and that omitting `"type"` leaves
+    /// it unset (the pre-0.0.4 behavior).
+    #[test]
+    fn test_parse_derive_value_type() {
+        let mut tmp = tempfile::NamedTempFile::new().unwrap();
+        write!(
+            tmp,
+            r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "papers": {{
+        "${{year}}": {{
+            "$derive": {{"field":"published", "pattern":"^(\\d{{4}})", "type":"int"}}
+        }},
+        "${{tag}}": {{
+            "$derive": {{"field":"tag"}}
+        }}
+    }}
+}}"#
+        )
+        .unwrap();
+
+        let config = Config::load_from_file(tmp.path()).expect("Failed to load derive type config");
+        let papers = config.api.get("papers").expect("Missing papers node");
+        let by_year = papers
+            .sub_paths
+            .get("${year}")
+            .expect("Missing ${year} sub-path");
+        let derive = by_year.derive.as_ref().expect("Missing derive").to_config();
+        assert_eq!(derive.field, "published");
+        assert_eq!(derive.value_type, Some(DeriveType::Int));
+
+        let by_tag = papers
+            .sub_paths
+            .get("${tag}")
+            .expect("Missing ${tag} sub-path");
+        let derive = by_tag.derive.as_ref().expect("Missing derive").to_config();
+        assert_eq!(derive.value_type, None);
+    }
+
+    /// Checks that an unknown `$derive.type` name is rejected at load time
+    /// rather than silently ignored.
+    #[test]
+    fn test_unknown_derive_value_type_is_rejected() {
+        let mut tmp = tempfile::NamedTempFile::new().unwrap();
+        write!(
+            tmp,
+            r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "papers": {{
+        "${{year}}": {{
+            "$derive": {{"field":"published", "type":"integer"}}
+        }}
+    }}
+}}"#
+        )
+        .unwrap();
+
+        assert!(Config::load_from_file(tmp.path()).is_err());
     }
 
     /// Checks that `$derive` on a non-template (plain) sub-path key is

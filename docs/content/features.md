@@ -46,7 +46,9 @@ Legacy `$emit_list`, `$emit_id`, and `$emit_items` are still accepted for backwa
 Template keys such as `${year}` can be expanded by:
 
 - `$values` for static lists.
-- `$derive` for values extracted from loaded source data.
+- `$derive` for values extracted from loaded source data, with an optional
+  `type` (`string`, `int`, `float`, `bool`, `auto`) so derived values can be
+  compared against non-string fields.
 
 ## Build and Runtime Experience
 
