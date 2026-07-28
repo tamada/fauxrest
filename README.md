@@ -1,9 +1,9 @@
 # fauxrest
 
-[![Version](https://img.shields.io/badge/Version-0.0.2-blue)](https://github.com/tamada/fauxrest/releases/tag/v0.0.2)
+[![Version](https://img.shields.io/badge/Version-0.0.3-blue)](https://github.com/tamada/fauxrest/releases/tag/v0.0.3)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?logo=spdx)](LICENSE)
 
-[![Coverage Status](https://coveralls.io/repos/github/tamada/fauxrest/badge.svg?branch=releases/v0.0.2)](https://coveralls.io/github/tamada/fauxrest?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/tamada/fauxrest/badge.svg?branch=releases/v0.0.3)](https://coveralls.io/github/tamada/fauxrest?branch=main)
 [![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-c45508?logo=rust)](https://www.rust-lang.org/)
 [![Docker](https://img.shields.io/badge/Container-quay.io/tama5/fauxrest:latest-2496ED?logo=docker)](https://quay.io/repository/tama5/fauxrest)
 
@@ -36,11 +36,20 @@ To install `fauxrest` into your local environment, type the following command.
 brew install tamada/tap/faurest
 ```
 
+### 📦 Cargo
+
+The `fauxrest` can be installed through `cargo`.
+
+```sh
+cargo install fauxrest
+```
+
 ### 🐳 Container image
 
 [![Docker](https://img.shields.io/badge/Container-quay.io/tama5/fauxrest:latest-2496ED?logo=docker)](https://quay.io/repository/tama5/fauxrest)
 
-Fauxrest also supports container images distributed on [Quay.io](https://quay.io/repository/tama5/fauxrest). Use it with the following command (in the following example, we use [`docker`](https://www.docker.com); however, [`podman`](https://podman.io), [`finch,`](https://runfinch.com) and/or [`apple/container`](https://github.com/apple/container) might be supported).
+Fauxrest also supports container images distributed on [Quay.io](https://quay.io/repository/tama5/fauxrest). 
+The following example uses `docker` command, however, you can replace it to your favorit container runner such as [podman](https://podman.io), [finch](https://github.com/runfinch/finch), [apple/container](https://github.com/apple/container), and/or [WSL Container](https://learn.microsoft.com/windows/wsl/wsl-container).
 
 ```sh
 docker run -it --rm -v $PWD:/opt quay.io/tama5/faurest:latest 
@@ -141,7 +150,7 @@ For comprehensive technical architecture design, command line args, and subcomma
 ### 👩‍💼 Developers 👨‍💼
 
 - Haruaki Tamada ([@tamada](https://github.com/tamada))
-- Google Gemini, GitHub Copilot
+- Claude Code, Google Gemini, GitHub Copilot
 
 ### 📄 License
 
@@ -157,3 +166,10 @@ And it is derived from Faux (meaning `fake' in French) and REST.
 ![logo](.github/assets/logo.svg)
 
 This logo is based on the one published on [SVGRepo](https://www.svgrepo.com/svg/476993/forest).
+
+### 🧰 Related Tools
+
+- [JSON Server](https://github.com/typicode/json-server)
+- [Mockoon](https://github.com/mockoon/mockoon)
+- [Prism](https://stoplight.io/open-source/prism)
+- [WireMock](https://github.com/wiremock/wiremock)

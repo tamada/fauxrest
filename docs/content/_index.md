@@ -28,7 +28,3 @@ It compiles JSON datasets into production-ready static API endpoints for CDN hos
 - API root (`/api`) acts as a discovery document for available endpoints.
 - Files and directories prefixed with `_` or `.` are ignored by the builder.
 
-### Delivery Model
-
-`fauxrest` can emit multiple outputs in one build, such as JSON for API delivery,
-TypeScript modules for frontend builds, and SQLite for offline query workloads.

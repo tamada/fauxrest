@@ -1,12 +1,11 @@
 baseURL = "https://tamada.github.io/fauxrest"
-languageCode = "en-us"
 defaultContentLanguage = "en"
 title = "FauxREST"
-googleAnalytics = ""
 theme = ["github.com/tamada/hugo_theme_mod", "github.com/nunocoracao/blowfish/v2"]
+googleAnalytics = "G-EXCS4F5X2L"
 
 [params]
-logo = "fauxrest.svg" # relative path from docs/assets.
+logo = "fauxrest.svg"
 description = "Pseudo-REST Static API Generator"
 dateFormat = "2006-01-02"
 copyright = "Copyright &copy; 2026 by Haruaki Tamada. Made with [Hugo](https://gohugo.io/). Deployed to [GitHub Pages](https://pages.github.com/)."

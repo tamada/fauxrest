@@ -59,6 +59,20 @@ When using template-style sub-path keys such as `"${year}"`, provide `$values` i
 
 When values are not known in advance, use `$derive` to derive expansion values from loaded input data. `$derive` is only valid under template sub-path keys and cannot be used together with `$values`.
 
+A `$derive.pattern` extracts a regular expression capture, so its result is always a **string** and can never match a numeric field under `$filter` (`eq` is type-strict: `"2024"` does not equal `2024`). Set `type` to convert the derived value to another scalar kind:
+
+- `"string"`: stringify the value, for matching a numeric field against string data.
+- `"int"`: parse as a 64-bit integer.
+- `"float"`: parse as a floating point number.
+- `"bool"`: parse the literals `true` and `false`.
+- `"auto"`: infer conservatively. `true`/`false` become booleans and integers are converted only when the conversion round-trips losslessly, so `"007"` and `"+7"` stay strings. Floats are never inferred; request `"float"` explicitly.
+
+Omitting `type` performs no conversion, which is the behavior of releases before 0.0.4. Values that fail to convert are skipped instead of aborting the build, and are reported together with the other non-derivable values.
+
+The converted value is what gets deduplicated, rendered as a path segment, and substituted into `$filter` conditions, so `"type": "int"` applied to `"007"` yields the endpoint `/7`.
+
+Note that `"auto"` makes a value derived from a string field stop matching that same field under `eq` once it is inferred as a number (`$filter` reports this as a type mismatch warning). Prefer an explicit type such as `"int"` unless that is what you intend.
+
 ```json
 {
   "api": {
@@ -88,6 +102,15 @@ When values are not known in advance, use `$derive` to derive expansion values f
         "$derive": { "field": "from", "pattern": "^(\\d{4})" },
         "$filter": [
           { "field": "from", "op": "contains", "value": "{year}" }
+        ]
+      }
+    },
+    "papers": {
+      // "year" holds numbers; type: "int" makes the comparison numeric
+      "${year}": {
+        "$derive": { "field": "year", "pattern": "^(\\d{4})", "type": "int" },
+        "$filter": [
+          { "field": "year", "op": "eq", "value": "{year}" }
         ]
       }
     },
