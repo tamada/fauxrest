@@ -30,6 +30,7 @@ jobs:
         id: update_version
         run: |
            sh .github/scripts/update_version.sh ${{ steps.vars.outputs.tag }}
+           cargo build
            git commit -a -m "update version to ${{ steps.vars.outputs.tag }}" || true
 
       - name: Push branch
