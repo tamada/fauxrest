@@ -53,29 +53,6 @@
 			]
 		},
 		{
-			"label": "run-tamadalab-derive-check",
-			"type": "shell",
-			"command": "cargo",
-			"args": [
-				"run",
-				"--",
-				"testdata/tamadalab",
-				"--config",
-				"testdata/tamadalab/_config.json",
-				"--dest",
-				"/tmp/fauxrest-tamadalab-intfix"
-			]
-		},
-		{
-			"label": "check-tamadalab-years-output",
-			"type": "shell",
-			"command": "sh",
-			"args": [
-				"-lc",
-				"find /tmp/fauxrest-tamadalab-intfix/papers/years -maxdepth 2 -type f | head -n 20"
-			]
-		},
-		{
 			"label": "jj-describe-current-final",
 			"type": "shell",
 			"command": "jj",
@@ -131,49 +108,12 @@
 			]
 		},
 		{
-			"label": "run-tamadalab-emit-debug",
-			"type": "shell",
-			"command": "cargo",
-			"args": [
-				"run",
-				"--",
-				"testdata/tamadalab",
-				"--config",
-				"testdata/tamadalab/_config.json",
-				"--dest",
-				"/tmp/fauxrest-tamadalab-emit-debug"
-			]
-		},
-		{
-			"label": "list-tamadalab-emit-debug",
-			"type": "shell",
-			"command": "sh",
-			"args": [
-				"-lc",
-				"find /tmp/fauxrest-tamadalab-emit-debug -maxdepth 5 -type f | sort"
-			]
-		},
-		{
 			"label": "cargo-test-type-mismatch-warning",
 			"type": "shell",
 			"command": "cargo",
 			"args": [
 				"test",
 				"-q"
-			]
-		},
-		{
-			"label": "run-tamadalab-type-warning-check",
-			"type": "shell",
-			"command": "cargo",
-			"args": [
-				"run",
-				"--",
-				"testdata/tamadalab",
-				"--config",
-				"testdata/tamadalab/_config.json",
-				"--dest",
-				"/tmp/fauxrest-tamadalab-warning-check"
 			]
 		},
 		{
@@ -219,20 +159,6 @@
 			"args": [
 				"test",
 				"-q"
-			]
-		},
-		{
-			"label": "run-tamadalab-after-warning-fix",
-			"type": "shell",
-			"command": "cargo",
-			"args": [
-				"run",
-				"--",
-				"testdata/tamadalab",
-				"--config",
-				"testdata/tamadalab/_config.json",
-				"--dest",
-				"/tmp/fauxrest-tamadalab-warning-check2"
 			]
 		},
 		{

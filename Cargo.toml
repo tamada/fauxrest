@@ -8,6 +8,7 @@ edition = "2024"
 authors = ["Haruaki Tamada <tamada@users.noreply.github.com>"]
 categories = ["command-line-utilities", "filesystem"]
 keywords = ["rest-api", "pseudo-rest-api"]
+exclude = ["testdata/", "docs/", ".github/", ".vscode/"]
 
 [[bin]]
 name = "fauxrest"
