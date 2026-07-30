@@ -4,7 +4,6 @@
 
 use std::fmt::Display;
 
-use regex::Regex;
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -170,7 +169,7 @@ fn regex_match(target: Option<&Value>, rhs: &Value, positive: bool) -> Result<bo
     let pattern = rhs
         .as_str()
         .ok_or_else(|| Error::Config("regex filter value must be a string".to_string()))?;
-    let re = Regex::new(pattern)
+    let re = crate::compile_regex(pattern)
         .map_err(|e| Error::Config(format!("invalid regex '{}': {}", pattern, e)))?;
     let matched = re.is_match(value);
     Ok(if positive { matched } else { !matched })

@@ -1,0 +1,39 @@
+{
+  "$config": [
+    {
+      "serializer": "json",
+      "layout": "index",
+      "dest": "dist"
+    }
+  ],
+  "items": {
+    "$emit": [],
+    "matched": {
+      "$emit": [
+        "list"
+      ],
+      "$filter": [
+        {
+          "field": "name",
+          "op": "regeq",
+          "value": "^item-0[0-9]{5}$"
+        },
+        {
+          "field": "tag",
+          "op": "regneq",
+          "value": "^gamma$"
+        },
+        {
+          "field": "name",
+          "op": "regeq",
+          "value": "item"
+        },
+        {
+          "field": "tag",
+          "op": "regeq",
+          "value": "^(alpha|beta)$"
+        }
+      ]
+    }
+  }
+}

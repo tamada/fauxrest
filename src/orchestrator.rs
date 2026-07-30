@@ -3,7 +3,6 @@
 //! Orchestrates the multi-serializer execution loop based on configuration,
 //! reading raw JSON and generating static files according to specified layouts.
 
-use regex::Regex;
 use serde_json::{Map, Value, json};
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
@@ -445,14 +444,17 @@ fn apply_filters(data: &Value, filters: &[FilterCondition]) -> Result<Value> {
 }
 
 /// Returns whether `item` satisfies every condition in `filters` (a
-/// logical AND). Only an explicit `Ok(false)` from
-/// [`FilterCondition::apply`] short-circuits to "does not match"; an `Err`
-/// (e.g. an invalid regex) is treated as if that condition matched and
-/// evaluation continues with the remaining conditions. This function itself
-/// never returns `Err`.
+/// logical AND).
+///
+/// A condition that cannot be evaluated is propagated as an error and aborts
+/// the build. `$filter` is what keeps records out of the generated API, so
+/// treating an unevaluable condition as a match would publish the very
+/// records it was meant to withhold — silently, and with a successful exit
+/// code. `Config` rejects unusable regex patterns when it loads, so a
+/// configuration that validated should never reach this path.
 fn matches_all_conditions(item: &Value, filters: &[FilterCondition]) -> Result<bool> {
     for cond in filters {
-        if let Ok(false) = cond.apply(item) {
+        if !cond.apply(item)? {
             return Ok(false);
         }
     }
@@ -619,7 +621,7 @@ fn derive_scalar_value(value: &Value, cfg: &DeriveConfig) -> Result<Option<Value
             Value::Bool(v) => v.to_string(),
             _ => return Ok(None),
         };
-        let re = Regex::new(pattern)
+        let re = crate::compile_regex(pattern)
             .map_err(|e| Error::Config(format!("invalid $derive.pattern '{}': {}", pattern, e)))?;
         if let Some(caps) = re.captures(&s) {
             if let Some(group1) = caps.get(1) {
@@ -901,5 +903,56 @@ impl LayoutTrait for FileLayout {
         } else {
             PathBuf::from(endpoint)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::FilterOp;
+
+    /// An unevaluable condition must abort rather than count as a match.
+    ///
+    /// [`Config`] rejects unusable regex patterns when it loads, so this
+    /// exercises the second layer on its own: a `FilterCondition` built
+    /// directly, bypassing validation, still must not fail open.
+    #[test]
+    fn test_unevaluable_condition_errors_instead_of_matching() {
+        let broken = FilterCondition {
+            field: "name".to_string(),
+            op: FilterOp::RegEq,
+            value: json!("([unclosed"),
+        };
+        let item = json!({"name": "alpha"});
+        assert!(matches_all_conditions(&item, &[broken]).is_err());
+    }
+
+    /// A non-string `value` for a regex operator is the same class of
+    /// problem and must not be swallowed either.
+    #[test]
+    fn test_non_string_regex_value_errors_instead_of_matching() {
+        let broken = FilterCondition {
+            field: "name".to_string(),
+            op: FilterOp::RegNeq,
+            value: json!(42),
+        };
+        let item = json!({"name": "alpha"});
+        assert!(matches_all_conditions(&item, &[broken]).is_err());
+    }
+
+    /// Failing closed must not swallow working conditions: evaluable filters
+    /// keep reporting matches and non-matches as before.
+    #[test]
+    fn test_evaluable_conditions_are_unaffected() {
+        let matching = FilterCondition {
+            field: "name".to_string(),
+            op: FilterOp::RegEq,
+            value: json!("^al"),
+        };
+        let item = json!({"name": "alpha"});
+        assert!(matches_all_conditions(&item, std::slice::from_ref(&matching)).unwrap());
+
+        let other = json!({"name": "beta"});
+        assert!(!matches_all_conditions(&other, &[matching]).unwrap());
     }
 }
