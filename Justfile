@@ -15,7 +15,11 @@ test:
 generate_demo: build
     PATH=target/debug vhs .github/assets/demo.tape
 
-# Times $filter regex evaluation over a generated dataset.
+# Criterion microbenchmark of the $filter evaluation loop.
+bench-micro:
+    cargo bench --bench filter_regex
+
+# Times $filter regex evaluation end to end over a generated dataset.
 # See testdata/bench/README.md. Pass a record count as `just bench 20000`.
 bench count="200000":
     python3 testdata/bench/generate.py {{count}}

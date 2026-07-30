@@ -1,7 +1,13 @@
-# Regex caching benchmark
+# Regex caching benchmark (end to end)
 
 Measures the cost of compiling `$filter` regex patterns, which used to happen
 once per record instead of once per pattern (issue #4).
+
+This is the whole-CLI measurement: it includes reading the dataset and writing
+the output, so it reflects what a user actually waits for. `benches/filter_regex.rs`
+covers the same change as a criterion microbenchmark over the evaluation loop
+alone — run that with `cargo bench` when you want a repeatable regression
+signal, and this one when you want the wall-clock figure.
 
 ## What it isolates
 
@@ -47,3 +53,7 @@ five runs each, on an Apple Silicon macOS machine:
 
 About 13x faster. The gap widens with more serializers, since each one
 re-materializes the routing tree and so re-evaluates every condition.
+
+`cargo bench` reports a much larger multiple (roughly 175x) for the same
+change, because it times only the evaluation loop. The difference between the
+two numbers is the JSON parsing and file writing that a real run cannot avoid.
