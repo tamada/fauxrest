@@ -1124,13 +1124,6 @@ fn test_static_invalid_glob_is_rejected() {
     assert!(format!("{}", err).contains("invalid $static glob"));
 }
 
-<<<<<<< HEAD
-/// The motivating case for string ordering: a date-range endpoint over a field
-/// that stores ISO-8601 dates as strings. `gte` used to accept every record,
-/// since both operands collapsed to `0.0` and `0.0 >= 0.0` holds.
-#[test]
-fn test_date_range_endpoint_filters_on_string_dates() {
-=======
 /// An unusable `$filter` pattern must be rejected at load time. Left to
 /// runtime it failed open and emitted every record, including the ones the
 /// condition existed to withhold.
@@ -1191,7 +1184,6 @@ fn test_non_string_regex_filter_value_is_rejected() {
 /// still narrows the collection to the matching records.
 #[test]
 fn test_valid_regex_filter_still_selects_matching_items() {
->>>>>>> origin/main
     let tmp = tempfile::tempdir().unwrap();
     let data_dir = tmp.path().join("data");
     let dest_dir = tmp.path().join("dist");
@@ -1199,39 +1191,18 @@ fn test_valid_regex_filter_still_selects_matching_items() {
 
     fs::create_dir(&data_dir).unwrap();
     fs::write(
-<<<<<<< HEAD
-        data_dir.join("activities.json"),
-        r#"[
-    {"id": 1, "from": "2018-04-01", "label": "old"},
-    {"id": 2, "from": "2021-09-15", "label": "recent"},
-    {"id": 3, "from": "2026-10-16", "label": "newest"}
-]"#,
-=======
         data_dir.join("items.json"),
         r#"[{"id": 1, "name": "alpha"}, {"id": 2, "name": "beta"}]"#,
->>>>>>> origin/main
     )
     .unwrap();
 
     let config_json = format!(
         r#"{{
     "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
-<<<<<<< HEAD
-    "activities": {{
-        "$emit": [],
-        "since2020": {{
-            "$emit": ["list"],
-            "$filter": [{{"field": "from", "op": "gte", "value": "2020-01-01"}}]
-        }},
-        "before2020": {{
-            "$emit": ["list"],
-            "$filter": [{{"field": "from", "op": "lt", "value": "2020-01-01"}}]
-=======
     "items": {{
         "selected": {{
             "$emit": ["list"],
             "$filter": [{{"field": "name", "op": "regeq", "value": "^al"}}]
->>>>>>> origin/main
         }}
     }}
 }}"#,
@@ -1242,7 +1213,63 @@ fn test_valid_regex_filter_still_selects_matching_items() {
     let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
     fauxrest::run(config, &data_dir).expect("run should succeed");
 
-<<<<<<< HEAD
+    let content = fs::read_to_string(dest_dir.join("items/selected/index.json"))
+        .expect("filtered endpoint should exist");
+    assert!(
+        content.contains("alpha"),
+        "alpha should be kept: {}",
+        content
+    );
+    assert!(
+        !content.contains("beta"),
+        "beta should have been filtered out: {}",
+        content
+    );
+}
+
+/// The motivating case for string ordering: a date-range endpoint over a field
+/// that stores ISO-8601 dates as strings. `gte` used to accept every record,
+/// since both operands collapsed to `0.0` and `0.0 >= 0.0` holds.
+#[test]
+fn test_date_range_endpoint_filters_on_string_dates() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("activities.json"),
+        r#"[
+    {"id": 1, "from": "2018-04-01", "label": "old"},
+    {"id": 2, "from": "2021-09-15", "label": "recent"},
+    {"id": 3, "from": "2026-10-16", "label": "newest"}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "activities": {{
+        "$emit": [],
+        "since2020": {{
+            "$emit": ["list"],
+            "$filter": [{{"field": "from", "op": "gte", "value": "2020-01-01"}}]
+        }},
+        "before2020": {{
+            "$emit": ["list"],
+            "$filter": [{{"field": "from", "op": "lt", "value": "2020-01-01"}}]
+        }}
+    }}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    fauxrest::run(config, &data_dir).expect("run should succeed");
+
     let since = fs::read_to_string(dest_dir.join("activities/since2020/index.json")).unwrap();
     assert!(
         since.contains("recent"),
@@ -1270,18 +1297,5 @@ fn test_valid_regex_filter_still_selects_matching_items() {
         !before.contains("recent"),
         "2021 must be excluded: {}",
         before
-=======
-    let content = fs::read_to_string(dest_dir.join("items/selected/index.json"))
-        .expect("filtered endpoint should exist");
-    assert!(
-        content.contains("alpha"),
-        "alpha should be kept: {}",
-        content
-    );
-    assert!(
-        !content.contains("beta"),
-        "beta should have been filtered out: {}",
-        content
->>>>>>> origin/main
     );
 }
