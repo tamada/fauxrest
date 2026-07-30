@@ -2,6 +2,7 @@
 //! [`FilterCondition`](crate::filter::FilterCondition) evaluation used to
 //! keep or drop items when materializing an endpoint.
 
+use std::cmp::Ordering;
 use std::fmt::Display;
 
 use regex::Regex;
@@ -12,6 +13,10 @@ use crate::{Error, Result};
 
 /// This operation targets the `$filter` directive.
 /// All operations use `op` to process the value of `field` and the given `value`.
+///
+/// The ordering operators accept two numbers or two strings; strings compare
+/// lexicographically, which is what sorts ISO-8601 dates correctly. Mixing
+/// kinds does not match and reports a type-mismatch warning.
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum FilterOp {
@@ -99,10 +104,10 @@ impl FilterCondition {
         let result = match self.op {
             FilterOp::Eq => target.is_some_and(|t| t.eq(&self.value)),
             FilterOp::Neq => target.is_some_and(|t| t.ne(&self.value)),
-            FilterOp::Gt => compare_ord(target, &self.value, |lhs, rhs| lhs > rhs),
-            FilterOp::Gte => compare_ord(target, &self.value, |lhs, rhs| lhs >= rhs),
-            FilterOp::Lt => compare_ord(target, &self.value, |lhs, rhs| lhs < rhs),
-            FilterOp::Lte => compare_ord(target, &self.value, |lhs, rhs| lhs <= rhs),
+            FilterOp::Gt => compare_ord(target, &self.value, Ordering::is_gt),
+            FilterOp::Gte => compare_ord(target, &self.value, Ordering::is_ge),
+            FilterOp::Lt => compare_ord(target, &self.value, Ordering::is_lt),
+            FilterOp::Lte => compare_ord(target, &self.value, Ordering::is_le),
             FilterOp::Contains => contains_value(target, &self.value),
             FilterOp::Exists => {
                 let expected = self.value.as_bool().unwrap_or(false);
@@ -115,28 +120,34 @@ impl FilterCondition {
     }
 }
 
-/// Returns `true` if `left` and `right` have the same JSON value kind (both
-/// strings, both numbers, etc.).
-fn is_match_type(left: &Value, right: &Value) -> bool {
-    let left_type = crate::value_kind(left);
-    let right_type = crate::value_kind(right);
-    left_type == right_type
-}
-
-/// Implements the ordering operators (`gt`, `gte`, `lt`, `lte`) by comparing
-/// `target` and `rhs` as `f64` values, but only when they are the same JSON
-/// kind; returns `false` if `target` is absent or the kinds differ.
-fn compare_ord<F>(target: Option<&Value>, rhs: &Value, cmp: F) -> bool
+/// Implements the ordering operators (`gt`, `gte`, `lt`, `lte`): orders
+/// `target` against `rhs` with [`scalar_ordering`] and asks `accept` whether
+/// that ordering satisfies the operator. Returns `false` if `target` is absent
+/// or the two cannot be ordered.
+fn compare_ord<F>(target: Option<&Value>, rhs: &Value, accept: F) -> bool
 where
-    F: Fn(f64, f64) -> bool,
+    F: Fn(Ordering) -> bool,
 {
     let Some(lhs) = target else {
         return false;
     };
-    if is_match_type(lhs, rhs) {
-        cmp(lhs.as_f64().unwrap_or(0.0), rhs.as_f64().unwrap_or(0.0))
-    } else {
-        false
+    scalar_ordering(lhs, rhs).is_some_and(accept)
+}
+
+/// Orders two values of the same JSON kind: numbers numerically, strings
+/// lexicographically by Unicode scalar value. Returns `None` when the kinds
+/// differ, or for kinds that have no useful order (bool, null, array,
+/// object).
+///
+/// Lexicographic order is what makes zero-padded, fixed-width formats such as
+/// ISO-8601 dates (`"2026-10-16"`) sort correctly as strings. It is *not*
+/// meaningful for free-form text like `"April 2023"`, so ordering such a field
+/// gives an answer that is well-defined but not the one a reader would expect.
+fn scalar_ordering(lhs: &Value, rhs: &Value) -> Option<Ordering> {
+    match (lhs, rhs) {
+        (Value::Number(_), Value::Number(_)) => lhs.as_f64()?.partial_cmp(&rhs.as_f64()?),
+        (Value::String(lhs), Value::String(rhs)) => Some(lhs.as_str().cmp(rhs.as_str())),
+        _ => None,
     }
 }
 
@@ -190,14 +201,20 @@ fn warn_if_type_mismatch(op: &FilterOp, field: &str, target: Option<&Value>, rig
 }
 
 /// Returns whether `lhs` and `rhs` have JSON kinds that make sense to
-/// compare under `op` (e.g. both numeric for ordering operators, both
-/// strings for regex operators). Operators without a specific kind
-/// requirement (like `exists`) are always considered compatible.
+/// compare under `op` (e.g. both numeric or both strings for ordering
+/// operators, both strings for regex operators). Operators without a specific
+/// kind requirement (like `exists`) are always considered compatible.
+///
+/// This drives the stderr type-mismatch warning only, so it has to agree with
+/// what the operators actually support — reporting a comparison the evaluator
+/// handles correctly would be noise.
 fn is_type_compatible(op: &FilterOp, lhs: &Value, rhs: &Value) -> bool {
     use FilterOp::*;
     match op {
         Eq | Neq => crate::value_kind(lhs) == crate::value_kind(rhs),
-        Gt | Gte | Lt | Lte => lhs.is_number() && rhs.is_number(),
+        Gt | Gte | Lt | Lte => {
+            (lhs.is_number() && rhs.is_number()) || (lhs.is_string() && rhs.is_string())
+        }
         Contains => match lhs {
             Value::String(_) => rhs.is_string(),
             Value::Array(_) => true,
@@ -205,5 +222,132 @@ fn is_type_compatible(op: &FilterOp, lhs: &Value, rhs: &Value) -> bool {
         },
         RegEq | RegNeq => lhs.is_string() && rhs.is_string(),
         _ => true,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    fn cond(field: &str, op: FilterOp, value: Value) -> FilterCondition {
+        FilterCondition {
+            field: field.to_string(),
+            op,
+            value,
+        }
+    }
+
+    /// Strings order lexicographically, which is what makes ISO-8601 dates
+    /// comparable. Before this worked, `gt`/`lt` matched nothing and
+    /// `gte`/`lte` matched everything, because both operands collapsed to
+    /// `0.0`.
+    #[test]
+    fn test_iso_dates_compare_as_strings() {
+        let early = json!({ "from": "2018-04-01" });
+        let late = json!({ "from": "2026-10-16" });
+        let pivot = json!("2020-01-01");
+
+        assert!(
+            cond("from", FilterOp::Gt, pivot.clone())
+                .apply(&late)
+                .unwrap()
+        );
+        assert!(
+            !cond("from", FilterOp::Gt, pivot.clone())
+                .apply(&early)
+                .unwrap()
+        );
+        assert!(
+            cond("from", FilterOp::Lt, pivot.clone())
+                .apply(&early)
+                .unwrap()
+        );
+        assert!(
+            !cond("from", FilterOp::Lt, pivot.clone())
+                .apply(&late)
+                .unwrap()
+        );
+    }
+
+    /// The inclusive operators must distinguish equal from unequal rather than
+    /// accepting everything.
+    #[test]
+    fn test_inclusive_operators_are_not_always_true() {
+        let item = json!({ "from": "2020-01-01" });
+        let same = json!("2020-01-01");
+        let later = json!("2021-01-01");
+
+        assert!(
+            cond("from", FilterOp::Gte, same.clone())
+                .apply(&item)
+                .unwrap()
+        );
+        assert!(cond("from", FilterOp::Lte, same).apply(&item).unwrap());
+        assert!(
+            !cond("from", FilterOp::Gte, later.clone())
+                .apply(&item)
+                .unwrap()
+        );
+        assert!(cond("from", FilterOp::Lte, later).apply(&item).unwrap());
+    }
+
+    /// Numeric ordering is unchanged.
+    #[test]
+    fn test_numbers_still_compare_numerically() {
+        let item = json!({ "age": 20 });
+        assert!(cond("age", FilterOp::Gt, json!(18)).apply(&item).unwrap());
+        assert!(!cond("age", FilterOp::Gt, json!(20)).apply(&item).unwrap());
+        assert!(cond("age", FilterOp::Gte, json!(20)).apply(&item).unwrap());
+        // Lexicographic order would call "20" less than "9"; numeric must not.
+        assert!(cond("age", FilterOp::Gt, json!(9)).apply(&item).unwrap());
+    }
+
+    /// Kinds that cannot be ordered, and mismatched pairs, do not match.
+    #[test]
+    fn test_unorderable_and_mismatched_kinds_do_not_match() {
+        for (item, value) in [
+            (json!({ "f": "2020" }), json!(2020)),
+            (json!({ "f": 2020 }), json!("2020")),
+            (json!({ "f": true }), json!(false)),
+            (json!({ "f": [1, 2] }), json!([1])),
+            (json!({ "f": null }), json!(null)),
+        ] {
+            for op in [FilterOp::Gt, FilterOp::Gte, FilterOp::Lt, FilterOp::Lte] {
+                assert!(
+                    !cond("f", op.clone(), value.clone()).apply(&item).unwrap(),
+                    "{:?} {} {:?} should not match",
+                    item,
+                    op,
+                    value
+                );
+            }
+        }
+    }
+
+    /// A missing field never matches an ordering operator.
+    #[test]
+    fn test_absent_field_does_not_match() {
+        let item = json!({ "other": "x" });
+        assert!(!cond("f", FilterOp::Gte, json!("a")).apply(&item).unwrap());
+    }
+
+    /// Two strings are a supported comparison now, so they must not be
+    /// reported as a type mismatch. Warning about a comparison the evaluator
+    /// handles correctly would be noise.
+    #[test]
+    fn test_string_operands_are_not_a_type_mismatch() {
+        for op in [FilterOp::Gt, FilterOp::Gte, FilterOp::Lt, FilterOp::Lte] {
+            assert!(
+                is_type_compatible(&op, &json!("2020-01-01"), &json!("2021-01-01")),
+                "two strings should be compatible under {}",
+                op
+            );
+            assert!(
+                !is_type_compatible(&op, &json!("2020"), &json!(2020)),
+                "mixed kinds should still be reported under {}",
+                op
+            );
+        }
     }
 }
