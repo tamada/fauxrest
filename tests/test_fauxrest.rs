@@ -1226,3 +1226,76 @@ fn test_valid_regex_filter_still_selects_matching_items() {
         content
     );
 }
+
+/// The motivating case for string ordering: a date-range endpoint over a field
+/// that stores ISO-8601 dates as strings. `gte` used to accept every record,
+/// since both operands collapsed to `0.0` and `0.0 >= 0.0` holds.
+#[test]
+fn test_date_range_endpoint_filters_on_string_dates() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("activities.json"),
+        r#"[
+    {"id": 1, "from": "2018-04-01", "label": "old"},
+    {"id": 2, "from": "2021-09-15", "label": "recent"},
+    {"id": 3, "from": "2026-10-16", "label": "newest"}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "activities": {{
+        "$emit": [],
+        "since2020": {{
+            "$emit": ["list"],
+            "$filter": [{{"field": "from", "op": "gte", "value": "2020-01-01"}}]
+        }},
+        "before2020": {{
+            "$emit": ["list"],
+            "$filter": [{{"field": "from", "op": "lt", "value": "2020-01-01"}}]
+        }}
+    }}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    fauxrest::run(config, &data_dir).expect("run should succeed");
+
+    let since = fs::read_to_string(dest_dir.join("activities/since2020/index.json")).unwrap();
+    assert!(
+        since.contains("recent"),
+        "2021 is after the pivot: {}",
+        since
+    );
+    assert!(
+        since.contains("newest"),
+        "2026 is after the pivot: {}",
+        since
+    );
+    assert!(
+        !since.contains("\"old\""),
+        "2018 must be excluded, not swept in by a degenerate comparison: {}",
+        since
+    );
+
+    let before = fs::read_to_string(dest_dir.join("activities/before2020/index.json")).unwrap();
+    assert!(
+        before.contains("\"old\""),
+        "2018 is before the pivot: {}",
+        before
+    );
+    assert!(
+        !before.contains("recent"),
+        "2021 must be excluded: {}",
+        before
+    );
+}
