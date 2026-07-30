@@ -1136,3 +1136,106 @@ fn test_static_invalid_glob_is_rejected() {
     };
     assert!(format!("{}", err).contains("invalid $static glob"));
 }
+
+/// An unusable `$filter` pattern must be rejected at load time. Left to
+/// runtime it failed open and emitted every record, including the ones the
+/// condition existed to withhold.
+#[test]
+fn test_invalid_filter_regex_is_rejected() {
+    let config_json = r#"{
+    "$config": [{"serializer": "json", "layout": "index", "dest": "dist"}],
+    "items": {
+        "broken": {
+            "$emit": ["list"],
+            "$filter": [{"field": "name", "op": "regeq", "value": "([unclosed"}]
+        }
+    }
+}"#;
+    let err = match Config::load_from_str(config_json) {
+        Ok(_) => panic!("config with an invalid $filter regex should be rejected"),
+        Err(e) => e,
+    };
+    let msg = format!("{}", err);
+    assert!(
+        msg.contains("invalid $filter regeq pattern"),
+        "unexpected error: {}",
+        msg
+    );
+    assert!(
+        msg.contains("items/broken"),
+        "error should name the offending node: {}",
+        msg
+    );
+}
+
+/// A non-string `value` for a regex operator cannot be evaluated either, and
+/// is caught by the same validation.
+#[test]
+fn test_non_string_regex_filter_value_is_rejected() {
+    let config_json = r#"{
+    "$config": [{"serializer": "json", "layout": "index", "dest": "dist"}],
+    "items": {
+        "broken": {
+            "$emit": ["list"],
+            "$filter": [{"field": "name", "op": "regneq", "value": 42}]
+        }
+    }
+}"#;
+    let err = match Config::load_from_str(config_json) {
+        Ok(_) => panic!("regex filter with a numeric value should be rejected"),
+        Err(e) => e,
+    };
+    let msg = format!("{}", err);
+    assert!(
+        msg.contains("requires a string value"),
+        "unexpected error: {}",
+        msg
+    );
+}
+
+/// Rejecting unusable patterns must not reject working ones: a valid `regeq`
+/// still narrows the collection to the matching records.
+#[test]
+fn test_valid_regex_filter_still_selects_matching_items() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("items.json"),
+        r#"[{"id": 1, "name": "alpha"}, {"id": 2, "name": "beta"}]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "items": {{
+        "selected": {{
+            "$emit": ["list"],
+            "$filter": [{{"field": "name", "op": "regeq", "value": "^al"}}]
+        }}
+    }}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    fauxrest::run(config, &data_dir).expect("run should succeed");
+
+    let content = fs::read_to_string(dest_dir.join("items/selected/index.json"))
+        .expect("filtered endpoint should exist");
+    assert!(
+        content.contains("alpha"),
+        "alpha should be kept: {}",
+        content
+    );
+    assert!(
+        !content.contains("beta"),
+        "beta should have been filtered out: {}",
+        content
+    );
+}
