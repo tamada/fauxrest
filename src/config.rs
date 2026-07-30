@@ -9,7 +9,6 @@
 
 pub use crate::filter::{FilterCondition, FilterOp};
 use crate::{Error, Result};
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeSet, HashMap};
@@ -257,6 +256,11 @@ pub struct DeriveConfig {
 ///
 /// The conversion runs on the value's stringified form, so it applies equally
 /// to values extracted by a `pattern` and to raw field values.
+///
+/// Deliberately limited to the two conversions that make sense for a value
+/// destined to become a path segment. `type` is an additive enum, so anything
+/// left out here can be introduced later without invalidating an existing
+/// configuration.
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum DeriveType {
@@ -265,15 +269,6 @@ pub enum DeriveType {
     /// Parse the value as a 64-bit integer. Values that do not parse
     /// exactly (including floats such as `2024.5`) are skipped.
     Int,
-    /// Parse the value as a floating point number.
-    Float,
-    /// Parse the literals `true` and `false`; anything else is skipped.
-    Bool,
-    /// Infer the type conservatively: `true`/`false` become booleans, and a
-    /// string becomes an integer only when the conversion round-trips
-    /// losslessly (so `"007"` and `"+7"` stay strings). Floats are never
-    /// inferred — request [`DeriveType::Float`] explicitly for those.
-    Auto,
 }
 
 /// Declares which non-JSON static files (images, CSS, …) found in the input
@@ -520,8 +515,8 @@ impl Config {
 
 impl Config {
     /// Recursively validates every node of the routing overlay, checking
-    /// `$aggregate` well-formedness and the `${name}` template sub-path
-    /// rules (see [`validate_node`]).
+    /// `$aggregate` well-formedness, `$filter` evaluability, and the
+    /// `${name}` template sub-path rules (see [`validate_node`]).
     fn validate(&self) -> Result<()> {
         if let Some(spec) = self.static_files.as_ref() {
             validate_static(spec)?;
@@ -551,12 +546,16 @@ fn validate_static(spec: &StaticSpec) -> Result<()> {
 /// Validates a single overlay node and recurses into its `sub_paths`.
 ///
 /// Checks that any `$aggregate` directive is well-formed (via
-/// [`validate_aggregate`]), and that `${name}` template sub-path keys have
-/// exactly one of `$values`/`$derive` set (and that non-template keys have
-/// neither).
+/// [`validate_aggregate`]), that any `$filter` condition can actually be
+/// evaluated (via [`validate_filter`]), and that `${name}` template sub-path
+/// keys have exactly one of `$values`/`$derive` set (and that non-template
+/// keys have neither).
 fn validate_node(path: &str, node: &ApiNode) -> Result<()> {
     if let Some(aggregate) = node.aggregate.as_ref() {
         validate_aggregate(path, aggregate)?;
+    }
+    if let Some(filters) = node.filter.as_ref() {
+        validate_filter(path, filters)?;
     }
 
     let mut keys = node.sub_paths.keys().cloned().collect::<Vec<_>>();
@@ -661,6 +660,37 @@ fn validate_aggregate(path: &str, aggregate: &AggregateSpec) -> Result<()> {
     Ok(())
 }
 
+/// Validates the `$filter` conditions on a single node: `regeq`/`regneq`
+/// require a string `value` that compiles as a regular expression.
+///
+/// `$filter` is what keeps records out of the generated API, so a pattern
+/// that cannot be evaluated has to be rejected before anything is written.
+/// Left to runtime it would fail in the unsafe direction and emit the very
+/// records the condition was meant to withhold.
+fn validate_filter(path: &str, filters: &[FilterCondition]) -> Result<()> {
+    for cond in filters {
+        if !matches!(cond.op, FilterOp::RegEq | FilterOp::RegNeq) {
+            continue;
+        }
+        let pattern = cond.value.as_str().ok_or_else(|| {
+            Error::Config(format!(
+                "{}: $filter {} on '{}' requires a string value, got {}",
+                path,
+                cond.op,
+                cond.field,
+                crate::value_kind(&cond.value)
+            ))
+        })?;
+        crate::compile_regex(pattern).map_err(|e| {
+            Error::Config(format!(
+                "{}: invalid $filter {} pattern '{}' on '{}': {}",
+                path, cond.op, pattern, cond.field, e
+            ))
+        })?;
+    }
+    Ok(())
+}
+
 /// If `key` has the `${name}` template sub-path syntax, returns `name`;
 /// otherwise returns `None`.
 fn template_var_from_key(key: &str) -> Option<&str> {
@@ -688,7 +718,7 @@ fn validate_derive(path: &str, derive: &DeriveSource) -> Result<()> {
         )));
     }
     if let Some(pattern) = cfg.pattern.as_ref() {
-        Regex::new(pattern).map_err(|e| {
+        crate::compile_regex(pattern).map_err(|e| {
             Error::Config(format!(
                 "{}: invalid $derive.pattern '{}': {}",
                 path, pattern, e

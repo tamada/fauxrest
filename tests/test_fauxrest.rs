@@ -570,57 +570,44 @@ fn test_derive_string_type_stringifies_numeric_field() {
     );
 }
 
-/// `$derive.type: "auto"` converts values that round-trip losslessly and
-/// leaves identifier-like strings such as `"007"` untouched, so the
-/// generated path keeps its leading zeros.
+/// `$derive.type` accepts only `string` and `int`, and rejects the wider set
+/// that 0.0.3 shipped. Rejecting at load time is the point: a config written
+/// against `auto`/`float`/`bool` fails instead of quietly changing behaviour.
+///
+/// The message is unhelpfully generic because `DeriveSource` is
+/// `#[serde(untagged)]`, which swallows the inner variant error. That affects
+/// every `$derive` mistake, not just this one, and is tracked separately.
 #[test]
-fn test_derive_auto_type_preserves_identifier_like_strings() {
-    let tmp = tempfile::tempdir().unwrap();
-    let data_dir = tmp.path().join("data");
-    let dest_dir = tmp.path().join("dist");
-    let config_file = tmp.path().join("fauxrest.json");
-
-    fs::create_dir(&data_dir).unwrap();
-    fs::write(
-        data_dir.join("rooms.json"),
-        r#"[
-    {"id": 1, "code": "007"},
-    {"id": 2, "code": "42"}
-]"#,
-    )
-    .unwrap();
-
-    let config_json = format!(
-        r#"{{
-    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+fn test_derive_type_accepts_only_string_and_int() {
+    let config = |value: &str| {
+        format!(
+            r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "dist"}}],
     "rooms": {{
         "${{code}}": {{
-            "$derive": {{ "field": "code", "type": "auto" }},
-            "$filter": [{{"field": "code", "op": "eq", "value": "{{code}}"}}],
-            "$emit": ["list"]
+            "$derive": {{ "field": "code", "type": "{}" }}
         }}
     }}
 }}"#,
-        dest_dir.display()
-    );
-    fs::write(&config_file, &config_json).unwrap();
+            value
+        )
+    };
 
-    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
-    assert!(fauxrest::run(config, data_dir).is_ok());
+    for unsupported in ["auto", "float", "bool"] {
+        assert!(
+            Config::load_from_str(config(unsupported)).is_err(),
+            "$derive.type {:?} should be rejected",
+            unsupported
+        );
+    }
 
-    // "007" stays a string, so the path keeps its leading zeros and still
-    // matches the string field it came from.
-    assert_contains(&dest_dir, "rooms/007/index.json", "\"id\": 1");
-    // "42" becomes the number 42. The path is unchanged, but the substituted
-    // filter value is now numeric and no longer equals the string field it
-    // was derived from, leaving the endpoint empty. This is the sharp edge of
-    // "auto" -- $filter reports it via a type-mismatch warning on stderr.
-    let numeric = fs::read_to_string(dest_dir.join("rooms/42/index.json")).unwrap();
-    assert_eq!(
-        numeric.split_whitespace().collect::<String>(),
-        "[]",
-        "auto turns \"42\" into a number, which no longer matches the string field"
-    );
+    for supported in ["string", "int"] {
+        assert!(
+            Config::load_from_str(config(supported)).is_ok(),
+            "$derive.type {:?} should still load",
+            supported
+        );
+    }
 }
 
 /// Values that cannot be converted to the requested `$derive.type` are
@@ -1137,11 +1124,74 @@ fn test_static_invalid_glob_is_rejected() {
     assert!(format!("{}", err).contains("invalid $static glob"));
 }
 
+<<<<<<< HEAD
 /// The motivating case for string ordering: a date-range endpoint over a field
 /// that stores ISO-8601 dates as strings. `gte` used to accept every record,
 /// since both operands collapsed to `0.0` and `0.0 >= 0.0` holds.
 #[test]
 fn test_date_range_endpoint_filters_on_string_dates() {
+=======
+/// An unusable `$filter` pattern must be rejected at load time. Left to
+/// runtime it failed open and emitted every record, including the ones the
+/// condition existed to withhold.
+#[test]
+fn test_invalid_filter_regex_is_rejected() {
+    let config_json = r#"{
+    "$config": [{"serializer": "json", "layout": "index", "dest": "dist"}],
+    "items": {
+        "broken": {
+            "$emit": ["list"],
+            "$filter": [{"field": "name", "op": "regeq", "value": "([unclosed"}]
+        }
+    }
+}"#;
+    let err = match Config::load_from_str(config_json) {
+        Ok(_) => panic!("config with an invalid $filter regex should be rejected"),
+        Err(e) => e,
+    };
+    let msg = format!("{}", err);
+    assert!(
+        msg.contains("invalid $filter regeq pattern"),
+        "unexpected error: {}",
+        msg
+    );
+    assert!(
+        msg.contains("items/broken"),
+        "error should name the offending node: {}",
+        msg
+    );
+}
+
+/// A non-string `value` for a regex operator cannot be evaluated either, and
+/// is caught by the same validation.
+#[test]
+fn test_non_string_regex_filter_value_is_rejected() {
+    let config_json = r#"{
+    "$config": [{"serializer": "json", "layout": "index", "dest": "dist"}],
+    "items": {
+        "broken": {
+            "$emit": ["list"],
+            "$filter": [{"field": "name", "op": "regneq", "value": 42}]
+        }
+    }
+}"#;
+    let err = match Config::load_from_str(config_json) {
+        Ok(_) => panic!("regex filter with a numeric value should be rejected"),
+        Err(e) => e,
+    };
+    let msg = format!("{}", err);
+    assert!(
+        msg.contains("requires a string value"),
+        "unexpected error: {}",
+        msg
+    );
+}
+
+/// Rejecting unusable patterns must not reject working ones: a valid `regeq`
+/// still narrows the collection to the matching records.
+#[test]
+fn test_valid_regex_filter_still_selects_matching_items() {
+>>>>>>> origin/main
     let tmp = tempfile::tempdir().unwrap();
     let data_dir = tmp.path().join("data");
     let dest_dir = tmp.path().join("dist");
@@ -1149,18 +1199,24 @@ fn test_date_range_endpoint_filters_on_string_dates() {
 
     fs::create_dir(&data_dir).unwrap();
     fs::write(
+<<<<<<< HEAD
         data_dir.join("activities.json"),
         r#"[
     {"id": 1, "from": "2018-04-01", "label": "old"},
     {"id": 2, "from": "2021-09-15", "label": "recent"},
     {"id": 3, "from": "2026-10-16", "label": "newest"}
 ]"#,
+=======
+        data_dir.join("items.json"),
+        r#"[{"id": 1, "name": "alpha"}, {"id": 2, "name": "beta"}]"#,
+>>>>>>> origin/main
     )
     .unwrap();
 
     let config_json = format!(
         r#"{{
     "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+<<<<<<< HEAD
     "activities": {{
         "$emit": [],
         "since2020": {{
@@ -1170,6 +1226,12 @@ fn test_date_range_endpoint_filters_on_string_dates() {
         "before2020": {{
             "$emit": ["list"],
             "$filter": [{{"field": "from", "op": "lt", "value": "2020-01-01"}}]
+=======
+    "items": {{
+        "selected": {{
+            "$emit": ["list"],
+            "$filter": [{{"field": "name", "op": "regeq", "value": "^al"}}]
+>>>>>>> origin/main
         }}
     }}
 }}"#,
@@ -1180,6 +1242,7 @@ fn test_date_range_endpoint_filters_on_string_dates() {
     let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
     fauxrest::run(config, &data_dir).expect("run should succeed");
 
+<<<<<<< HEAD
     let since = fs::read_to_string(dest_dir.join("activities/since2020/index.json")).unwrap();
     assert!(
         since.contains("recent"),
@@ -1207,5 +1270,18 @@ fn test_date_range_endpoint_filters_on_string_dates() {
         !before.contains("recent"),
         "2021 must be excluded: {}",
         before
+=======
+    let content = fs::read_to_string(dest_dir.join("items/selected/index.json"))
+        .expect("filtered endpoint should exist");
+    assert!(
+        content.contains("alpha"),
+        "alpha should be kept: {}",
+        content
+    );
+    assert!(
+        !content.contains("beta"),
+        "beta should have been filtered out: {}",
+        content
+>>>>>>> origin/main
     );
 }
