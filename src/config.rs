@@ -256,6 +256,11 @@ pub struct DeriveConfig {
 ///
 /// The conversion runs on the value's stringified form, so it applies equally
 /// to values extracted by a `pattern` and to raw field values.
+///
+/// Deliberately limited to the two conversions that make sense for a value
+/// destined to become a path segment. `type` is an additive enum, so anything
+/// left out here can be introduced later without invalidating an existing
+/// configuration.
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum DeriveType {
@@ -264,15 +269,6 @@ pub enum DeriveType {
     /// Parse the value as a 64-bit integer. Values that do not parse
     /// exactly (including floats such as `2024.5`) are skipped.
     Int,
-    /// Parse the value as a floating point number.
-    Float,
-    /// Parse the literals `true` and `false`; anything else is skipped.
-    Bool,
-    /// Infer the type conservatively: `true`/`false` become booleans, and a
-    /// string becomes an integer only when the conversion round-trips
-    /// losslessly (so `"007"` and `"+7"` stay strings). Floats are never
-    /// inferred — request [`DeriveType::Float`] explicitly for those.
-    Auto,
 }
 
 /// Declares which non-JSON static files (images, CSS, …) found in the input
