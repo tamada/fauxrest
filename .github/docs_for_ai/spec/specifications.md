@@ -63,15 +63,12 @@ A `$derive.pattern` extracts a regular expression capture, so its result is alwa
 
 - `"string"`: stringify the value, for matching a numeric field against string data.
 - `"int"`: parse as a 64-bit integer.
-- `"float"`: parse as a floating point number.
-- `"bool"`: parse the literals `true` and `false`.
-- `"auto"`: infer conservatively. `true`/`false` become booleans and integers are converted only when the conversion round-trips losslessly, so `"007"` and `"+7"` stay strings. Floats are never inferred; request `"float"` explicitly.
 
 Omitting `type` performs no conversion, which is the behavior of releases before 0.0.4. Values that fail to convert are skipped instead of aborting the build, and are reported together with the other non-derivable values.
 
 The converted value is what gets deduplicated, rendered as a path segment, and substituted into `$filter` conditions, so `"type": "int"` applied to `"007"` yields the endpoint `/7`.
 
-Note that `"auto"` makes a value derived from a string field stop matching that same field under `eq` once it is inferred as a number (`$filter` reports this as a type mismatch warning). Prefer an explicit type such as `"int"` unless that is what you intend.
+The set is deliberately limited to these two: a derived value becomes a path segment, and `string` and `int` are the kinds that makes sense for. `type` is an additive enum, so further kinds can be introduced later without invalidating an existing configuration. Anything else is rejected when the configuration loads.
 
 ```json
 {

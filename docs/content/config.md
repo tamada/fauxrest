@@ -146,15 +146,15 @@ optional `type` key converts the derived value before it is used:
 }
 ```
 
-Supported types are `string`, `int`, `float`, `bool`, and `auto`. Omitting
-`type` performs no conversion, which is how `$derive` behaved before 0.0.4.
+Supported types are `string` and `int`. Omitting `type` performs no
+conversion, which is how `$derive` behaved before 0.0.4.
 
 - Conversion applies to the whole derived value, so it also decides the
   generated path segment: `"type": "int"` on `"007"` produces `/7`.
 - Values that cannot be converted are skipped and reported as non-derivable
   rather than failing the build.
-- `auto` is deliberately conservative: it converts `true`/`false` and
-  integers that round-trip losslessly, leaving `"007"` and `"+7"` as strings,
-  and never inferring floats. Be aware that a value derived from a *string*
-  field and inferred as a number will no longer match that field under `eq`;
-  prefer an explicit type when in doubt.
+
+The set is deliberately small: a derived value becomes a path segment, and
+`string` and `int` are the kinds that makes sense for. `type` is an additive
+enum, so more can be introduced later without invalidating a configuration
+that works today.

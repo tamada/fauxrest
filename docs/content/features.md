@@ -47,7 +47,7 @@ Template keys such as `${year}` can be expanded by:
 
 - `$values` for static lists.
 - `$derive` for values extracted from loaded source data, with an optional
-  `type` (`string`, `int`, `float`, `bool`, `auto`) so derived values can be
+  `type` (`string`, `int`) so derived values can be
   compared against non-string fields.
 
 ## Build and Runtime Experience
