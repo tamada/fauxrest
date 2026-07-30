@@ -3,7 +3,6 @@
 //! Orchestrates the multi-serializer execution loop based on configuration,
 //! reading raw JSON and generating static files according to specified layouts.
 
-use regex::Regex;
 use serde_json::{Map, Value, json};
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
@@ -622,7 +621,7 @@ fn derive_scalar_value(value: &Value, cfg: &DeriveConfig) -> Result<Option<Value
             Value::Bool(v) => v.to_string(),
             _ => return Ok(None),
         };
-        let re = Regex::new(pattern)
+        let re = crate::compile_regex(pattern)
             .map_err(|e| Error::Config(format!("invalid $derive.pattern '{}': {}", pattern, e)))?;
         if let Some(caps) = re.captures(&s) {
             if let Some(group1) = caps.get(1) {

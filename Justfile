@@ -15,6 +15,16 @@ test:
 generate_demo: build
     PATH=target/debug vhs .github/assets/demo.tape
 
+# Times $filter regex evaluation over a generated dataset.
+# See testdata/bench/README.md. Pass a record count as `just bench 20000`.
+bench count="200000":
+    python3 testdata/bench/generate.py {{count}}
+    cargo build --release
+    rm -rf /tmp/fauxrest-bench
+    time ./target/release/fauxrest testdata/bench/data \
+        --config testdata/bench/_config.json \
+        --dest /tmp/fauxrest-bench
+
 docs:
     cargo llvm-cov --html
     cd docs && {{ container_runner }} run -it --rm hugomods/hugo:0.163.0

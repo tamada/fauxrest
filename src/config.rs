@@ -9,7 +9,6 @@
 
 pub use crate::filter::{FilterCondition, FilterOp};
 use crate::{Error, Result};
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeSet, HashMap};
@@ -686,7 +685,7 @@ fn validate_filter(path: &str, filters: &[FilterCondition]) -> Result<()> {
                 crate::value_kind(&cond.value)
             ))
         })?;
-        Regex::new(pattern).map_err(|e| {
+        crate::compile_regex(pattern).map_err(|e| {
             Error::Config(format!(
                 "{}: invalid $filter {} pattern '{}' on '{}': {}",
                 path, cond.op, pattern, cond.field, e
@@ -723,7 +722,7 @@ fn validate_derive(path: &str, derive: &DeriveSource) -> Result<()> {
         )));
     }
     if let Some(pattern) = cfg.pattern.as_ref() {
-        Regex::new(pattern).map_err(|e| {
+        crate::compile_regex(pattern).map_err(|e| {
             Error::Config(format!(
                 "{}: invalid $derive.pattern '{}': {}",
                 path, pattern, e
