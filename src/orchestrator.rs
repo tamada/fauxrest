@@ -658,10 +658,9 @@ fn derive_scalar_value(value: &Value, cfg: &DeriveConfig) -> Result<Option<Value
 /// The conversion always runs on the value's [`scalar_to_string`] form, so a
 /// string extracted by a `$derive.pattern` and a raw field value are treated
 /// identically. Returns `None` when the value cannot be represented in the
-/// requested type (a non-numeric string for `int`/`float`, anything but
-/// `true`/`false` for `bool`), which makes the caller skip that item and
-/// count it as non-derivable. `value_type` of `None` keeps the value
-/// unchanged.
+/// requested type (a non-numeric string for `int`), which makes the caller
+/// skip that item and count it as non-derivable. `value_type` of `None` keeps
+/// the value unchanged.
 ///
 /// The converted value is what gets deduplicated, rendered as a path
 /// segment, and substituted into `$filter` conditions, so `"$type": "int"`
@@ -675,38 +674,6 @@ fn cast_derived_value(value: Value, value_type: Option<&DeriveType>) -> Option<V
     match value_type {
         DeriveType::String => Some(Value::String(text)),
         DeriveType::Int => text.parse::<i64>().ok().map(|n| Value::Number(n.into())),
-        DeriveType::Float => text
-            .parse::<f64>()
-            .ok()
-            .and_then(serde_json::Number::from_f64)
-            .map(Value::Number),
-        DeriveType::Bool => match text.as_str() {
-            "true" => Some(Value::Bool(true)),
-            "false" => Some(Value::Bool(false)),
-            _ => None,
-        },
-        DeriveType::Auto => Some(infer_scalar_value(value)),
-    }
-}
-
-/// Implements [`DeriveType::Auto`]: converts a string that spells `true` or
-/// `false` to a bool, and one that holds an integer to a number, but only
-/// when the conversion round-trips back to the exact same text. That guard
-/// keeps identifier-like values such as `"007"`, `"+7"`, and `" 7"` as
-/// strings, so they survive as written in the generated path. Non-string
-/// values are already typed and pass through unchanged.
-fn infer_scalar_value(value: Value) -> Value {
-    let Value::String(ref s) = value else {
-        return value;
-    };
-    match s.as_str() {
-        "true" => return Value::Bool(true),
-        "false" => return Value::Bool(false),
-        _ => {}
-    }
-    match s.parse::<i64>() {
-        Ok(n) if n.to_string() == *s => Value::Number(n.into()),
-        _ => value,
     }
 }
 

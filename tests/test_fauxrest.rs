@@ -570,57 +570,44 @@ fn test_derive_string_type_stringifies_numeric_field() {
     );
 }
 
-/// `$derive.type: "auto"` converts values that round-trip losslessly and
-/// leaves identifier-like strings such as `"007"` untouched, so the
-/// generated path keeps its leading zeros.
+/// `$derive.type` accepts only `string` and `int`, and rejects the wider set
+/// that 0.0.3 shipped. Rejecting at load time is the point: a config written
+/// against `auto`/`float`/`bool` fails instead of quietly changing behaviour.
+///
+/// The message is unhelpfully generic because `DeriveSource` is
+/// `#[serde(untagged)]`, which swallows the inner variant error. That affects
+/// every `$derive` mistake, not just this one, and is tracked separately.
 #[test]
-fn test_derive_auto_type_preserves_identifier_like_strings() {
-    let tmp = tempfile::tempdir().unwrap();
-    let data_dir = tmp.path().join("data");
-    let dest_dir = tmp.path().join("dist");
-    let config_file = tmp.path().join("fauxrest.json");
-
-    fs::create_dir(&data_dir).unwrap();
-    fs::write(
-        data_dir.join("rooms.json"),
-        r#"[
-    {"id": 1, "code": "007"},
-    {"id": 2, "code": "42"}
-]"#,
-    )
-    .unwrap();
-
-    let config_json = format!(
-        r#"{{
-    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+fn test_derive_type_accepts_only_string_and_int() {
+    let config = |value: &str| {
+        format!(
+            r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "dist"}}],
     "rooms": {{
         "${{code}}": {{
-            "$derive": {{ "field": "code", "type": "auto" }},
-            "$filter": [{{"field": "code", "op": "eq", "value": "{{code}}"}}],
-            "$emit": ["list"]
+            "$derive": {{ "field": "code", "type": "{}" }}
         }}
     }}
 }}"#,
-        dest_dir.display()
-    );
-    fs::write(&config_file, &config_json).unwrap();
+            value
+        )
+    };
 
-    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
-    assert!(fauxrest::run(config, data_dir).is_ok());
+    for unsupported in ["auto", "float", "bool"] {
+        assert!(
+            Config::load_from_str(config(unsupported)).is_err(),
+            "$derive.type {:?} should be rejected",
+            unsupported
+        );
+    }
 
-    // "007" stays a string, so the path keeps its leading zeros and still
-    // matches the string field it came from.
-    assert_contains(&dest_dir, "rooms/007/index.json", "\"id\": 1");
-    // "42" becomes the number 42. The path is unchanged, but the substituted
-    // filter value is now numeric and no longer equals the string field it
-    // was derived from, leaving the endpoint empty. This is the sharp edge of
-    // "auto" -- $filter reports it via a type-mismatch warning on stderr.
-    let numeric = fs::read_to_string(dest_dir.join("rooms/42/index.json")).unwrap();
-    assert_eq!(
-        numeric.split_whitespace().collect::<String>(),
-        "[]",
-        "auto turns \"42\" into a number, which no longer matches the string field"
-    );
+    for supported in ["string", "int"] {
+        assert!(
+            Config::load_from_str(config(supported)).is_ok(),
+            "$derive.type {:?} should still load",
+            supported
+        );
+    }
 }
 
 /// Values that cannot be converted to the requested `$derive.type` are
