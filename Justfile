@@ -92,14 +92,24 @@ fmt-record:
     hash=$(git rev-parse HEAD)
     subject=$(git log -1 --pretty=%s)
 
-    if ! git diff --quiet HEAD -- . ; then
-        echo "⚠ Working tree is dirty; commit the formatting pass before recording." >&2
-        exit 1
-    fi
-
+    # Idempotent: checked first, so re-running after this recipe dirties the
+    # tree with its own edit still reports cleanly instead of tripping the
+    # dirty-tree guard below.
     if grep -qx "$hash" .git-blame-ignore-revs 2>/dev/null; then
         echo "already recorded: $hash ($subject)"
         exit 0
+    fi
+
+    if [ "${subject#style:}" = "$subject" ]; then
+        echo "⚠ HEAD is not a formatting commit: $subject" >&2
+        echo "  Only 'style:' revisions belong in .git-blame-ignore-revs." >&2
+        exit 1
+    fi
+
+    # Ignore this file itself: it is the one thing this recipe is allowed to change.
+    if ! git diff --quiet HEAD -- . ':!.git-blame-ignore-revs' ; then
+        echo "⚠ Working tree is dirty; commit the formatting pass before recording." >&2
+        exit 1
     fi
 
     # Entries must be bare 40-character hashes on their own line; git rejects
