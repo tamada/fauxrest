@@ -57,3 +57,40 @@ container:
         -t {{container_image}}/fauxrest:{{ app_version }} \
         -f Containerfile \
         .
+
+# Pre-push checks: clippy, format, and tests
+pre-push:
+    #!/bin/bash
+    set -e
+    echo "=== Running pre-push checks ==="
+
+    echo "Running clippy..."
+    cargo clippy -- -D warnings
+
+    echo "Checking format..."
+    if cargo fmt --all --check > /dev/null 2>&1; then
+        echo "✓ Format OK"
+    else
+        echo "❌ Format issues detected. Run 'just fmt-fix' to fix."
+        exit 1
+    fi
+
+    echo "Running tests..."
+    cargo test
+
+    echo "✓ All checks passed, ready to push"
+
+# Apply format fixes and update git-blame-ignore-revs
+fmt-fix:
+    #!/bin/bash
+    set -e
+    cargo fmt --all
+
+    COMMIT_HASH=$(git rev-parse HEAD)
+    COMMIT_MSG=$(git log -1 --pretty=%B | head -1)
+
+    # Check if current commit is already recorded
+    if ! grep -q "$COMMIT_HASH" .git-blame-ignore-revs 2>/dev/null; then
+        echo "$COMMIT_HASH  # $COMMIT_MSG" >> .git-blame-ignore-revs
+        echo "✓ Updated .git-blame-ignore-revs with $COMMIT_HASH"
+    fi
