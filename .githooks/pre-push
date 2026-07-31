@@ -1,0 +1,22 @@
+#!/bin/bash
+# Pre-push hook to run quality checks before pushing
+# This hook is optional. To enable it, run:
+#   git config core.hooksPath .githooks
+
+set -e
+
+echo "=== Running pre-push checks ==="
+
+echo "Running clippy..."
+cargo clippy -- -D warnings
+
+echo "Checking format..."
+if ! cargo fmt --all --check > /dev/null 2>&1; then
+    echo "❌ Format issues detected. Run 'just fmt' to fix."
+    exit 1
+fi
+
+echo "Running tests..."
+cargo test
+
+echo "✓ All checks passed, ready to push"

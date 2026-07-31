@@ -1,0 +1,12 @@
+# Revisions ignored by `git blame` — formatting-only changes with no behavioral effect.
+#
+# Entries must be full 40-character object names; abbreviated hashes are rejected.
+# Append new entries with `just fmt-record` after committing a formatting pass.
+#
+# Usage:
+#   git blame --ignore-revs-file .git-blame-ignore-revs <file>
+# or, once per clone:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style: format code for better readability in main.rs, serializers.rs, and static_files.rs
+02c1f7de0809bd095a0a8df90b321b97c87c9831

@@ -4,10 +4,10 @@
 //! ([`JSONSerializer`], [`TypescriptSerializer`], [`SqliteSerializer`]) that
 //! turn a `serde_json::Value` into the bytes written for each endpoint.
 
-use serde_json::Value;
-use rusqlite::{params, Connection};
-use std::fs;
 use crate::Error;
+use rusqlite::{Connection, params};
+use serde_json::Value;
+use std::fs;
 
 /// Trait for physical data serialization
 pub trait Serializer {
@@ -52,7 +52,9 @@ impl Serializer for JSONSerializer {
         }
     }
     /// Returns the extension 'json'
-    fn extension(&self) -> &str { "json" }
+    fn extension(&self) -> &str {
+        "json"
+    }
 }
 
 /// Serializes data in TypeScript/JavaScript (ESM) format
@@ -72,7 +74,9 @@ impl Serializer for TypescriptSerializer {
         Ok(format!("export const data = {};", json).into_bytes())
     }
     /// Returns the extension 'ts'
-    fn extension(&self) -> &str { "ts" }
+    fn extension(&self) -> &str {
+        "ts"
+    }
 }
 
 /// Serializes data as a SQLite database
@@ -86,7 +90,9 @@ impl Serializer for SqliteSerializer {
         fs::read(tmp.path()).map_err(|e| e.into())
     }
     /// Returns the extension 'db'
-    fn extension(&self) -> &str { "db" }
+    fn extension(&self) -> &str {
+        "db"
+    }
 }
 
 impl SqliteSerializer {
@@ -98,7 +104,10 @@ impl SqliteSerializer {
         conn.execute("CREATE TABLE data (id INTEGER PRIMARY KEY, value TEXT)", [])?;
         if let Some(arr) = d.as_array() {
             for (i, val) in arr.iter().enumerate() {
-                conn.execute("INSERT INTO data (id, value) VALUES (?1, ?2)", params![i as i64, val.to_string()])?;
+                conn.execute(
+                    "INSERT INTO data (id, value) VALUES (?1, ?2)",
+                    params![i as i64, val.to_string()],
+                )?;
             }
         }
         Ok(())

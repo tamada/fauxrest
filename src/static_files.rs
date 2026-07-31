@@ -108,7 +108,11 @@ pub(crate) fn copy_static_files(config: &Config, data_dir: &Path) -> Result<()> 
         return Ok(());
     }
 
-    let dests: Vec<&Path> = config.serializers.iter().map(|s| s.dest.as_path()).collect();
+    let dests: Vec<&Path> = config
+        .serializers
+        .iter()
+        .map(|s| s.dest.as_path())
+        .collect();
     if dests.is_empty() {
         return Ok(());
     }
@@ -117,12 +121,7 @@ pub(crate) fn copy_static_files(config: &Config, data_dir: &Path) -> Result<()> 
 }
 
 /// Recursively walks `dir`, copying matching files into each destination.
-fn walk_and_copy(
-    root: &Path,
-    dir: &Path,
-    policy: &StaticPolicy,
-    dests: &[&Path],
-) -> Result<()> {
+fn walk_and_copy(root: &Path, dir: &Path, policy: &StaticPolicy, dests: &[&Path]) -> Result<()> {
     let entries = fs::read_dir(dir).map_err(Error::Io)?;
     for entry in entries {
         let entry = entry.map_err(Error::Io)?;

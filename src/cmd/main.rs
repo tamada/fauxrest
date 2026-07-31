@@ -274,14 +274,14 @@ mod tests {
         (dir, path)
     }
 
-    const CONFIG_BODY: &str =
-        r#"{"$config": [{"serializer": "typescript", "layout": "file", "dest": "from-config", "minify": true}]}"#;
+    const CONFIG_BODY: &str = r#"{"$config": [{"serializer": "typescript", "layout": "file", "dest": "from-config", "minify": true}]}"#;
 
     /// Without CLI overrides, every serializer field comes from the config file.
     #[test]
     fn config_values_used_when_no_cli_override() {
         let (_dir, path) = write_config(CONFIG_BODY);
-        let args = Args::try_parse_from(["fauxrest", "data", "-c", path.to_str().unwrap()]).unwrap();
+        let args =
+            Args::try_parse_from(["fauxrest", "data", "-c", path.to_str().unwrap()]).unwrap();
         let config = args.load_config().unwrap();
         assert_eq!(config.serializers.len(), 1);
         let s = &config.serializers[0];
@@ -343,14 +343,9 @@ mod tests {
         let (_dir, path) = write_config(
             r#"{"$config": [{"serializer": "json", "layout": "index", "dest": "from-config"}]}"#,
         );
-        let args = Args::try_parse_from([
-            "fauxrest",
-            "data",
-            "-c",
-            path.to_str().unwrap(),
-            "--minify",
-        ])
-        .unwrap();
+        let args =
+            Args::try_parse_from(["fauxrest", "data", "-c", path.to_str().unwrap(), "--minify"])
+                .unwrap();
         let config = args.load_config().unwrap();
         assert!(config.serializers[0].minify);
     }
