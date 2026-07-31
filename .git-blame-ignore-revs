@@ -1,0 +1,5 @@
+# This file records commits that should be ignored by `git blame`
+# Typically formatting-only commits (style:, chore: refactor commits)
+# Usage: git blame --ignore-revs-file .git-blame-ignore-revs <file>
+
+02c1f7d  # style: format code for better readability in main.rs, serializers.rs, and static_files.rs
