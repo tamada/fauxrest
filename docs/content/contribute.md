@@ -34,6 +34,41 @@ Keep command parsing and process-level concerns outside library boundaries.
 - Require clean builds with no warnings or linter issues.
 - Keep tests deterministic and isolated.
 
+CI runs `cargo clippy -- -D warnings` and `cargo fmt --all --check` on every push
+and pull request. To run the same gates locally before sharing a change:
+
+```sh
+just pre-push
+```
+
+An optional `pre-push` hook runs the same checks automatically. It is opt-in:
+
+```sh
+git config core.hooksPath .githooks   # enable
+git config --unset core.hooksPath     # disable
+```
+
+Note that `jj` does not run Git hooks, so the hook does not fire on
+`jj git push`. Run `just pre-push` directly when working through `jj`.
+
+## Formatting
+
+Formatting-only revisions add noise to `git blame`, so they are recorded in
+`.git-blame-ignore-revs`. After running a formatting pass, use:
+
+```sh
+just fmt-fix
+```
+
+which applies `cargo fmt --all` and appends the current revision to
+`.git-blame-ignore-revs` if it is not already listed.
+
+To skip those revisions when reading history:
+
+```sh
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
 ## Version Control Workflow
 
 Project workflow uses Jujutsu (`jj`):
