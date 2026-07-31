@@ -12,7 +12,7 @@ cargo clippy -- -D warnings
 
 echo "Checking format..."
 if ! cargo fmt --all --check > /dev/null 2>&1; then
-    echo "❌ Format issues detected. Run 'just fmt-fix' to fix."
+    echo "❌ Format issues detected. Run 'just fmt' to fix."
     exit 1
 fi
 

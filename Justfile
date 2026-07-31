@@ -71,7 +71,7 @@ pre-push:
     if cargo fmt --all --check > /dev/null 2>&1; then
         echo "✓ Format OK"
     else
-        echo "❌ Format issues detected. Run 'just fmt-fix' to fix."
+        echo "❌ Format issues detected. Run 'just fmt' to fix."
         exit 1
     fi
 
@@ -80,17 +80,29 @@ pre-push:
 
     echo "✓ All checks passed, ready to push"
 
-# Apply format fixes and update git-blame-ignore-revs
-fmt-fix:
-    #!/bin/bash
-    set -e
+# Apply `cargo fmt` across the workspace. Commit it alone with a `style:` subject.
+fmt:
     cargo fmt --all
 
-    COMMIT_HASH=$(git rev-parse HEAD)
-    COMMIT_MSG=$(git log -1 --pretty=%B | head -1)
+# Record HEAD in .git-blame-ignore-revs. Run *after* committing a formatting pass.
+fmt-record:
+    #!/usr/bin/env bash
+    set -euo pipefail
 
-    # Check if current commit is already recorded
-    if ! grep -q "$COMMIT_HASH" .git-blame-ignore-revs 2>/dev/null; then
-        echo "$COMMIT_HASH  # $COMMIT_MSG" >> .git-blame-ignore-revs
-        echo "✓ Updated .git-blame-ignore-revs with $COMMIT_HASH"
+    hash=$(git rev-parse HEAD)
+    subject=$(git log -1 --pretty=%s)
+
+    if ! git diff --quiet HEAD -- . ; then
+        echo "⚠ Working tree is dirty; commit the formatting pass before recording." >&2
+        exit 1
     fi
+
+    if grep -qx "$hash" .git-blame-ignore-revs 2>/dev/null; then
+        echo "already recorded: $hash ($subject)"
+        exit 0
+    fi
+
+    # Entries must be bare 40-character hashes on their own line; git rejects
+    # abbreviated names and does not accept trailing comments.
+    printf '\n# %s\n%s\n' "$subject" "$hash" >> .git-blame-ignore-revs
+    echo "✓ recorded $hash ($subject)"
