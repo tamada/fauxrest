@@ -15,6 +15,34 @@ use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
+/// Deserializes `value` into `T`, surfacing the inner failure.
+///
+/// `$derive` and `$aggregate` each accept two JSON shapes. Deriving
+/// `#[serde(untagged)]` for those enums made serde try both variants and, when
+/// both failed, discard the individual reasons in favour of "data did not match
+/// any variant of untagged enum ..." — so a rejected `$derive.type`, a
+/// misspelled key, and a value of the wrong kind were all reported identically,
+/// naming none of them. Dispatching on the JSON shape by hand and routing the
+/// chosen variant through here keeps the diagnostic serde already produced.
+fn from_json_value<T, E>(value: Value) -> std::result::Result<T, E>
+where
+    T: serde::de::DeserializeOwned,
+    E: serde::de::Error,
+{
+    T::deserialize(value).map_err(serde::de::Error::custom)
+}
+
+/// Builds the error for a directive whose JSON is neither of the shapes it
+/// accepts, naming the directive and what it wanted.
+fn shape_error<E: serde::de::Error>(directive: &str, expected: &str, got: &Value) -> E {
+    serde::de::Error::custom(format!(
+        "{} must be {}, got {}",
+        directive,
+        expected,
+        crate::value_kind(got)
+    ))
+}
+
 /// Selects which physical outputs are produced for a collection endpoint via
 /// the `$emit` directive.
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -29,14 +57,33 @@ pub enum EmitTarget {
 /// The value of a `$aggregate` directive: either a plain list of source
 /// paths (flat mode) or a full [`AggregateConfig`] with an explicit mode and
 /// per-source key mapping.
-#[derive(Deserialize, Debug, Clone, PartialEq)]
-#[serde(untagged)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum AggregateSpec {
     /// Shorthand form: `"$aggregate": ["a", "b"]`, equivalent to flat mode
     /// with each entry as an unkeyed source.
     Paths(Vec<String>),
     /// Full form: `"$aggregate": { "mode": ..., "sources": [...] }`.
     Config(AggregateConfig),
+}
+
+impl<'de> Deserialize<'de> for AggregateSpec {
+    /// Dispatches on the JSON shape rather than deriving `#[serde(untagged)]`,
+    /// so a malformed full form reports what is actually wrong with it rather
+    /// than a generic "did not match any variant".
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        match Value::deserialize(deserializer)? {
+            value @ Value::Array(_) => from_json_value(value).map(AggregateSpec::Paths),
+            value @ Value::Object(_) => from_json_value(value).map(AggregateSpec::Config),
+            other => Err(shape_error(
+                "$aggregate",
+                "a list of source paths or an object",
+                &other,
+            )),
+        }
+    }
 }
 
 /// Full form of an `$aggregate` directive, specifying the merge [`AggregateMode`]
@@ -65,13 +112,31 @@ pub enum AggregateMode {
 
 /// A single entry of an `$aggregate.sources` list: either a bare path string
 /// or a [`AggregateSourceMapping`] that renames the key used in keyed mode.
-#[derive(Deserialize, Debug, Clone, PartialEq)]
-#[serde(untagged)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum AggregateSource {
     /// A bare source path, e.g. `"job-histories"`.
     Path(String),
     /// A source path with an explicit `as` key alias.
     Mapping(AggregateSourceMapping),
+}
+
+impl<'de> Deserialize<'de> for AggregateSource {
+    /// Dispatches on the JSON shape so a malformed object reports its own
+    /// failure rather than a generic "did not match any variant".
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        match Value::deserialize(deserializer)? {
+            Value::String(path) => Ok(AggregateSource::Path(path)),
+            value @ Value::Object(_) => from_json_value(value).map(AggregateSource::Mapping),
+            other => Err(shape_error(
+                "$aggregate source entry",
+                "a source path or an object",
+                &other,
+            )),
+        }
+    }
 }
 
 /// Maps a source dataset/endpoint path to an alternate key name, used in
@@ -219,14 +284,28 @@ pub struct ApiNode {
 
 /// The value of a `$derive` directive: either a bare field-name shorthand or
 /// a full [`DeriveConfig`] with an extraction pattern.
-#[derive(Deserialize, Debug, Clone, PartialEq)]
-#[serde(untagged)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum DeriveSource {
     /// Shorthand form: `"$derive": "field"`, deriving template values
     /// directly from the named field's raw value.
     Field(String),
     /// Full form: `"$derive": { "field": ..., "pattern": ... }`.
     Config(DeriveConfig),
+}
+
+impl<'de> Deserialize<'de> for DeriveSource {
+    /// Dispatches on the JSON shape so a malformed object reports its own
+    /// failure rather than a generic "did not match any variant".
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        match Value::deserialize(deserializer)? {
+            Value::String(field) => Ok(DeriveSource::Field(field)),
+            value @ Value::Object(_) => from_json_value(value).map(DeriveSource::Config),
+            other => Err(shape_error("$derive", "a field name or an object", &other)),
+        }
+    }
 }
 
 /// Full form of a `$derive` directive: the source `field` to read from each
