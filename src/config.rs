@@ -245,7 +245,7 @@ pub struct DeriveConfig {
     /// A `pattern` always extracts a string, so without this the derived
     /// value can never match a numeric or boolean field under `$filter`.
     /// `None` keeps the extracted value as-is, which is the behavior of
-    /// releases before 0.0.4.
+    /// releases before 0.0.3, where this field was introduced.
     #[serde(default, rename = "type")]
     pub value_type: Option<DeriveType>,
 }
@@ -863,7 +863,7 @@ mod tests {
 
     /// Checks that a `$derive` object carrying an explicit `"type"` parses
     /// into the matching [`DeriveType`], and that omitting `"type"` leaves
-    /// it unset (the pre-0.0.4 behavior).
+    /// it unset (the pre-0.0.3 behavior).
     #[test]
     fn test_parse_derive_value_type() {
         let mut tmp = tempfile::NamedTempFile::new().unwrap();
