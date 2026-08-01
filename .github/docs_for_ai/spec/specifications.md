@@ -64,7 +64,9 @@ A `$derive.pattern` extracts a regular expression capture, so its result is alwa
 - `"string"`: stringify the value, for matching a numeric field against string data.
 - `"int"`: parse as a 64-bit integer.
 
-Omitting `type` performs no conversion, which is the behavior of releases before 0.0.4. Values that fail to convert are skipped instead of aborting the build, and are reported together with the other non-derivable values.
+Omitting `type` performs no conversion, which is the behavior of releases before 0.0.3. Values that fail to convert are skipped instead of aborting the build, and are reported together with the other non-derivable values.
+
+`type` was introduced in 0.0.3, which also accepted `"float"`, `"bool"` and `"auto"`. Those three are rejected from 0.0.4 onwards.
 
 The converted value is what gets deduplicated, rendered as a path segment, and substituted into `$filter` conditions, so `"type": "int"` applied to `"007"` yields the endpoint `/7`.
 

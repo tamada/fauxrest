@@ -574,9 +574,8 @@ fn test_derive_string_type_stringifies_numeric_field() {
 /// that 0.0.3 shipped. Rejecting at load time is the point: a config written
 /// against `auto`/`float`/`bool` fails instead of quietly changing behaviour.
 ///
-/// The message is unhelpfully generic because `DeriveSource` is
-/// `#[serde(untagged)]`, which swallows the inner variant error. That affects
-/// every `$derive` mistake, not just this one, and is tracked separately.
+/// See `test_config_errors_name_what_is_wrong` for the message itself, which
+/// now names the rejected variant.
 #[test]
 fn test_derive_type_accepts_only_string_and_int() {
     let config = |value: &str| {
@@ -1298,4 +1297,78 @@ fn test_date_range_endpoint_filters_on_string_dates() {
         "2021 must be excluded: {}",
         before
     );
+}
+
+/// Config errors must name what is actually wrong.
+///
+/// `$derive` and `$aggregate` each accept two JSON shapes. While those enums
+/// derived `#[serde(untagged)]`, serde tried both variants and, when both
+/// failed, reported only "data did not match any variant of untagged enum ..."
+/// — every mistake below produced that same sentence, naming none of them.
+#[test]
+fn test_config_errors_name_what_is_wrong() {
+    let derive = |body: &str| {
+        format!(
+            r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "dist"}}],
+    "papers": {{"${{year}}": {{"$derive": {}}}}}
+}}"#,
+            body
+        )
+    };
+    let aggregate = |body: &str| {
+        format!(
+            r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "dist"}}],
+    "bundle": {{"$aggregate": {}}}
+}}"#,
+            body
+        )
+    };
+
+    let cases: [(String, &str); 8] = [
+        // The value rejected by the 0.0.4 narrowing has to be named, since a
+        // config carried over from 0.0.3 fails on exactly this.
+        (derive(r#"{"field": "year", "type": "auto"}"#), "auto"),
+        (derive(r#"{"fields": "year"}"#), "missing field `field`"),
+        (
+            derive(r#"{"field": "year", "pattern": 42}"#),
+            "invalid type",
+        ),
+        (derive("42"), "$derive must be a field name or an object"),
+        (
+            aggregate(r#"{"mode": "nested", "sources": ["papers"]}"#),
+            "nested",
+        ),
+        (
+            aggregate(r#"{"sources": [42]}"#),
+            "$aggregate source entry must be",
+        ),
+        (
+            aggregate(r#"{"sources": [{"form": "papers"}]}"#),
+            "missing field `from`",
+        ),
+        (
+            aggregate(r#""papers""#),
+            "$aggregate must be a list of source paths or an object",
+        ),
+    ];
+
+    for (config_json, expected) in cases {
+        let err = match Config::load_from_str(&config_json) {
+            Ok(_) => panic!("should be rejected: {}", config_json),
+            Err(e) => format!("{}", e),
+        };
+        assert!(
+            err.contains(expected),
+            "error should mention {:?}, got: {}",
+            expected,
+            err
+        );
+        assert!(
+            !err.contains("did not match any variant"),
+            "error should not fall back to the untagged message, got: {}",
+            err
+        );
+    }
 }

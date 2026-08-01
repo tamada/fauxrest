@@ -147,7 +147,10 @@ optional `type` key converts the derived value before it is used:
 ```
 
 Supported types are `string` and `int`. Omitting `type` performs no
-conversion, which is how `$derive` behaved before 0.0.4.
+conversion, which is how `$derive` behaved before 0.0.3.
+
+`type` was introduced in 0.0.3, which also accepted `float`, `bool` and
+`auto`. Those three are rejected from 0.0.4 onwards; see the release notes.
 
 - Conversion applies to the whole derived value, so it also decides the
   generated path segment: `"type": "int"` on `"007"` produces `/7`.
