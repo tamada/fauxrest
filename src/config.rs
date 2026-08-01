@@ -364,13 +364,31 @@ pub enum DeriveType {
 /// `--copy-static` command line flag) nothing is copied. `exclude` (deny)
 /// always wins: a file that matches an `exclude` glob is never copied, even
 /// when copying is forced on for every file via `--copy-static`.
-#[derive(Deserialize, Debug, Clone, PartialEq)]
-#[serde(untagged)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum StaticSpec {
     /// Shorthand form: a list of include (allow) globs.
     Include(Vec<String>),
     /// Full form with explicit `include` (allow) and `exclude` (deny) globs.
     Detailed(StaticConfig),
+}
+
+impl<'de> Deserialize<'de> for StaticSpec {
+    /// Dispatches on the JSON shape so a malformed form reports its own
+    /// failure rather than a generic "did not match any variant".
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        match Value::deserialize(deserializer)? {
+            value @ Value::Array(_) => from_json_value(value).map(StaticSpec::Include),
+            value @ Value::Object(_) => from_json_value(value).map(StaticSpec::Detailed),
+            other => Err(shape_error(
+                "$static",
+                "a list of globs or an object",
+                &other,
+            )),
+        }
+    }
 }
 
 /// Full static-copy configuration with explicit include/exclude glob lists.

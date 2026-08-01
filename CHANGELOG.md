@@ -45,12 +45,12 @@ can see them before upgrading.
   lexicographically, which is the correct order for zero-padded, fixed-width
   formats such as `"2026-10-16"`. It remains meaningless for free-form text like
   `"April 2023"`. ([#2], [#13])
-- Configuration errors name what is wrong. Every mistake inside a `$derive` or
-  `$aggregate` directive produced the same sentence — `data did not match any
-  variant of untagged enum ...` — naming none of them. A rejected `type`, a
-  misspelled key and a value of the wrong kind are now reported individually,
-  for example ``unknown variant `auto`, expected `string` or `int` ``. ([#16],
-  [#17])
+- Configuration errors name what is wrong. Every mistake inside a `$derive`,
+  `$aggregate` or `$static` directive produced the same sentence — `data did
+  not match any variant of untagged enum ...` — naming none of them. A rejected
+  `type`, a misspelled key and a value of the wrong kind are now reported
+  individually, for example ``unknown variant `auto`, expected `string` or
+  `int` ``. ([#16], [#17], [#20])
 
 ### Performance
 
@@ -136,4 +136,5 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#15]: https://github.com/tamada/fauxrest/pull/15
 [#16]: https://github.com/tamada/fauxrest/issues/16
 [#17]: https://github.com/tamada/fauxrest/pull/17
+[#20]: https://github.com/tamada/fauxrest/pull/20
 [#18]: https://github.com/tamada/fauxrest/pull/18
