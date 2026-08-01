@@ -145,6 +145,28 @@ For comprehensive technical architecture design, command line args, and subcomma
 
 ---
 
+## 🏷️ Powered by FauxREST
+
+Built an API with `fauxrest`? Feel free to show it off with this badge:
+
+[![Powered by: FauxREST](https://tamada.github.io/fauxrest/powered-by.svg)](https://github.com/tamada/fauxrest)
+
+Markdown:
+
+```markdown
+[![Powered by: FauxREST](https://tamada.github.io/fauxrest/powered-by.svg)](https://github.com/tamada/fauxrest)
+```
+
+HTML:
+
+```html
+<a href="https://github.com/tamada/fauxrest"><img
+    src="https://tamada.github.io/fauxrest/powered-by.svg"
+    alt="Powered by: FauxREST" width="157" height="20"></a>
+```
+
+Entirely optional, and no permission is needed — use it wherever you like.
+
 ## 😀 About
 
 ### 👩‍💼 Developers 👨‍💼
