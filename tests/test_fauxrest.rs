@@ -1301,8 +1301,8 @@ fn test_date_range_endpoint_filters_on_string_dates() {
 
 /// Config errors must name what is actually wrong.
 ///
-/// `$derive` and `$aggregate` each accept two JSON shapes. While those enums
-/// derived `#[serde(untagged)]`, serde tried both variants and, when both
+/// `$derive`, `$aggregate` and `$static` each accept two JSON shapes. While those
+/// enums derived `#[serde(untagged)]`, serde tried both variants and, when both
 /// failed, reported only "data did not match any variant of untagged enum ..."
 /// — every mistake below produced that same sentence, naming none of them.
 #[test]
@@ -1312,6 +1312,15 @@ fn test_config_errors_name_what_is_wrong() {
             r#"{{
     "$config": [{{"serializer": "json", "layout": "index", "dest": "dist"}}],
     "papers": {{"${{year}}": {{"$derive": {}}}}}
+}}"#,
+            body
+        )
+    };
+    let static_spec = |body: &str| {
+        format!(
+            r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "dist"}}],
+    "$static": {}
 }}"#,
             body
         )
@@ -1326,7 +1335,7 @@ fn test_config_errors_name_what_is_wrong() {
         )
     };
 
-    let cases: [(String, &str); 8] = [
+    let cases: [(String, &str); 10] = [
         // The value rejected by the 0.0.4 narrowing has to be named, since a
         // config carried over from 0.0.3 fails on exactly this.
         (derive(r#"{"field": "year", "type": "auto"}"#), "auto"),
@@ -1351,6 +1360,11 @@ fn test_config_errors_name_what_is_wrong() {
         (
             aggregate(r#""papers""#),
             "$aggregate must be a list of source paths or an object",
+        ),
+        (static_spec(r#"{"include": [42]}"#), "invalid type"),
+        (
+            static_spec("42"),
+            "$static must be a list of globs or an object",
         ),
     ];
 
