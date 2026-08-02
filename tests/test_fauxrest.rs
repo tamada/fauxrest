@@ -24,6 +24,12 @@ fn assert_file(dest: &Path, rel_path: &str) {
     assert!(metadata.is_file(), "{:?} should be regular file", file);
 }
 
+/// Reads a generated JSON endpoint for exact value assertions.
+fn read_json(dest: &Path, rel_path: &str) -> serde_json::Value {
+    let content = fs::read_to_string(dest.join(rel_path)).expect("Failed to read JSON endpoint");
+    serde_json::from_str(&content).expect("Failed to parse JSON endpoint")
+}
+
 #[test]
 fn test_json_ser_file_layout() {
     let tmp = tempfile::tempdir().unwrap();
@@ -380,8 +386,10 @@ fn test_emit_empty_set_is_allowed_and_emits_nothing_at_node() {
     assert!(!discovery.contains("\"/users/1\""));
 }
 
+/// A no-op pattern stringifies numeric values, while no pattern preserves
+/// their type for a strict `eq` filter.
 #[test]
-fn test_template_subpath_expansion_with_derive_from_int_field() {
+fn test_numeric_derive_preserves_type_without_pattern() {
     let tmp = tempfile::tempdir().unwrap();
     let data_dir = tmp.path().join("data");
     let dest_dir = tmp.path().join("dist");
@@ -391,8 +399,8 @@ fn test_template_subpath_expansion_with_derive_from_int_field() {
     fs::write(
         data_dir.join("papers.json"),
         r#"[
-    {"id": 1, "year": 2024, "from": "2024", "title": "p1"},
-    {"id": 2, "year": 2025, "from": "2025", "title": "p2"}
+    {"id": 1, "year": 2024, "title": "p1"},
+    {"id": 2, "year": 2025, "title": "p2"}
 ]"#,
     )
     .unwrap();
@@ -401,10 +409,18 @@ fn test_template_subpath_expansion_with_derive_from_int_field() {
         r#"{{
     "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
     "papers": {{
-        "years": {{
+        "with-pattern": {{
             "${{year}}": {{
                 "$derive": {{ "field": "year", "pattern": ".*" }},
-                "$filter": [{{"field": "from", "op": "contains", "value": "{{year}}"}}]
+                "$filter": [{{"field": "year", "op": "eq", "value": "{{year}}"}}],
+                "$emit": ["list"]
+            }}
+        }},
+        "without-pattern": {{
+            "${{year}}": {{
+                "$derive": "year",
+                "$filter": [{{"field": "year", "op": "eq", "value": "{{year}}"}}],
+                "$emit": ["list"]
             }}
         }}
     }}
@@ -416,8 +432,18 @@ fn test_template_subpath_expansion_with_derive_from_int_field() {
     let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
     assert!(fauxrest::run(config, data_dir).is_ok());
 
-    assert_file(&dest_dir, "papers/years/2024/index.json");
-    assert_file(&dest_dir, "papers/years/2025/index.json");
+    assert_eq!(
+        read_json(&dest_dir, "papers/with-pattern/2024/index.json"),
+        serde_json::json!([])
+    );
+    assert_eq!(
+        read_json(&dest_dir, "papers/without-pattern/2024/index.json"),
+        serde_json::json!([{"id": 1, "year": 2024, "title": "p1"}])
+    );
+    assert_eq!(
+        read_json(&dest_dir, "papers/without-pattern/2025/index.json"),
+        serde_json::json!([{"id": 2, "year": 2025, "title": "p2"}])
+    );
 }
 
 /// `$derive.type: "int"` lets a pattern-extracted value be compared against
