@@ -2,7 +2,7 @@
 
 use fauxrest::{Config, Layout};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 /// Helper to assert that a file exists and has content containing a substring.
 fn assert_contains(dest: &Path, rel_path: &str, expected: &str) {
@@ -1411,4 +1411,150 @@ fn test_config_errors_name_what_is_wrong() {
             err
         );
     }
+}
+
+/// Writes a `members.json` whose categories and generations both contain a
+/// value that should not reach the output, and runs `api` over it.
+fn members_fixture(tmp: &Path, api: &str) -> (PathBuf, PathBuf) {
+    let data_dir = tmp.join("data");
+    let dest_dir = tmp.join("dist");
+    let config_file = tmp.join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("members.json"),
+        r#"[
+    {"id": 1, "name": "a", "category": "active", "generation": 0},
+    {"id": 2, "name": "b", "category": "active", "generation": 10},
+    {"id": 3, "name": "c", "category": "non_member", "generation": 3}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "members": {}
+}}"#,
+        dest_dir.display(),
+        api
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    (data_dir, dest_dir)
+}
+
+/// A record removed by the node's `$filter` must not bring a template
+/// endpoint into existence. Deriving from pre-filter data used to publish
+/// `/members/non_member` as an empty collection, showing the excluded
+/// category name in the output.
+#[test]
+fn test_filtered_out_records_do_not_create_template_endpoints() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir) = members_fixture(
+        tmp.path(),
+        r#"{
+        "$filter": [{"field": "category", "op": "neq", "value": "non_member"}],
+        "${category}": {
+            "$derive": "category",
+            "$filter": [{"field": "category", "op": "eq", "value": "{category}"}],
+            "$emit": ["list"]
+        }
+    }"#,
+    );
+
+    let config: Config = Config::load_from_file(tmp.path().join("fauxrest.json")).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_file(&dest_dir, "members/active/index.json");
+    assert!(
+        !dest_dir.join("members/non_member").exists(),
+        "a filtered-out category must not produce an endpoint"
+    );
+}
+
+/// `$derive.exclude` drops the values it names, and only those. Excluding
+/// generation 0 must leave 10 alone — the regex workarounds this replaces
+/// truncated it to 1 or dropped it outright.
+#[test]
+fn test_derive_exclude_drops_only_named_values() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir) = members_fixture(
+        tmp.path(),
+        r#"{
+        "${generation}": {
+            "$derive": {"field": "generation", "exclude": [0]},
+            "$filter": [{"field": "generation", "op": "eq", "value": "{generation}"}],
+            "$emit": ["list"]
+        }
+    }"#,
+    );
+
+    let config: Config = Config::load_from_file(tmp.path().join("fauxrest.json")).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert!(
+        !dest_dir.join("members/0").exists(),
+        "excluded generation must not produce an endpoint"
+    );
+    assert_eq!(
+        read_json(&dest_dir, "members/10/index.json"),
+        serde_json::json!([{"id": 2, "name": "b", "category": "active", "generation": 10}]),
+        "10 must survive an exclusion of 0"
+    );
+    assert_file(&dest_dir, "members/3/index.json");
+}
+
+/// `exclude` compares by JSON kind, matching how `$filter` compares. An
+/// entry of the wrong kind excludes nothing rather than quietly matching.
+#[test]
+fn test_derive_exclude_compares_by_kind() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir) = members_fixture(
+        tmp.path(),
+        r#"{
+        "${generation}": {
+            "$derive": {"field": "generation", "exclude": ["0"]},
+            "$filter": [{"field": "generation", "op": "eq", "value": "{generation}"}],
+            "$emit": ["list"]
+        }
+    }"#,
+    );
+
+    let config: Config = Config::load_from_file(tmp.path().join("fauxrest.json")).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_file(&dest_dir, "members/0/index.json");
+}
+
+/// `$omit` must not reach the data `$derive` reads. Hiding a field from the
+/// output is about the payload, and letting it also erase the endpoints
+/// derived from that field would delete them without saying so.
+#[test]
+fn test_omit_does_not_hide_the_derived_field() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir) = members_fixture(
+        tmp.path(),
+        r#"{
+        "$omit": ["generation"],
+        "${generation}": {
+            "$derive": "generation",
+            "$filter": [{"field": "generation", "op": "eq", "value": "{generation}"}],
+            "$emit": ["list"]
+        }
+    }"#,
+    );
+
+    let config: Config = Config::load_from_file(tmp.path().join("fauxrest.json")).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_file(&dest_dir, "members/0/index.json");
+    assert_file(&dest_dir, "members/10/index.json");
+
+    let root = read_json(&dest_dir, "members/index.json");
+    assert!(
+        !root.to_string().contains("generation"),
+        "the omitted field must still be absent from the payload: {}",
+        root
+    );
 }

@@ -327,6 +327,19 @@ pub struct DeriveConfig {
     /// releases before 0.0.3, where this field was introduced.
     #[serde(default, rename = "type")]
     pub value_type: Option<DeriveType>,
+    /// Values to drop from the derived set, leaving no endpoint behind.
+    ///
+    /// Compared after `pattern` and `type` have run, so an entry names the
+    /// value as it would appear in the path, and it is compared by JSON kind
+    /// as well: `0` does not exclude the string `"0"`. Excluding a value the
+    /// data never produces is not an error, since which values occur depends
+    /// on the data of the moment.
+    ///
+    /// A `$filter` on the same node already keeps filtered-out records from
+    /// contributing values. `exclude` is for the cases that are awkward to
+    /// state as a predicate over records.
+    #[serde(default)]
+    pub exclude: Option<Vec<Value>>,
 }
 
 /// Target scalar type of a `$derive` directive's `type` field, applied to the
@@ -804,8 +817,9 @@ fn is_scalar(value: &Value) -> bool {
     matches!(value, Value::String(_) | Value::Number(_) | Value::Bool(_))
 }
 
-/// Validates a `$derive` directive: the target `field` must be non-empty,
-/// and if a `pattern` is given it must be a valid regular expression.
+/// Validates a `$derive` directive: the target `field` must be non-empty, a
+/// `pattern` must be a valid regular expression, and every `exclude` entry
+/// must be a scalar.
 fn validate_derive(path: &str, derive: &DeriveSource) -> Result<()> {
     let cfg = derive.to_config();
     if cfg.field.trim().is_empty() {
@@ -821,6 +835,18 @@ fn validate_derive(path: &str, derive: &DeriveSource) -> Result<()> {
                 path, pattern, e
             ))
         })?;
+    }
+    // A derived value is always a scalar, so a composite entry could never
+    // match one. Rejecting it here turns a clause that silently excludes
+    // nothing into a load error.
+    for value in cfg.exclude.iter().flatten() {
+        if value.is_array() || value.is_object() {
+            return Err(Error::Config(format!(
+                "{}: $derive.exclude takes scalars, got {}",
+                path,
+                crate::value_kind(value)
+            )));
+        }
     }
     Ok(())
 }
@@ -849,6 +875,7 @@ impl DeriveSource {
                 field: field.clone(),
                 pattern: None,
                 value_type: None,
+                exclude: None,
             },
             DeriveSource::Config(c) => c.clone(),
         }
@@ -1017,6 +1044,73 @@ mod tests {
         .unwrap();
 
         assert!(Config::load_from_file(tmp.path()).is_err());
+    }
+
+    /// A derived value is a scalar, so a composite `$derive.exclude` entry
+    /// could never match one. Rejecting it at load time keeps a clause that
+    /// excludes nothing from looking like it works.
+    #[test]
+    fn test_composite_derive_exclude_entry_is_rejected() {
+        let mut tmp = tempfile::NamedTempFile::new().unwrap();
+        write!(
+            tmp,
+            r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "papers": {{
+        "${{year}}": {{
+            "$derive": {{"field":"published", "exclude":[[2024]]}}
+        }}
+    }}
+}}"#
+        )
+        .unwrap();
+
+        let err = match Config::load_from_file(tmp.path()) {
+            Ok(_) => panic!("a composite exclude entry should be rejected"),
+            Err(e) => e.to_string(),
+        };
+        assert!(
+            err.contains("$derive.exclude") && err.contains("array"),
+            "error should name the directive and the offending kind, got: {}",
+            err
+        );
+    }
+
+    /// Scalars of every kind are accepted, since the derived value they have
+    /// to match can be any of them.
+    #[test]
+    fn test_scalar_derive_exclude_entries_are_accepted() {
+        let mut tmp = tempfile::NamedTempFile::new().unwrap();
+        write!(
+            tmp,
+            r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "papers": {{
+        "${{year}}": {{
+            "$derive": {{"field":"published", "exclude":[0, "draft", true]}}
+        }}
+    }}
+}}"#
+        )
+        .unwrap();
+
+        let config =
+            Config::load_from_file(tmp.path()).expect("scalar exclude entries should load");
+        let derive = config
+            .api
+            .get("papers")
+            .and_then(|n| n.sub_paths.get("${year}"))
+            .and_then(|n| n.derive.as_ref())
+            .expect("Missing $derive")
+            .to_config();
+        assert_eq!(
+            derive.exclude,
+            Some(vec![
+                serde_json::json!(0),
+                serde_json::json!("draft"),
+                serde_json::json!(true)
+            ])
+        );
     }
 
     /// Checks that `$derive` on a non-template (plain) sub-path key is

@@ -128,6 +128,42 @@ Template sub-paths like `${year}` support:
 
 `$values` and `$derive` are mutually exclusive at the same template node.
 
+### Which values `$derive` produces
+
+`$derive` enumerates its template values from the records that survive the
+node's effective `$filter` — its own, or the one inherited from its parent.
+A record the filter removed cannot create an endpoint:
+
+```json
+{
+  "members": {
+    "$filter": [{ "field": "category", "op": "neq", "value": "non_member" }],
+    "${category}": {
+      "$derive": "category",
+      "$filter": [{ "field": "category", "op": "eq", "value": "{category}" }]
+    }
+  }
+}
+```
+
+`/members/non_member` is not generated. Before 0.0.5 the values came from the
+unfiltered data, so it was created as an empty collection.
+
+`$pick` and `$omit` are not applied first: hiding a field from the payload
+does not remove the endpoints derived from it.
+
+To drop a value the filter keeps, name it in `exclude`:
+
+```json
+{
+  "$derive": { "field": "generation", "exclude": [0] }
+}
+```
+
+Entries are compared after `pattern` and `type` have run, and by JSON kind as
+well — `0` does not exclude the string `"0"`. Excluding a value the data does
+not contain is not an error, since which values occur depends on the data.
+
 ### Typed `$derive` values
 
 A `$derive.pattern` extracts a regular expression capture, so the derived
