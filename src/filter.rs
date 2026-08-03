@@ -15,7 +15,7 @@ use crate::{Error, Result};
 ///
 /// The ordering operators accept two numbers or two strings; strings compare
 /// lexicographically, which is what sorts ISO-8601 dates correctly. Mixing
-/// kinds does not match and reports a type-mismatch warning.
+/// kinds is an error rather than a non-match.
 #[derive(Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum FilterOp {
@@ -80,8 +80,14 @@ impl FilterCondition {
     /// unmatched for every operator except [`FilterOp::Exists`] (which
     /// checks for the field's presence) and [`FilterOp::RegNeq`] (which
     /// treats a missing field as not matching the pattern, i.e. `true`).
-    /// Returns an error if [`FilterOp::RegEq`]/[`FilterOp::RegNeq`] is used
-    /// with a non-string `value` or an invalid regex pattern.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::FilterType`](crate::Error::FilterType) when the
+    /// record's value and `value` hold JSON kinds this operator cannot
+    /// compare — see [`check_type_mismatch`]. Also returns an error if
+    /// [`FilterOp::RegEq`]/[`FilterOp::RegNeq`] is used with a non-string
+    /// `value` or an invalid regex pattern.
     ///
     /// # Examples
     ///
@@ -99,7 +105,7 @@ impl FilterCondition {
     /// ```
     pub fn apply(&self, item: &Value) -> Result<bool> {
         let target = item.get(&self.field);
-        warn_if_type_mismatch(&self.op, &self.field, target, &self.value);
+        check_type_mismatch(&self.op, &self.field, target, &self.value)?;
         let result = match self.op {
             FilterOp::Eq => target.is_some_and(|t| t.eq(&self.value)),
             FilterOp::Neq => target.is_some_and(|t| t.ne(&self.value)),
@@ -186,17 +192,37 @@ fn regex_match(target: Option<&Value>, rhs: &Value, positive: bool) -> Result<bo
     Ok(if positive { matched } else { !matched })
 }
 
-/// Emits a one-time diagnostic warning (via
-/// [`crate::emit_type_mismatch_warning`]) when `target` is present but its
-/// JSON kind is incompatible with `right` for the given operator. No-op if
-/// `target` is absent.
-fn warn_if_type_mismatch(op: &FilterOp, field: &str, target: Option<&Value>, right: &Value) {
+/// Fails when `target` is present but its JSON kind is incompatible with
+/// `right` for the given operator.
+///
+/// One field holding different kinds across records is a defect in the input
+/// data, not something to reconcile here: no single interpretation keeps every
+/// record, so continuing would publish an endpoint quietly missing whichever
+/// half lost. Stopping costs one rerun instead.
+///
+/// Absent fields and nulls are exempt. A field that is a number in most
+/// records and `null` in one is an unset value, not a conflicting type, and an
+/// explicit `"value": null` in a condition is how a configuration asks whether
+/// a field is unset.
+fn check_type_mismatch(
+    op: &FilterOp,
+    field: &str,
+    target: Option<&Value>,
+    right: &Value,
+) -> Result<()> {
     let Some(left) = target else {
-        return;
+        return Ok(());
     };
-    if !is_type_compatible(op, left, right) {
-        crate::emit_type_mismatch_warning(op, field, left, right);
+    if left.is_null() || right.is_null() || is_type_compatible(op, left, right) {
+        return Ok(());
     }
+    let (left_kind, right_kind) = (crate::value_kind(left), crate::value_kind(right));
+    let detail = if left_kind == right_kind {
+        format!("op '{op}' cannot compare two values of kind {left_kind}")
+    } else {
+        format!("the record holds {left_kind}, the condition compares against {right_kind}")
+    };
+    Err(Error::FilterType(format!("field '{field}': {detail}")))
 }
 
 /// Returns whether `lhs` and `rhs` have JSON kinds that make sense to
@@ -204,9 +230,9 @@ fn warn_if_type_mismatch(op: &FilterOp, field: &str, target: Option<&Value>, rig
 /// operators, both strings for regex operators). Operators without a specific
 /// kind requirement (like `exists`) are always considered compatible.
 ///
-/// This drives the stderr type-mismatch warning only, so it has to agree with
-/// what the operators actually support — reporting a comparison the evaluator
-/// handles correctly would be noise.
+/// This decides which comparisons [`check_type_mismatch`] rejects, so it has
+/// to agree with what the operators actually support — failing a comparison
+/// the evaluator handles correctly would reject valid data.
 fn is_type_compatible(op: &FilterOp, lhs: &Value, rhs: &Value) -> bool {
     use FilterOp::*;
     match op {
@@ -302,20 +328,74 @@ mod tests {
         assert!(cond("age", FilterOp::Gt, json!(9)).apply(&item).unwrap());
     }
 
-    /// Kinds that cannot be ordered, and mismatched pairs, do not match.
+    /// A record and a condition holding different kinds is the mixed-type
+    /// input this rejects, and the message has to name both kinds so the
+    /// offending record can be found.
     #[test]
-    fn test_unorderable_and_mismatched_kinds_do_not_match() {
+    fn test_mismatched_kinds_are_rejected() {
         for (item, value) in [
             (json!({ "f": "2020" }), json!(2020)),
             (json!({ "f": 2020 }), json!("2020")),
+        ] {
+            for op in [FilterOp::Eq, FilterOp::Gt, FilterOp::Gte, FilterOp::Lte] {
+                let err = cond("f", op.clone(), value.clone())
+                    .apply(&item)
+                    .expect_err("mixed kinds must be rejected");
+                let message = err.to_string();
+                assert!(
+                    message.contains("'f'")
+                        && message.contains("number")
+                        && message.contains("string"),
+                    "{:?} {} {:?} reported unhelpfully: {}",
+                    item,
+                    op,
+                    value,
+                    message
+                );
+            }
+        }
+    }
+
+    /// Both sides sharing a kind the operator cannot order is equally
+    /// unevaluable, and naming the operator is what makes it fixable.
+    #[test]
+    fn test_unorderable_kinds_are_rejected() {
+        for (item, value) in [
             (json!({ "f": true }), json!(false)),
             (json!({ "f": [1, 2] }), json!([1])),
-            (json!({ "f": null }), json!(null)),
         ] {
             for op in [FilterOp::Gt, FilterOp::Gte, FilterOp::Lt, FilterOp::Lte] {
+                let err = cond("f", op.clone(), value.clone())
+                    .apply(&item)
+                    .expect_err("unorderable kinds must be rejected");
                 assert!(
-                    !cond("f", op.clone(), value.clone()).apply(&item).unwrap(),
-                    "{:?} {} {:?} should not match",
+                    err.to_string().contains(&op.to_string()),
+                    "{:?} {} {:?} did not name the operator: {}",
+                    item,
+                    op,
+                    value,
+                    err
+                );
+            }
+        }
+    }
+
+    /// An unset value is not a conflicting type. A field left `null` in one
+    /// record out of many is ordinary data, and `"value": null` is how a
+    /// condition asks whether a field is unset — neither may fail the run.
+    #[test]
+    fn test_null_operands_are_exempt() {
+        for (item, value) in [
+            (json!({ "f": null }), json!(null)),
+            (json!({ "f": null }), json!(2020)),
+            (json!({ "f": null }), json!("2020")),
+            (json!({ "f": 2020 }), json!(null)),
+            (json!({ "f": "2020" }), json!(null)),
+        ] {
+            for op in [FilterOp::Eq, FilterOp::Neq, FilterOp::Gt, FilterOp::Lte] {
+                assert!(
+                    cond("f", op.clone(), value.clone()).apply(&item).is_ok(),
+                    "{:?} {} {:?} must not fail the run",
                     item,
                     op,
                     value

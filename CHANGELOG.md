@@ -30,6 +30,19 @@ can see them before upgrading.
   on those endpoints existing will produce fewer of them. `$pick` and `$omit`
   are still applied afterwards, so omitting a field from the payload does not
   remove the endpoints derived from it. ([#7])
+### Changed
+
+- **Breaking:** a `$filter` comparison whose two sides hold JSON kinds it
+  cannot evaluate now fails the run instead of printing a warning to stderr and
+  treating the condition as unmatched. This covers one field holding different
+  kinds across records — the case where no single `$derive.type` keeps every
+  record, so roughly half were dropped and the endpoint still published — and
+  operators applied to a kind they cannot order, such as `gt` on two booleans.
+  A no-op `"pattern": ".*"` over a numeric field is reported for the same
+  reason, rather than yielding an empty collection per derived value.
+  `null` and absent fields are exempt: a field left unset in some records is
+  ordinary data, and `"value": null` is how a condition asks whether a field is
+  unset. ([#3])
 
 ## [0.0.4] - 2026-08-01
 
@@ -148,6 +161,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 
 [#1]: https://github.com/tamada/fauxrest/issues/1
 [#2]: https://github.com/tamada/fauxrest/issues/2
+[#3]: https://github.com/tamada/fauxrest/issues/3
 [#4]: https://github.com/tamada/fauxrest/issues/4
 [#6]: https://github.com/tamada/fauxrest/issues/6
 [#7]: https://github.com/tamada/fauxrest/issues/7

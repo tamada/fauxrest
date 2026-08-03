@@ -4,7 +4,7 @@
 //! for compiling raw JSON datasets into structured static API endpoints.
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     sync::{Arc, Mutex, OnceLock},
 };
 
@@ -33,6 +33,12 @@ pub enum Error {
     /// Destination directory already contains files and overwrite is disabled
     #[error("{0}: dest is not empty, use --overwrite to overwrite existing files")]
     DestNotEmpty(String),
+
+    /// A `$filter` condition met operand kinds it cannot evaluate, either
+    /// because the record and the condition hold different JSON kinds or
+    /// because the operator does not support the kind they share.
+    #[error("$filter type error: {0}")]
+    FilterType(String),
 
     /// IO error
     #[error("IO error: {0}")]
@@ -68,37 +74,6 @@ mod static_files;
 pub use config::{Config, Layout, SerializerConfig, StaticConfig, StaticSpec};
 pub use orchestrator::run;
 pub use serializers::{JSONSerializer, Serializer, SqliteSerializer, TypescriptSerializer};
-
-use crate::config::FilterOp;
-
-/// Process-wide set of already-emitted `$filter` type-mismatch warning keys,
-/// used to deduplicate repeated warnings printed to stderr.
-static TYPE_MISMATCH_WARNINGS: OnceLock<Mutex<HashSet<String>>> = OnceLock::new();
-
-/// Prints a one-time warning to stderr when a `$filter` comparison mixes
-/// incompatible JSON value types (e.g. comparing a string field against a
-/// numeric literal).
-///
-/// The warning is deduplicated per `(field, op, lhs kind, rhs kind)` tuple
-/// via [`TYPE_MISMATCH_WARNINGS`], so the same mismatch is only reported once
-/// per process even if it occurs for many items.
-pub(crate) fn emit_type_mismatch_warning(op: &FilterOp, field: &str, lhs: &Value, rhs: &Value) {
-    let lhs_kind = value_kind(lhs);
-    let rhs_kind = value_kind(rhs);
-    let op_str = op.to_string();
-    let key = format!("{}|{}|{}|{}", field, op_str, lhs_kind, rhs_kind);
-    let warnings = TYPE_MISMATCH_WARNINGS.get_or_init(|| Mutex::new(HashSet::new()));
-    let mut guard = match warnings.lock() {
-        Ok(g) => g,
-        Err(_) => return,
-    };
-    if guard.insert(key) {
-        eprintln!(
-            "warning: $filter type mismatch for field '{}' with op '{}': lhs is {}, rhs is {}",
-            field, op_str, lhs_kind, rhs_kind
-        );
-    }
-}
 
 /// Process-wide cache of compiled `$filter`/`$derive` patterns, keyed by the
 /// pattern string.

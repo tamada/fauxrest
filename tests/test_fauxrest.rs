@@ -386,14 +386,13 @@ fn test_emit_empty_set_is_allowed_and_emits_nothing_at_node() {
     assert!(!discovery.contains("\"/users/1\""));
 }
 
-/// A no-op pattern stringifies numeric values, while no pattern preserves
-/// their type for a strict `eq` filter.
-#[test]
-fn test_numeric_derive_preserves_type_without_pattern() {
-    let tmp = tempfile::tempdir().unwrap();
-    let data_dir = tmp.path().join("data");
-    let dest_dir = tmp.path().join("dist");
-    let config_file = tmp.path().join("fauxrest.json");
+/// Writes `papers.json` holding two numeric-`year` records, plus a config
+/// deriving `${year}` through `derive` and filtering the same field with a
+/// strict `eq`. Shared by the two halves of the no-op-pattern regression.
+fn numeric_derive_fixture(tmp: &Path, derive: &str) -> (PathBuf, PathBuf, PathBuf) {
+    let data_dir = tmp.join("data");
+    let dest_dir = tmp.join("dist");
+    let config_file = tmp.join("fauxrest.json");
 
     fs::create_dir(&data_dir).unwrap();
     fs::write(
@@ -409,39 +408,57 @@ fn test_numeric_derive_preserves_type_without_pattern() {
         r#"{{
     "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
     "papers": {{
-        "with-pattern": {{
-            "${{year}}": {{
-                "$derive": {{ "field": "year", "pattern": ".*" }},
-                "$filter": [{{"field": "year", "op": "eq", "value": "{{year}}"}}],
-                "$emit": ["list"]
-            }}
-        }},
-        "without-pattern": {{
-            "${{year}}": {{
-                "$derive": "year",
-                "$filter": [{{"field": "year", "op": "eq", "value": "{{year}}"}}],
-                "$emit": ["list"]
-            }}
+        "${{year}}": {{
+            "$derive": {},
+            "$filter": [{{"field": "year", "op": "eq", "value": "{{year}}"}}],
+            "$emit": ["list"]
         }}
     }}
 }}"#,
-        dest_dir.display()
+        dest_dir.display(),
+        derive
     );
     fs::write(&config_file, &config_json).unwrap();
+
+    (data_dir, dest_dir, config_file)
+}
+
+/// A no-op pattern stringifies a numeric value, so the derived `"2024"` can
+/// never equal the number `2024` the records hold. That comparison is now
+/// rejected outright: before, it produced an empty collection per year and
+/// left the mistake to be noticed in the output.
+#[test]
+fn test_no_op_pattern_on_numeric_field_is_rejected() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, _dest_dir, config_file) =
+        numeric_derive_fixture(tmp.path(), r#"{ "field": "year", "pattern": ".*" }"#);
+
+    let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
+    let err = fauxrest::run(config, data_dir).expect_err("stringified derive must be rejected");
+    let message = err.to_string();
+    assert!(
+        message.contains("'year'") && message.contains("number") && message.contains("string"),
+        "error should name the field and both kinds, got: {}",
+        message
+    );
+}
+
+/// Without a pattern the derived value keeps its original JSON number, so the
+/// same strict `eq` selects the expected record for each year.
+#[test]
+fn test_numeric_derive_preserves_type_without_pattern() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir, config_file) = numeric_derive_fixture(tmp.path(), r#""year""#);
 
     let config: Config = Config::load_from_file(Path::new(&config_file)).unwrap();
     assert!(fauxrest::run(config, data_dir).is_ok());
 
     assert_eq!(
-        read_json(&dest_dir, "papers/with-pattern/2024/index.json"),
-        serde_json::json!([])
-    );
-    assert_eq!(
-        read_json(&dest_dir, "papers/without-pattern/2024/index.json"),
+        read_json(&dest_dir, "papers/2024/index.json"),
         serde_json::json!([{"id": 1, "year": 2024, "title": "p1"}])
     );
     assert_eq!(
-        read_json(&dest_dir, "papers/without-pattern/2025/index.json"),
+        read_json(&dest_dir, "papers/2025/index.json"),
         serde_json::json!([{"id": 2, "year": 2025, "title": "p2"}])
     );
 }
@@ -646,11 +663,14 @@ fn test_derive_type_conversion_failure_skips_value() {
     let config_file = tmp.path().join("fauxrest.json");
 
     fs::create_dir(&data_dir).unwrap();
+    // Every `year` is a number, so the fixture isolates conversion failure
+    // from the mixed-kind rejection: 2024.5 has no exact `int` form and is
+    // skipped, while a string here would fail the run instead.
     fs::write(
         data_dir.join("papers.json"),
         r#"[
     {"id": 1, "year": 2024},
-    {"id": 2, "year": "unknown"}
+    {"id": 2, "year": 2024.5}
 ]"#,
     )
     .unwrap();
@@ -675,7 +695,7 @@ fn test_derive_type_conversion_failure_skips_value() {
 
     assert_file(&dest_dir, "papers/2024/index.json");
     assert!(
-        !dest_dir.join("papers/unknown").exists(),
+        !dest_dir.join("papers/2024.5").exists(),
         "non-convertible value should not produce an endpoint"
     );
 }
