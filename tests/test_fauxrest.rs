@@ -1578,3 +1578,121 @@ fn test_omit_does_not_hide_the_derived_field() {
         root
     );
 }
+
+/// A build that fails partway must leave the destination as it was. Output
+/// used to be written endpoint by endpoint, so a later failure left a tree
+/// that was neither a complete build nor an absent one — and the next run
+/// then refused to start, because the destination was no longer empty.
+#[test]
+fn test_failed_build_leaves_the_destination_untouched() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::create_dir(&dest_dir).unwrap();
+    // A file the build does not own, of the kind static hosts expect to find
+    // beside the output.
+    fs::write(dest_dir.join("CNAME"), "example.com").unwrap();
+    fs::write(
+        data_dir.join("papers.json"),
+        r#"[{"id": 1, "title": "written before the failure"}]"#,
+    )
+    .unwrap();
+
+    // `papers` materializes first and writes; `zzz` then fails on a source
+    // that does not exist.
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}", "overwrite": true}}],
+    "zzz": {{"$aggregate": ["no-such-dataset"]}}
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(&config_file).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_err());
+
+    let mut left: Vec<String> = fs::read_dir(&dest_dir)
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        .collect();
+    left.sort();
+    assert_eq!(
+        left,
+        vec!["CNAME".to_string()],
+        "a failed build must leave neither output nor staging behind"
+    );
+}
+
+/// Publishing merges into the destination instead of replacing it, so files
+/// the build does not own survive. Static hosts keep `CNAME`, `.nojekyll` and
+/// similar beside the generated output.
+#[test]
+fn test_successful_build_keeps_unrelated_files_in_dest() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::create_dir(&dest_dir).unwrap();
+    fs::write(dest_dir.join("CNAME"), "example.com").unwrap();
+    fs::write(dest_dir.join(".nojekyll"), "").unwrap();
+    fs::write(data_dir.join("papers.json"), r#"[{"id": 1, "title": "p"}]"#).unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}", "overwrite": true}}]
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(&config_file).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_file(&dest_dir, "papers/index.json");
+    assert_eq!(
+        fs::read_to_string(dest_dir.join("CNAME")).unwrap(),
+        "example.com"
+    );
+    assert!(dest_dir.join(".nojekyll").exists());
+}
+
+/// The build must not leave its staging directory behind on success either.
+#[test]
+fn test_successful_build_removes_its_staging_directory() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("nested").join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(data_dir.join("papers.json"), r#"[{"id": 1, "title": "p"}]"#).unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}]
+}}"#,
+        dest_dir.display()
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    let config: Config = Config::load_from_file(&config_file).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_file(&dest_dir, "papers/index.json");
+    let siblings: Vec<String> = fs::read_dir(dest_dir.parent().unwrap())
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        .collect();
+    assert_eq!(
+        siblings,
+        vec!["dist".to_string()],
+        "staging must not survive the build, got: {:?}",
+        siblings
+    );
+}

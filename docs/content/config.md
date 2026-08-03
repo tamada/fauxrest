@@ -46,6 +46,12 @@ and the serializer `dest` directory already contains files, the build aborts
 with an error instead of clobbering the existing output. Set it to `true`
 (or pass `--overwrite` on the command line) to allow overwriting.
 
+A build writes into a staging directory beside `dest` and moves its output into
+place only after every step has succeeded, so a build that fails leaves `dest`
+as it was. Publishing merges into `dest` rather than replacing it: generated
+files are written over, and anything else already there — `CNAME`,
+`.nojekyll`, `_headers` and similar — is left alone.
+
 Command-line options take precedence over the configuration file
 (**CLI > config > default**). When you pass `-d/--dest`, `-s/--serializer`,
 `-l/--layout`, `--minify`, `--no-minify`, or `--overwrite` explicitly, that value

@@ -22,16 +22,6 @@ can see them before upgrading.
 
 ### Changed
 
-- **Breaking:** `$derive` enumerates its template values from the records that
-  survive the node's effective `$filter`, rather than from the unfiltered data.
-  A filtered-out record no longer creates an endpoint: a `members` node
-  excluding `category: "non_member"` used to publish `/members/non_member` as
-  an empty collection, showing the excluded name in the output. Builds relying
-  on those endpoints existing will produce fewer of them. `$pick` and `$omit`
-  are still applied afterwards, so omitting a field from the payload does not
-  remove the endpoints derived from it. ([#7])
-### Changed
-
 - **Breaking:** a `$filter` comparison whose two sides hold JSON kinds it
   cannot evaluate now fails the run instead of printing a warning to stderr and
   treating the condition as unmatched. This covers one field holding different
@@ -43,6 +33,25 @@ can see them before upgrading.
   `null` and absent fields are exempt: a field left unset in some records is
   ordinary data, and `"value": null` is how a condition asks whether a field is
   unset. ([#3])
+- **Breaking:** `$derive` enumerates its template values from the records that
+  survive the node's effective `$filter`, rather than from the unfiltered data.
+  A filtered-out record no longer creates an endpoint: a `members` node
+  excluding `category: "non_member"` used to publish `/members/non_member` as
+  an empty collection, showing the excluded name in the output. Builds relying
+  on those endpoints existing will produce fewer of them. `$pick` and `$omit`
+  are still applied afterwards, so omitting a field from the payload does not
+  remove the endpoints derived from it. ([#7])
+
+### Fixed
+
+- A build that fails partway no longer leaves what it had already written in
+  the serializer destination. Output was written endpoint by endpoint, so a
+  later failure left a tree that was neither a complete build nor an absent
+  one, and the next run then refused to start because the destination was no
+  longer empty. Everything is now written to a staging directory beside the
+  destination and moved into place only once every step has succeeded.
+  Publishing merges rather than replaces, so files the build does not own —
+  `CNAME`, `.nojekyll` and the like — are left alone. ([#23])
 
 ## [0.0.4] - 2026-08-01
 
@@ -165,6 +174,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#4]: https://github.com/tamada/fauxrest/issues/4
 [#6]: https://github.com/tamada/fauxrest/issues/6
 [#7]: https://github.com/tamada/fauxrest/issues/7
+[#23]: https://github.com/tamada/fauxrest/issues/23
 [#10]: https://github.com/tamada/fauxrest/pull/10
 [#11]: https://github.com/tamada/fauxrest/pull/11
 [#12]: https://github.com/tamada/fauxrest/pull/12
