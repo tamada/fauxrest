@@ -7,6 +7,7 @@ use serde_json::{Map, Value, json};
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::path::{Path, PathBuf};
+use tempfile::TempDir;
 
 use crate::Result;
 use crate::config::{
@@ -33,6 +34,10 @@ const DERIVE_CARDINALITY_WARN_THRESHOLD: usize = 1000;
 /// static assets allowed by the `$static` policy are copied into each
 /// destination.
 ///
+/// The build writes into [`Staging`] directories throughout and is published
+/// to the configured destinations only once every step has succeeded, so a
+/// build that fails leaves them as they were.
+///
 /// # Examples
 ///
 /// ```no_run
@@ -41,19 +46,126 @@ const DERIVE_CARDINALITY_WARN_THRESHOLD: usize = 1000;
 /// let config = Config::load_from_file("_config.json").expect("valid config");
 /// run(config, "data").expect("build should succeed");
 /// ```
-pub fn run<P: AsRef<Path>>(config: Config, data_dir: P) -> Result<()> {
+pub fn run<P: AsRef<Path>>(mut config: Config, data_dir: P) -> Result<()> {
     for s_conf in &config.serializers {
         ensure_dest_writable(s_conf)?;
     }
-    let data_dir = data_dir.as_ref();
+    let staging = Staging::redirect(&mut config)?;
+    build(&config, data_dir.as_ref())?;
+    staging.publish()
+}
+
+/// Runs the build itself, writing through whatever destinations `config`
+/// currently names. Split out of [`run`] so every fallible step happens while
+/// those destinations are still [`Staging`] directories.
+fn build(config: &Config, data_dir: &Path) -> Result<()> {
     let mut endpoints = Vec::new();
     let dataset = DataSource::new(data_dir)?;
     for s_conf in &config.serializers {
         let context: SerializerContext = s_conf.try_into()?;
         endpoints.extend(run_serializer(context, &dataset, &config.api)?);
     }
-    generate_discovery(&config, &endpoints)?;
-    crate::static_files::copy_static_files(&config, data_dir)?;
+    generate_discovery(config, &endpoints)?;
+    crate::static_files::copy_static_files(config, data_dir)
+}
+
+/// Prefix for staging directory names, so one left behind by a killed process
+/// is recognizable.
+const STAGING_PREFIX: &str = ".fauxrest-staging-";
+
+/// Points every serializer at a private directory for the duration of a
+/// build, keeping the real destinations untouched until it succeeds.
+///
+/// A build writes through three paths — endpoints, the discovery index, and
+/// copied static files — and all of them resolve against a serializer's
+/// `dest`, so redirecting `dest` covers every one of them.
+///
+/// Dropping this discards the staged output: a failed build leaves nothing
+/// behind, which is the whole point. Publishing is deliberately the last step,
+/// after every step that can fail on the data has already run.
+struct Staging {
+    /// Each staging directory paired with the destination its contents belong
+    /// in. Dropping the [`TempDir`] deletes the directory.
+    dirs: Vec<(TempDir, PathBuf)>,
+}
+
+impl Staging {
+    /// Replaces each serializer's `dest` with a fresh staging directory,
+    /// remembering where its contents are eventually to be published.
+    ///
+    /// The staging directory is created beside its destination rather than in
+    /// the system temporary directory, so publishing renames within one
+    /// filesystem instead of copying the whole output.
+    fn redirect(config: &mut Config) -> Result<Self> {
+        let mut dirs = Vec::new();
+        for s_conf in &mut config.serializers {
+            let parent = staging_parent(&s_conf.dest);
+            fs::create_dir_all(&parent).map_err(Error::Io)?;
+            let dir = tempfile::Builder::new()
+                .prefix(STAGING_PREFIX)
+                .tempdir_in(&parent)
+                .map_err(Error::Io)?;
+            let dest = std::mem::replace(&mut s_conf.dest, dir.path().to_path_buf());
+            dirs.push((dir, dest));
+        }
+        Ok(Staging { dirs })
+    }
+
+    /// Moves the staged output into the real destinations.
+    ///
+    /// Files are merged into what is already there rather than replacing the
+    /// destination wholesale: these outputs are published to static hosts, and
+    /// a `CNAME` or `.nojekyll` sitting next to them is not this build's to
+    /// delete. That makes publishing non-atomic, but it moves already-written
+    /// files and computes nothing, so the only failures left are the kind that
+    /// would break any write.
+    fn publish(self) -> Result<()> {
+        for (dir, dest) in &self.dirs {
+            publish_tree(dir.path(), dest)?;
+        }
+        Ok(())
+    }
+}
+
+/// Returns the directory to create a staging directory in, given a
+/// destination. A relative single-component `dest` such as `dist` has an empty
+/// parent, which is the current directory.
+fn staging_parent(dest: &Path) -> PathBuf {
+    match dest.parent() {
+        Some(parent) if !parent.as_os_str().is_empty() => parent.to_path_buf(),
+        _ => PathBuf::from("."),
+    }
+}
+
+/// Recursively moves everything in `staging` into `dest`, creating
+/// directories as needed and leaving unrelated entries in `dest` alone.
+fn publish_tree(staging: &Path, dest: &Path) -> Result<()> {
+    fs::create_dir_all(dest).map_err(Error::Io)?;
+    for entry in fs::read_dir(staging).map_err(Error::Io)? {
+        let entry = entry.map_err(Error::Io)?;
+        let target = dest.join(entry.file_name());
+        if entry.file_type().map_err(Error::Io)?.is_dir() {
+            publish_tree(&entry.path(), &target)?;
+        } else {
+            move_file(&entry.path(), &target)?;
+        }
+    }
+    Ok(())
+}
+
+/// Moves one file, falling back to a copy when it cannot be renamed.
+///
+/// A rename is what makes publishing cheap, but it only works within one
+/// filesystem; `dest` may be a mount point or a bind mount even though the
+/// staging directory sits beside it. The rename error is dropped in that case
+/// because the copy attempt that follows reports the real obstacle — a
+/// permission or space problem surfaces there just the same.
+fn move_file(from: &Path, to: &Path) -> Result<()> {
+    if fs::rename(from, to).is_ok() {
+        return Ok(());
+    }
+    fs::copy(from, to).map_err(Error::Io)?;
+    fs::remove_file(from).map_err(Error::Io)?;
     Ok(())
 }
 
