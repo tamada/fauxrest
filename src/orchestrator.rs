@@ -118,6 +118,34 @@ impl DataSource {
     }
 }
 
+/// One target's data at the stages its callers need separately.
+///
+/// The three differ in what has been applied, and using the wrong one is how
+/// endpoints go missing or appear when they should not:
+///
+/// - `base` is handed to children, so a child `$filter` replaces its parent's
+///   rather than narrowing what the parent already removed.
+/// - `filtered` is what `$derive` enumerates, so a record the filter dropped
+///   cannot bring an endpoint into existence. `$pick`/`$omit` are deliberately
+///   not applied yet: omitting a field must not silently empty the set of
+///   values derived from it.
+/// - `written()` is what reaches the output.
+struct EndpointData {
+    base: Value,
+    filtered: Value,
+    /// The `$pick`/`$omit` form, present only when the node has either.
+    /// `None` means `filtered` is already what gets written, which keeps the
+    /// common node from paying for a copy of its dataset.
+    picked: Option<Value>,
+}
+
+impl EndpointData {
+    /// The value to serialize for this endpoint.
+    fn written(&self) -> &Value {
+        self.picked.as_ref().unwrap_or(&self.filtered)
+    }
+}
+
 /// A single endpoint being materialized: its URL path (`endpoint`), the
 /// underlying dataset (`data`), and the optional overlay [`ApiNode`]
 /// (`node`) carrying directives that apply to it.
@@ -176,34 +204,35 @@ impl<'a> Target<'a> {
         self.node.and_then(mapper)
     }
 
-    /// Computes this target's endpoint data in two stages: an unfiltered
-    /// "base" value (after applying `$aggregate`, if any) used for child
-    /// template resolution, and the final `$filter`/`$pick`/`$omit`-applied
-    /// value that gets written out.
-    ///
-    /// Returns `(base, result)`.
+    /// Computes this target's endpoint data in the stages its callers need to
+    /// keep apart. See [`EndpointData`] for what each is used for.
     pub fn build_endpoint_data(
         &self,
         filters: &Option<&Vec<FilterCondition>>,
         sources: &DataSource,
-    ) -> Result<(Value, Value)> {
-        let mut endpoint_base = self.data.clone();
+    ) -> Result<EndpointData> {
+        let mut base = self.data.clone();
         if let Some(agg) = self.map_node(|n| n.aggregate.as_ref()) {
-            endpoint_base = aggregate_values2(agg, sources)?;
+            base = aggregate_values2(agg, sources)?;
         }
 
-        let endpoint_data = if let Some(filters) = filters {
-            apply_filters(&endpoint_base, filters)?
+        let filtered = if let Some(filters) = filters {
+            apply_filters(&base, filters)?
         } else {
-            endpoint_base.clone()
+            base.clone()
         };
 
-        let result = if let Some(n) = self.node {
-            apply_pick_omit(endpoint_data, n)
-        } else {
-            endpoint_data
+        let picked = match self.node {
+            Some(n) if n.pick.is_some() || n.omit.is_some() => {
+                Some(apply_pick_omit(filtered.clone(), n))
+            }
+            _ => None,
         };
-        Ok((endpoint_base, result))
+        Ok(EndpointData {
+            base,
+            filtered,
+            picked,
+        })
     }
 
     /// If `data` is an array, writes one file per item under
@@ -307,32 +336,29 @@ fn materialize_node(
 ) -> Result<Vec<String>> {
     let effective_filter = target.map_node(|n| n.filter.as_ref()).or(filter);
 
-    let (base, endpoint_data) = target.build_endpoint_data(&effective_filter, sources)?;
-    // let is_private = *target.map_node(|n| n.private.as_ref()).unwrap_or(&false);
-    // if is_private {
-    //     return Ok(vec![]);
-    // }
+    let data = target.build_endpoint_data(&effective_filter, sources)?;
     let mut endpoints = Vec::new();
 
     let (emit_list, emit_id) = resolve_emit_flags(target.node);
     if emit_list {
-        write_data2(target.endpoint, &endpoint_data, context)?;
+        write_data2(target.endpoint, data.written(), context)?;
         endpoints.push(format!("/{}", target.endpoint));
     }
     if emit_id {
-        endpoints.extend(target.emmit_ids(&endpoint_data, context)?);
+        endpoints.extend(target.emmit_ids(data.written(), context)?);
     }
 
+    let base = &data.base;
     for (key, child) in target.subpaths() {
         if let Some(var) = template_var_from_key(key) {
-            let values = resolve_template_values(target.endpoint, key, child, &base)?;
+            let values = resolve_template_values(target.endpoint, key, child, &data.filtered)?;
             for value in &values {
                 let segment = scalar_to_path_segment(value)?;
                 let child_endpoint = format!("{}/{}", target.endpoint, segment);
                 let expanded_child = expand_template_node(child, var, value);
                 let child = Target {
                     endpoint: &child_endpoint,
-                    data: &base,
+                    data: base,
                     node: Some(&expanded_child),
                 };
                 endpoints.extend(materialize_node(
@@ -346,7 +372,7 @@ fn materialize_node(
             let child_endpoint = format!("{}/{}", target.endpoint, key);
             let child = Target {
                 endpoint: &child_endpoint,
-                data: &base,
+                data: base,
                 node: Some(child),
             };
             endpoints.extend(materialize_node(
@@ -541,11 +567,27 @@ fn resolve_template_values(
 /// (an array of items, or a single object), reading `cfg.field` from each
 /// item and applying `cfg.pattern` if set (see [`derive_scalar_value`]).
 ///
+/// Values named by `cfg.exclude` are dropped (see [`is_excluded`]); unlike a
+/// value that could not be derived, an excluded one is deliberate and is not
+/// counted as skipped.
+///
 /// Values are deduplicated by their [`scalar_deterministic_key`] and
 /// returned in a stable (sorted) order. Prints a warning to stderr,
 /// tagged with `context`, if the number of unique values exceeds
 /// [`DERIVE_CARDINALITY_WARN_THRESHOLD`] or if any items were skipped
 /// because their value could not be derived.
+/// Returns whether `value` is named by `cfg.exclude`.
+///
+/// Comparison is by `serde_json::Value` equality, so it distinguishes kinds:
+/// an `exclude` of `0` leaves the string `"0"` in place. The check runs on the
+/// already-converted value, so an entry names what would have become the path
+/// segment.
+fn is_excluded(value: &Value, cfg: &DeriveConfig) -> bool {
+    cfg.exclude
+        .as_ref()
+        .is_some_and(|excluded| excluded.contains(value))
+}
+
 fn derive_values_from_data(
     source_data: &Value,
     cfg: &DeriveConfig,
@@ -554,27 +596,33 @@ fn derive_values_from_data(
     let mut unique: BTreeMap<String, Value> = BTreeMap::new();
     let mut skipped = 0usize;
 
+    let collect = |v: &Value, unique: &mut BTreeMap<String, Value>| -> Result<bool> {
+        let Some(extracted) = derive_scalar_value(v, cfg)? else {
+            return Ok(false);
+        };
+        if is_excluded(&extracted, cfg) {
+            return Ok(true);
+        }
+        let key = scalar_deterministic_key(&extracted);
+        unique.entry(key).or_insert(extracted);
+        Ok(true)
+    };
+
     match source_data {
         Value::Array(arr) => {
             for item in arr {
-                if let Some(v) = item.get(&cfg.field) {
-                    if let Some(extracted) = derive_scalar_value(v, cfg)? {
-                        let key = scalar_deterministic_key(&extracted);
-                        unique.entry(key).or_insert(extracted);
-                    } else {
-                        skipped += 1;
-                    }
+                if let Some(v) = item.get(&cfg.field)
+                    && !collect(v, &mut unique)?
+                {
+                    skipped += 1;
                 }
             }
         }
         Value::Object(obj) => {
-            if let Some(v) = obj.get(&cfg.field) {
-                if let Some(extracted) = derive_scalar_value(v, cfg)? {
-                    let key = scalar_deterministic_key(&extracted);
-                    unique.entry(key).or_insert(extracted);
-                } else {
-                    skipped += 1;
-                }
+            if let Some(v) = obj.get(&cfg.field)
+                && !collect(v, &mut unique)?
+            {
+                skipped += 1;
             }
         }
         _ => {

@@ -10,6 +10,26 @@ can see them before upgrading.
 
 ## [Unreleased]
 
+### Added
+
+- `$derive.exclude` drops named values from the derived set, so no endpoint is
+  created for them. Entries are compared after `pattern` and `type` have run,
+  and by JSON kind as well, so `0` does not exclude the string `"0"`. Excluding
+  a value the data does not contain is not an error. Expressing an exclusion
+  through `$derive.pattern` instead meant writing a lexical condition for a
+  semantic one, where `[^0]*` truncates `10` to `1` and loses that endpoint's
+  records without a word. ([#7])
+
+### Changed
+
+- **Breaking:** `$derive` enumerates its template values from the records that
+  survive the node's effective `$filter`, rather than from the unfiltered data.
+  A filtered-out record no longer creates an endpoint: a `members` node
+  excluding `category: "non_member"` used to publish `/members/non_member` as
+  an empty collection, showing the excluded name in the output. Builds relying
+  on those endpoints existing will produce fewer of them. `$pick` and `$omit`
+  are still applied afterwards, so omitting a field from the payload does not
+  remove the endpoints derived from it. ([#7])
 ### Changed
 
 - **Breaking:** a `$filter` comparison whose two sides hold JSON kinds it
@@ -144,6 +164,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#3]: https://github.com/tamada/fauxrest/issues/3
 [#4]: https://github.com/tamada/fauxrest/issues/4
 [#6]: https://github.com/tamada/fauxrest/issues/6
+[#7]: https://github.com/tamada/fauxrest/issues/7
 [#10]: https://github.com/tamada/fauxrest/pull/10
 [#11]: https://github.com/tamada/fauxrest/pull/11
 [#12]: https://github.com/tamada/fauxrest/pull/12
