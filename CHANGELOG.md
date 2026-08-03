@@ -10,6 +10,20 @@ can see them before upgrading.
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** a `$filter` comparison whose two sides hold JSON kinds it
+  cannot evaluate now fails the run instead of printing a warning to stderr and
+  treating the condition as unmatched. This covers one field holding different
+  kinds across records — the case where no single `$derive.type` keeps every
+  record, so roughly half were dropped and the endpoint still published — and
+  operators applied to a kind they cannot order, such as `gt` on two booleans.
+  A no-op `"pattern": ".*"` over a numeric field is reported for the same
+  reason, rather than yielding an empty collection per derived value.
+  `null` and absent fields are exempt: a field left unset in some records is
+  ordinary data, and `"value": null` is how a condition asks whether a field is
+  unset. ([#3])
+
 ## [0.0.4] - 2026-08-01
 
 ### Changed
@@ -127,6 +141,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 
 [#1]: https://github.com/tamada/fauxrest/issues/1
 [#2]: https://github.com/tamada/fauxrest/issues/2
+[#3]: https://github.com/tamada/fauxrest/issues/3
 [#4]: https://github.com/tamada/fauxrest/issues/4
 [#6]: https://github.com/tamada/fauxrest/issues/6
 [#10]: https://github.com/tamada/fauxrest/pull/10

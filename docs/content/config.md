@@ -131,9 +131,10 @@ Template sub-paths like `${year}` support:
 ### Typed `$derive` values
 
 A `$derive.pattern` extracts a regular expression capture, so the derived
-value is always a string. Because `$filter` compares strictly by type, such a
-value never matches a numeric field — `"2024"` does not equal `2024`. The
-optional `type` key converts the derived value before it is used:
+value is always a string. `$filter` compares strictly by type and rejects a
+comparison it cannot evaluate, so filtering a numeric field against such a
+value fails the build — `"2024"` is not the number `2024`. The optional `type`
+key converts the derived value before it is used:
 
 ```json
 {
@@ -156,6 +157,26 @@ conversion, which is how `$derive` behaved before 0.0.3.
   generated path segment: `"type": "int"` on `"007"` produces `/7`.
 - Values that cannot be converted are skipped and reported as non-derivable
   rather than failing the build.
+
+### `$filter` and value types
+
+`$filter` never converts between JSON kinds. A comparison it cannot evaluate
+fails the build instead of quietly matching nothing:
+
+- The record and the condition hold different kinds, for example a `year`
+  stored as `2007` in one record and `"2007"` in another. No single
+  `$derive.type` fits both, so continuing would publish an endpoint missing
+  whichever half lost the comparison.
+- The two sides share a kind the operator cannot handle, such as `gt` on two
+  booleans.
+
+The fix belongs in the data: store one kind per field. Since compilation is a
+build step, failing costs a rerun, whereas a half-empty endpoint is easy to
+publish without noticing.
+
+`null` and absent fields are exempt. A field left unset in some records is
+ordinary data rather than a conflicting type, and `{"op": "eq", "value": null}`
+remains the way to ask whether a field is unset.
 
 The set is deliberately small: a derived value becomes a path segment, and
 `string` and `int` are the kinds that makes sense for. `type` is an additive
