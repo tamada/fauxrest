@@ -19,17 +19,16 @@ Auto-discovery for config files checks:
 
 ## Serializer Configuration
 
-Set serializers under `$config.serializers`.
+`$config` is a list of serializer entries. Each entry produces a complete copy
+of the API in that format, so listing several writes several.
 
 ```json
 {
-	"$config": {
-		"serializers": [
-			{ "serializer": "json", "layout": "index", "dest": "./dist/api" },
-			{ "serializer": "typescript", "layout": "file", "dest": "./dist/modules" },
-			{ "serializer": "sqlite", "dest": "./dist/db/api.db" }
-		]
-	}
+	"$config": [
+		{ "serializer": "json", "layout": "index", "dest": "./dist/api" },
+		{ "serializer": "typescript", "layout": "file", "dest": "./dist/modules" },
+		{ "serializer": "sqlite", "layout": "index", "dest": "./dist/db" }
+	]
 }
 ```
 
@@ -38,6 +37,14 @@ Supported serializers:
 - `json`
 - `typescript` (or `javascript`, `js`, `ts`)
 - `sqlite`
+
+`serializer`, `layout` and `dest` are all required; `layout` is required for
+`sqlite` too, even though it only decides file names there.
+
+`dest` is a directory for every serializer. `sqlite` writes one database per
+endpoint beneath it, mirroring the layout the other serializers use, rather
+than a single database for the whole API — so name it after a directory
+(`./dist/db`), not a file.
 
 `minify` is configurable per serializer.
 
