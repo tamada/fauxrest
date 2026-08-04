@@ -26,17 +26,53 @@ Child `$filter` overrides parent `$filter` when both are present.
 
 ### Visibility Control
 
-`$emit` controls endpoint emission at that node.
+Two directives withhold output, and they differ in reach.
+
+`$emit` controls endpoint emission at the node it appears on.
 
 - `$emit: ["list"]` emits only collection endpoints.
 - `$emit: ["ids"]` emits only per-item endpoints.
 - `$emit: ["list", "ids"]` emits both.
-- `$emit: []` emits neither, which is how a node withholds itself. Its
-  sub-paths are still expanded; `$emit` applies to the node it appears on.
+- `$emit: []` emits neither.
 
-`$private`, `$emit_list`, `$emit_id` and `$emit_items` were replaced by `$emit`
-and are **not** accepted. A configuration still using one is rejected when it
-loads.
+`$emit` does not reach the node's sub-paths, and a sub-path with no `$emit` of
+its own emits everything. So this publishes the whole dataset one level down,
+despite the empty `$emit`:
+
+```json
+{
+	"staff": {
+		"$emit": [],
+		"by-name": {}
+	}
+}
+```
+
+`$skip: true` leaves the node **and everything beneath it** ungenerated. A
+skipped node is never descended into, so no sub-path can publish through it —
+including one added later by someone who did not notice the `$skip`, and
+including a descendant that sets `$skip: false`.
+
+```json
+{
+	"staff": {
+		"$skip": true,
+		"by-name": {}
+	}
+}
+```
+
+Nothing under `/staff` is written, and none of it appears in the discovery
+index. Use `$emit: []` to drop one node's own endpoints, and `$skip` when a
+subtree must stay ungenerated whatever is added to it.
+
+`$skip` is named for what it does to the build. Nothing is generated, which is
+not the same as generating something and protecting it — static hosting has no
+access control, and this tool offers none.
+
+`$private`, `$emit_list`, `$emit_id` and `$emit_items` are **not** accepted.
+`$private` was described in earlier documentation but never worked; `$skip` is
+the directive that does what it described.
 
 ### Aggregation
 

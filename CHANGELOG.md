@@ -12,6 +12,16 @@ can see them before upgrading.
 
 ### Added
 
+- `$skip: true` leaves an endpoint and everything beneath it ungenerated. A
+  skipped node is never descended into, so no sub-path can publish through it —
+  including one added later by someone who did not notice the `$skip`, and
+  including a descendant setting `$skip: false`. `$emit: []` only covers the
+  node it appears on: a sub-path under it with no `$emit` of its own emits
+  everything, so the records the parent withheld were published one level down
+  and listed in the discovery index. The directive is named for its effect on
+  the build; earlier documentation described a `$private` that was never
+  implemented, and "private" would have suggested a protection this offers no
+  more than any other static output does. ([#32])
 - `$derive.exclude` drops named values from the derived set, so no endpoint is
   created for them. Entries are compared after `pattern` and `type` have run,
   and by JSON kind as well, so `0` does not exclude the string `"0"`. Excluding
@@ -50,6 +60,15 @@ can see them before upgrading.
   `sqlite` entry in the same example also omitted the required `layout`, and
   named its `dest` `api.db` although `dest` is a directory for every
   serializer. ([#27])
+- A misspelled directive is rejected instead of becoming an endpoint named
+  after the typo. `ApiNode` collected every unrecognized key into its routing
+  tree, so `{"users": {"$fliter": {}}}` generated `/users/$fliter` with exit
+  code 0 and nothing on stderr — and the `$filter` it was meant to be never
+  ran, leaving the endpoint holding every record it should have narrowed. A
+  `$`-prefixed key that is not a directive now fails to load, naming the key
+  and listing the valid ones. `${name}` template sub-paths are unaffected, and
+  a directive given twice is reported rather than letting the later one win in
+  silence. ([#34])
 
 - A build that fails partway no longer leaves what it had already written in
   the serializer destination. Output was written endpoint by endpoint, so a
@@ -183,6 +202,8 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#7]: https://github.com/tamada/fauxrest/issues/7
 [#23]: https://github.com/tamada/fauxrest/issues/23
 [#27]: https://github.com/tamada/fauxrest/issues/27
+[#32]: https://github.com/tamada/fauxrest/issues/32
+[#34]: https://github.com/tamada/fauxrest/issues/34
 [#10]: https://github.com/tamada/fauxrest/pull/10
 [#11]: https://github.com/tamada/fauxrest/pull/11
 [#12]: https://github.com/tamada/fauxrest/pull/12
