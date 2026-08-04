@@ -231,23 +231,23 @@ impl AggregateSpec {
 /// `$pick`, `$omit`, `$emit`, `$values`, `$derive`) describing how the
 /// corresponding endpoint's data should be transformed, plus nested
 /// `sub_paths` for deeper routes.
-#[derive(Deserialize, Debug, Clone, Default, PartialEq)]
+///
+/// Deserialized by hand (see the [`Deserialize`] implementation) so that a
+/// `$`-prefixed key which is not a directive is rejected rather than taken for
+/// a route.
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct ApiNode {
     /// `$filter`: conditions that items must satisfy to be included.
-    #[serde(rename = "$filter")]
     pub filter: Option<Vec<FilterCondition>>,
 
     /// `$aggregate`: combines one or more other datasets/endpoints into this
     /// endpoint's data.
-    #[serde(rename = "$aggregate")]
     pub aggregate: Option<AggregateSpec>,
 
     /// `$pick`: restricts object fields to only those listed.
-    #[serde(rename = "$pick")]
     pub pick: Option<Vec<String>>,
 
     /// `$omit`: removes the listed object fields.
-    #[serde(rename = "$omit")]
     pub omit: Option<Vec<String>>,
 
     /// `$skip`: leaves this endpoint and everything below it ungenerated.
@@ -261,7 +261,6 @@ pub struct ApiNode {
     /// Named for what it does to the build rather than for a property of the
     /// data: nothing is generated, which is not the same as generating
     /// something and protecting it. Static hosting offers no access control.
-    #[serde(rename = "$skip")]
     pub skip: Option<bool>,
 
     /// `$emit`: selects which physical outputs (list and/or per-id files)
@@ -270,22 +269,118 @@ pub struct ApiNode {
     ///
     /// This applies to the node itself; its sub-paths still expand. Use
     /// `$skip` to leave a subtree ungenerated.
-    #[serde(rename = "$emit")]
     pub emit: Option<Vec<EmitTarget>>,
 
     /// `$values`: explicit list of scalar values used to expand a
     /// `${name}` template sub-path.
-    #[serde(rename = "$values")]
     pub values: Option<Vec<Value>>,
 
     /// `$derive`: derives the list of values used to expand a `${name}`
     /// template sub-path from a field of the parent dataset.
-    #[serde(rename = "$derive")]
     pub derive: Option<DeriveSource>,
 
     /// All other (non-`$`-prefixed) keys, forming the nested routing tree.
-    #[serde(flatten)]
     pub sub_paths: HashMap<String, ApiNode>,
+}
+
+/// Every directive an [`ApiNode`] accepts, in the order they are documented.
+///
+/// A `$`-prefixed key outside this list is a mistake — there is nothing else a
+/// leading `$` could mean here — so it is reported rather than kept.
+const NODE_DIRECTIVES: [&str; 8] = [
+    "$filter",
+    "$aggregate",
+    "$pick",
+    "$omit",
+    "$skip",
+    "$emit",
+    "$values",
+    "$derive",
+];
+
+impl<'de> Deserialize<'de> for ApiNode {
+    /// Reads the node's keys one at a time rather than deriving the
+    /// implementation, so that a `$`-prefixed key which is not a directive can
+    /// be named in the error.
+    ///
+    /// The derived form collected unrecognized keys into `sub_paths` through
+    /// `#[serde(flatten)]`, which gave a misspelling two ways to go wrong:
+    /// `{"$fliter": {}}` became an endpoint called `$fliter` and the intended
+    /// filter silently never ran, while `{"$fliter": true}` failed with
+    /// `invalid type: boolean, expected struct ApiNode` — naming neither the
+    /// key nor what was wrong with it.
+    ///
+    /// Streaming the map keeps serde's positions intact, so the error still
+    /// points at a line and column in the configuration file.
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct ApiNodeVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for ApiNodeVisitor {
+            type Value = ApiNode;
+
+            fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_str("an object of directives and sub-paths")
+            }
+
+            fn visit_map<M>(self, mut map: M) -> std::result::Result<ApiNode, M::Error>
+            where
+                M: serde::de::MapAccess<'de>,
+            {
+                use serde::de::Error;
+
+                let mut node = ApiNode::default();
+
+                /// Assigns a directive, rejecting a second occurrence rather
+                /// than letting the later one win unannounced.
+                macro_rules! once {
+                    ($field:expr, $key:expr, $map:expr) => {{
+                        if $field.is_some() {
+                            return Err(Error::custom(format!("duplicate {}", $key)));
+                        }
+                        $field = Some($map.next_value()?);
+                    }};
+                }
+
+                while let Some(key) = map.next_key::<String>()? {
+                    match key.as_str() {
+                        "$filter" => once!(node.filter, key, map),
+                        "$aggregate" => once!(node.aggregate, key, map),
+                        "$pick" => once!(node.pick, key, map),
+                        "$omit" => once!(node.omit, key, map),
+                        "$skip" => once!(node.skip, key, map),
+                        "$emit" => once!(node.emit, key, map),
+                        "$values" => once!(node.values, key, map),
+                        "$derive" => once!(node.derive, key, map),
+                        // `${name}` also begins with `$` but is a template
+                        // sub-path, not a directive.
+                        unknown
+                            if unknown.starts_with('$')
+                                && template_var_from_key(unknown).is_none() =>
+                        {
+                            return Err(Error::custom(format!(
+                                "unknown directive {}, expected one of {}",
+                                unknown,
+                                NODE_DIRECTIVES.join(", ")
+                            )));
+                        }
+                        _ => {
+                            let child = map.next_value()?;
+                            if node.sub_paths.insert(key.clone(), child).is_some() {
+                                return Err(Error::custom(format!("duplicate sub-path '{}'", key)));
+                            }
+                        }
+                    }
+                }
+
+                Ok(node)
+            }
+        }
+
+        deserializer.deserialize_map(ApiNodeVisitor)
+    }
 }
 
 /// The value of a `$derive` directive: either a bare field-name shorthand or
@@ -1110,6 +1205,117 @@ mod tests {
                 serde_json::json!("draft"),
                 serde_json::json!(true)
             ])
+        );
+    }
+
+    /// A `$`-prefixed key that is not a directive is a misspelling — nothing
+    /// else a leading `$` could mean here — and used to be taken for a route.
+    /// `{"$fliter": {}}` became an endpoint called `$fliter` while the filter
+    /// it was meant to be silently never ran.
+    #[test]
+    fn test_unknown_directive_is_rejected() {
+        for body in [
+            r#"{"$fliter": {}}"#,
+            r#"{"$fliter": true}"#,
+            r#"{"$emitt": []}"#,
+        ] {
+            let mut tmp = tempfile::NamedTempFile::new().unwrap();
+            write!(
+                tmp,
+                r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "users": {}
+}}"#,
+                body
+            )
+            .unwrap();
+
+            let err = match Config::load_from_file(tmp.path()) {
+                Ok(_) => panic!("{} should be rejected", body),
+                Err(e) => e.to_string(),
+            };
+            assert!(
+                err.contains("unknown directive"),
+                "{} should be reported as an unknown directive, got: {}",
+                body,
+                err
+            );
+        }
+    }
+
+    /// The offending key has to be named, and the valid ones listed — the
+    /// point of the error is to make the typo findable.
+    #[test]
+    fn test_unknown_directive_error_names_the_key_and_the_alternatives() {
+        let mut tmp = tempfile::NamedTempFile::new().unwrap();
+        write!(
+            tmp,
+            r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "users": {{"$fliter": {{}}}}
+}}"#
+        )
+        .unwrap();
+
+        let err = match Config::load_from_file(tmp.path()) {
+            Ok(_) => panic!("a misspelled directive should be rejected"),
+            Err(e) => e.to_string(),
+        };
+        assert!(err.contains("$fliter"), "should name the key, got: {}", err);
+        assert!(
+            err.contains("$filter") && err.contains("$derive"),
+            "should list the directives, got: {}",
+            err
+        );
+    }
+
+    /// `${name}` starts with `$` too, and is a template sub-path rather than
+    /// a directive. Rejecting it would break every template route.
+    #[test]
+    fn test_template_sub_path_key_is_not_treated_as_a_directive() {
+        let mut tmp = tempfile::NamedTempFile::new().unwrap();
+        write!(
+            tmp,
+            r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "papers": {{"${{year}}": {{"$derive": "year"}}}}
+}}"#
+        )
+        .unwrap();
+
+        let config = Config::load_from_file(tmp.path()).expect("template keys must still load");
+        assert!(
+            config
+                .api
+                .get("papers")
+                .expect("Missing papers node")
+                .sub_paths
+                .contains_key("${year}")
+        );
+    }
+
+    /// A directive given twice would otherwise have the later one win in
+    /// silence, which is how the earlier `#[serde(flatten)]` form behaved.
+    #[test]
+    fn test_duplicate_directive_is_rejected() {
+        let mut tmp = tempfile::NamedTempFile::new().unwrap();
+        write!(
+            tmp,
+            r#"{{
+    "$config": [{{"serializer":"json","layout":"index","dest":"dist"}}],
+    "users": {{"$pick": ["id"], "$pick": ["name"]}}
+}}"#
+        )
+        .unwrap();
+
+        let err = match Config::load_from_file(tmp.path()) {
+            Ok(_) => panic!("a repeated directive should be rejected"),
+            Err(e) => e.to_string(),
+        };
+        assert!(
+            err.contains("duplicate") && err.contains("$pick"),
+            "should name the repeated directive, got: {}",
+            err
         );
     }
 
