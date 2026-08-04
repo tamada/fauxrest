@@ -115,8 +115,10 @@ fn test_integration_typescript_file_layout() {
     assert_contains(&dest_dir, "users/index.ts", "export const data");
 }
 
+/// An empty `$emit` withholds the node's endpoints and keeps them out of the
+/// discovery index. It is what replaced the `$private` directive.
 #[test]
-fn test_private_directive_hides_collection_endpoint() {
+fn test_empty_emit_hides_collection_endpoint() {
     let tmp = tempfile::tempdir().unwrap();
     let data_dir = tmp.path().join("data");
     let dest_dir = tmp.path().join("dist");

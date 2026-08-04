@@ -26,16 +26,17 @@ Child `$filter` overrides parent `$filter` when both are present.
 
 ### Visibility Control
 
-`$private: true` suppresses generation of the target endpoint and all descendants.
-
 `$emit` controls endpoint emission at that node.
 
 - `$emit: ["list"]` emits only collection endpoints.
 - `$emit: ["ids"]` emits only per-item endpoints.
 - `$emit: ["list", "ids"]` emits both.
-- `$emit: []` emits neither (allowed).
+- `$emit: []` emits neither, which is how a node withholds itself. Its
+  sub-paths are still expanded; `$emit` applies to the node it appears on.
 
-Legacy `$emit_list`, `$emit_id`, and `$emit_items` are still accepted for backward compatibility.
+`$private`, `$emit_list`, `$emit_id` and `$emit_items` were replaced by `$emit`
+and are **not** accepted. A configuration still using one is rejected when it
+loads.
 
 ### Aggregation
 
