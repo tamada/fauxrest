@@ -54,6 +54,12 @@ can see them before upgrading.
 
 ### Fixed
 
+- The serializer configuration example in the documentation loads. `$config`
+  was shown as an object with a `serializers` key, which is rejected with
+  `invalid type: map, expected a sequence` — it is a list of entries. The
+  `sqlite` entry in the same example also omitted the required `layout`, and
+  named its `dest` `api.db` although `dest` is a directory for every
+  serializer. ([#27])
 - A misspelled directive is rejected instead of becoming an endpoint named
   after the typo. `ApiNode` collected every unrecognized key into its routing
   tree, so `{"users": {"$fliter": {}}}` generated `/users/$fliter` with exit
@@ -63,6 +69,7 @@ can see them before upgrading.
   and listing the valid ones. `${name}` template sub-paths are unaffected, and
   a directive given twice is reported rather than letting the later one win in
   silence. ([#34])
+
 - A build that fails partway no longer leaves what it had already written in
   the serializer destination. Output was written endpoint by endpoint, so a
   later failure left a tree that was neither a complete build nor an absent
@@ -194,6 +201,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#6]: https://github.com/tamada/fauxrest/issues/6
 [#7]: https://github.com/tamada/fauxrest/issues/7
 [#23]: https://github.com/tamada/fauxrest/issues/23
+[#27]: https://github.com/tamada/fauxrest/issues/27
 [#32]: https://github.com/tamada/fauxrest/issues/32
 [#34]: https://github.com/tamada/fauxrest/issues/34
 [#10]: https://github.com/tamada/fauxrest/pull/10
