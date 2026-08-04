@@ -561,10 +561,18 @@ impl StaticSpec {
 
 /// Represents the relationship between endpoint URL resolution and
 /// physical file placement.
-#[derive(Deserialize, Serialize, Debug, Clone, clap::ValueEnum)]
+///
+/// Every variant answers the same question — what file name an endpoint's
+/// path becomes. How *many* files there are is a separate matter, set by
+/// [`SerializerConfig::bundle`].
+#[derive(Deserialize, Serialize, Debug, Clone, Default, clap::ValueEnum)]
 #[serde(rename_all = "lowercase")]
 pub enum Layout {
     /// Outputs endpoints as `/endpoint/index.[ext]`. Highly compatible with all static web servers, maintaining clean URLs.
+    ///
+    /// The default: it is the one layout every static host resolves without
+    /// configuration.
+    #[default]
     Index,
     /// Outputs endpoints as extensionless files (`/endpoint`).
     /// **Smart Fallback Specification**: To avoid physical file-directory collisions,
@@ -579,10 +587,22 @@ pub enum Layout {
 pub struct SerializerConfig {
     /// Serializer type (json, typescript, sqlite)
     pub serializer: String,
-    /// Delivery layout (index, file, extension)
+    /// Delivery layout (index, file, extension), deciding what file name an
+    /// endpoint's path becomes. Defaults to [`Layout::Index`].
+    #[serde(default)]
     pub layout: Layout,
     /// Destination directory
     pub dest: PathBuf,
+    /// Whether to write the whole API as one `api.[ext]` keyed by endpoint
+    /// path, instead of a file per endpoint.
+    ///
+    /// Separate from `layout` because it answers a different question: layout
+    /// decides an endpoint's file *name*, this decides how many files there
+    /// are. For `sqlite` it is the difference between a directory of
+    /// single-endpoint databases and one database the whole API can be
+    /// queried from. `layout` has no effect while this is set.
+    #[serde(default)]
+    pub bundle: bool,
     /// Whether output should be compact (minified)
     #[serde(default)]
     pub minify: bool,
@@ -627,6 +647,7 @@ impl Default for Config {
                 serializer: "json".into(),
                 layout: Layout::Index,
                 dest: "dist".into(),
+                bundle: false,
                 minify: false,
                 overwrite: false,
             }],
@@ -657,6 +678,7 @@ impl Config {
                 serializer,
                 layout,
                 dest,
+                bundle: false,
                 minify: false,
                 overwrite: false,
             }],

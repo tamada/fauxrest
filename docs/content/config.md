@@ -25,9 +25,9 @@ of the API in that format, so listing several writes several.
 ```json
 {
 	"$config": [
-		{ "serializer": "json", "layout": "index", "dest": "./dist/api" },
+		{ "serializer": "json", "dest": "./dist/api" },
 		{ "serializer": "typescript", "layout": "file", "dest": "./dist/modules" },
-		{ "serializer": "sqlite", "layout": "index", "dest": "./dist/db" }
+		{ "serializer": "sqlite", "bundle": true, "dest": "./dist/db" }
 	]
 }
 ```
@@ -38,13 +38,13 @@ Supported serializers:
 - `typescript` (or `javascript`, `js`, `ts`)
 - `sqlite`
 
-`serializer`, `layout` and `dest` are all required; `layout` is required for
-`sqlite` too, even though it only decides file names there.
+`serializer` and `dest` are required. `layout` defaults to `index` and
+`bundle` to `false`, so an entry only names what it changes.
 
-`dest` is a directory for every serializer. `sqlite` writes one database per
-endpoint beneath it, mirroring the layout the other serializers use, rather
-than a single database for the whole API — so name it after a directory
-(`./dist/db`), not a file.
+`dest` is a directory for every serializer, so name it after one (`./dist/db`),
+not a file. By default `sqlite` writes one database per endpoint beneath it,
+mirroring what the other serializers do; `"bundle": true` is what produces a
+single database for the whole API.
 
 `minify` is configurable per serializer.
 
@@ -117,12 +117,42 @@ precedence.
 
 Supported layouts:
 
-- `index`: emits `/path/index.[ext]`
+`layout` decides what file name an endpoint's path becomes:
+
+- `index` (default): emits `/path/index.[ext]`
 - `file`: emits extensionless files when safe
 - `extension`: emits `/path.[ext]`
 
 In `file` layout, smart fallback avoids file-directory collisions by emitting
 `index.[ext]` when a path also needs child paths.
+
+## Bundling
+
+`layout` says what each endpoint's file is called. `bundle` says how many files
+there are — set it to write the whole API as one `api.[ext]` keyed by endpoint
+path, instead of a file per endpoint.
+
+```json
+{
+	"$config": [
+		{ "serializer": "sqlite", "bundle": true, "dest": "./dist/db" }
+	]
+}
+```
+
+- `sqlite` writes one database with a single
+  `endpoints(path TEXT PRIMARY KEY, value TEXT)` table, so the whole API can be
+  queried by path. Without `bundle` it writes one database per endpoint
+  instead, which cannot be queried across.
+- `json` and `typescript` write one object keyed by path, for example
+  `{"/users": [...], "/users/1": {...}}`.
+
+`layout` has no effect while `bundle` is set, since there are no per-endpoint
+file names to decide. The discovery index is still written beside the bundle,
+so `dest` holds `api.[ext]` and `index.[ext]`. Bundled output is not servable
+as a static API — it is for embedding or querying the whole dataset at once.
+
+`--bundle` sets it from the command line.
 
 ## Overlay Directives
 

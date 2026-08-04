@@ -118,13 +118,17 @@ For basic routing overrides, create a simple `_config.json` configuration in the
 
 ---
 
-### ⚡ Output Formats (`--format`)
+### ⚡ Delivery Layouts (`--layout`)
 
 To ensure seamless routing behavior across different CDN and static hosts:
 
-*   `--format index` (Default): Outputs `/endpoint/index.json`. Perfect for standard servers resolving `/endpoint/`.
-*   `--format file`: Outputs `/endpoint` file with no file extension.
-*   `--format extension`: Outputs `/endpoint.json`. Zero-risk option compatible with every hosting platform.
+*   `--layout index` (Default): Outputs `/endpoint/index.json`. Perfect for standard servers resolving `/endpoint/`.
+*   `--layout file`: Outputs `/endpoint` file with no file extension.
+*   `--layout extension`: Outputs `/endpoint.json`. Zero-risk option compatible with every hosting platform.
+
+Layout decides what each endpoint's file is called. To write the whole API as
+one file instead — one `api.db` that can be queried across every endpoint,
+rather than a database per endpoint — pass `--bundle`.
 
 ---
 

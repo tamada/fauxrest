@@ -5,9 +5,10 @@
 //! destination directory so the orchestrator can serialize data and compute
 //! output paths without re-resolving the configuration on every call.
 
+use std::cell::RefCell;
 use std::path::PathBuf;
 
-use serde_json::Value;
+use serde_json::{Map, Value};
 
 use crate::orchestrator::{ExtensionLayout, FileLayout, IndexLayout, LayoutTrait};
 use crate::serializers::{JSONSerializer, SqliteSerializer, TypescriptSerializer};
@@ -23,12 +24,54 @@ pub struct SerializerContext {
     pub layout: Box<dyn LayoutTrait>,
     /// The destination directory that output paths are relative to.
     pub dest: PathBuf,
+    /// Endpoints collected so far when `bundle` is set, keyed by path.
+    ///
+    /// `None` otherwise, which writes each endpoint as it is produced.
+    /// Bundling cannot work that way — the file is not complete until the
+    /// last endpoint has been materialized — so the payloads are held here as
+    /// `Value`s and encoded once at the end of the build.
+    ///
+    /// Keeping them as `Value`s is the point: assembling the bundle from the
+    /// already-written files would mean parsing each serializer's own output
+    /// back, which is not possible for TypeScript and wasteful for SQLite.
+    bundle: Option<RefCell<Map<String, Value>>>,
 }
 
 impl SerializerContext {
     /// Serializes `data` using this context's [`Serializer`].
     pub fn serialize(&self, data: &Value) -> Result<Vec<u8>> {
         self.serializer.serialize(data)
+    }
+
+    /// Records `data` as the payload of `endpoint` when bundling, returning
+    /// whether it was taken. `false` means this context writes a file per
+    /// endpoint and the caller should do so.
+    pub fn collect(&self, endpoint: &str, data: &Value) -> bool {
+        match &self.bundle {
+            Some(cell) => {
+                cell.borrow_mut()
+                    .insert(format!("/{}", endpoint), data.clone());
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// Encodes everything collected so far into the single bundle file, or
+    /// returns `None` when this context is not bundling.
+    ///
+    /// Consumes nothing: the discovery index is written afterwards and lists
+    /// the same endpoints.
+    pub fn finish_bundle(&self) -> Option<Result<(PathBuf, Vec<u8>)>> {
+        let cell = self.bundle.as_ref()?;
+        let bytes = self.serializer.serialize_bundle(&cell.borrow());
+        Some(bytes.map(|bytes| {
+            (
+                self.dest
+                    .join(format!("api.{}", self.serializer.extension())),
+                bytes,
+            )
+        }))
     }
 
     /// Computes the full output file path (including `dest`) for the
@@ -62,6 +105,7 @@ impl TryFrom<&SerializerConfig> for SerializerContext {
             serializer,
             layout,
             dest: config.dest.clone(),
+            bundle: config.bundle.then(|| RefCell::new(Map::new())),
         })
     }
 }
