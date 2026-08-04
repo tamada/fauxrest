@@ -115,8 +115,8 @@ fn test_integration_typescript_file_layout() {
     assert_contains(&dest_dir, "users/index.ts", "export const data");
 }
 
-/// An empty `$emit` withholds the node's endpoints and keeps them out of the
-/// discovery index. It is what replaced the `$private` directive.
+/// An empty `$emit` withholds the node's own endpoints and keeps them out of
+/// the discovery index. Its sub-paths are unaffected — that is `$skip`.
 #[test]
 fn test_empty_emit_hides_collection_endpoint() {
     let tmp = tempfile::tempdir().unwrap();
@@ -1697,4 +1697,146 @@ fn test_successful_build_removes_its_staging_directory() {
         "staging must not survive the build, got: {:?}",
         siblings
     );
+}
+
+/// Writes `staff.json` and runs `api` over it, returning the destination.
+fn staff_fixture(tmp: &Path, api: &str) -> (PathBuf, PathBuf) {
+    let data_dir = tmp.join("data");
+    let dest_dir = tmp.join("dist");
+    let config_file = tmp.join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(
+        data_dir.join("staff.json"),
+        r#"[
+    {"id": 1, "name": "Alice", "salary": 900},
+    {"id": 2, "name": "Bob", "salary": 800}
+]"#,
+    )
+    .unwrap();
+
+    let config_json = format!(
+        r#"{{
+    "$config": [{{"serializer": "json", "layout": "index", "dest": "{}"}}],
+    "staff": {}
+}}"#,
+        dest_dir.display(),
+        api
+    );
+    fs::write(&config_file, &config_json).unwrap();
+
+    (data_dir, dest_dir)
+}
+
+/// Counts the files written beneath `dest/staff`.
+fn staff_output_count(dest: &Path) -> usize {
+    fn walk(dir: &Path, files: &mut usize) {
+        let Ok(entries) = fs::read_dir(dir) else {
+            return;
+        };
+        for entry in entries.flatten() {
+            if entry.path().is_dir() {
+                walk(&entry.path(), files);
+            } else {
+                *files += 1;
+            }
+        }
+    }
+    let mut files = 0;
+    walk(&dest.join("staff"), &mut files);
+    files
+}
+
+/// `$skip` leaves the node ungenerated, and keeps it out of the discovery
+/// index along with it.
+#[test]
+fn test_skip_leaves_the_node_ungenerated() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir) = staff_fixture(tmp.path(), r#"{ "$skip": true }"#);
+
+    let config: Config = Config::load_from_file(tmp.path().join("fauxrest.json")).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_eq!(staff_output_count(&dest_dir), 0);
+    let discovery = fs::read_to_string(dest_dir.join("index.json")).unwrap();
+    assert!(
+        !discovery.contains("/staff"),
+        "a withheld endpoint must not be advertised: {}",
+        discovery
+    );
+}
+
+/// The point of `$skip` over `$emit: []`: nothing below it can publish,
+/// whatever it declares. A sub-path added under a skipped node — later, by
+/// someone who never saw the `$skip` — must not open the subtree back up,
+/// and neither must an explicit `$skip: false` on a descendant.
+#[test]
+fn test_skip_cannot_be_undone_from_below() {
+    for (label, api) in [
+        (
+            "a sub-path with no directives",
+            r#"{ "$skip": true, "by-name": {} }"#,
+        ),
+        (
+            "a sub-path that emits explicitly",
+            r#"{ "$skip": true, "by-name": { "$emit": ["list"] } }"#,
+        ),
+        (
+            "a descendant opting back in",
+            r#"{ "$skip": true, "by-name": { "$skip": false } }"#,
+        ),
+        (
+            "a grandchild that emits",
+            r#"{ "$skip": true, "a": { "b": { "$emit": ["list"] } } }"#,
+        ),
+        (
+            "a template sub-path",
+            r#"{ "$skip": true, "${name}": { "$derive": "name" } }"#,
+        ),
+    ] {
+        let tmp = tempfile::tempdir().unwrap();
+        let (data_dir, dest_dir) = staff_fixture(tmp.path(), api);
+
+        let config: Config = Config::load_from_file(tmp.path().join("fauxrest.json")).unwrap();
+        assert!(fauxrest::run(config, data_dir).is_ok());
+
+        assert_eq!(
+            staff_output_count(&dest_dir),
+            0,
+            "{} published through a $skip node",
+            label
+        );
+    }
+}
+
+/// `$skip` covers its own subtree and no more: an ancestor still emits.
+#[test]
+fn test_skip_on_a_sub_path_leaves_its_parent_alone() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (data_dir, dest_dir) =
+        staff_fixture(tmp.path(), r#"{ "internal": { "$skip": true, "b": {} } }"#);
+
+    let config: Config = Config::load_from_file(tmp.path().join("fauxrest.json")).unwrap();
+    assert!(fauxrest::run(config, data_dir).is_ok());
+
+    assert_file(&dest_dir, "staff/index.json");
+    assert!(
+        !dest_dir.join("staff/internal").exists(),
+        "the skipped sub-path must not be written"
+    );
+}
+
+/// `$skip: false` and an absent `$skip` both leave the node emitting.
+#[test]
+fn test_skip_false_emits_normally() {
+    for api in [r#"{ "$skip": false }"#, "{}"] {
+        let tmp = tempfile::tempdir().unwrap();
+        let (data_dir, dest_dir) = staff_fixture(tmp.path(), api);
+
+        let config: Config = Config::load_from_file(tmp.path().join("fauxrest.json")).unwrap();
+        assert!(fauxrest::run(config, data_dir).is_ok());
+
+        assert_file(&dest_dir, "staff/index.json");
+        assert_file(&dest_dir, "staff/1/index.json");
+    }
 }

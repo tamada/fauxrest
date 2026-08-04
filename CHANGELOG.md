@@ -12,6 +12,16 @@ can see them before upgrading.
 
 ### Added
 
+- `$skip: true` leaves an endpoint and everything beneath it ungenerated. A
+  skipped node is never descended into, so no sub-path can publish through it —
+  including one added later by someone who did not notice the `$skip`, and
+  including a descendant setting `$skip: false`. `$emit: []` only covers the
+  node it appears on: a sub-path under it with no `$emit` of its own emits
+  everything, so the records the parent withheld were published one level down
+  and listed in the discovery index. The directive is named for its effect on
+  the build; earlier documentation described a `$private` that was never
+  implemented, and "private" would have suggested a protection this offers no
+  more than any other static output does. ([#32])
 - `$derive.exclude` drops named values from the derived set, so no endpoint is
   created for them. Entries are compared after `pattern` and `type` have run,
   and by JSON kind as well, so `0` does not exclude the string `"0"`. Excluding
@@ -175,6 +185,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#6]: https://github.com/tamada/fauxrest/issues/6
 [#7]: https://github.com/tamada/fauxrest/issues/7
 [#23]: https://github.com/tamada/fauxrest/issues/23
+[#32]: https://github.com/tamada/fauxrest/issues/32
 [#10]: https://github.com/tamada/fauxrest/pull/10
 [#11]: https://github.com/tamada/fauxrest/pull/11
 [#12]: https://github.com/tamada/fauxrest/pull/12

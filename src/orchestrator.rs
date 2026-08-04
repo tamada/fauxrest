@@ -433,7 +433,12 @@ fn collect_datasets(data_dir: &Path) -> Result<HashMap<String, Value>> {
 /// Recursively writes output files for `target` and all of its overlay
 /// sub-paths.
 ///
-/// Applies the effective `$filter` (the target's own filter, or the
+/// A `$skip` node returns immediately, before reading data and before looking
+/// at its sub-paths. Nothing below it is visited, so no sub-path can publish
+/// through a node that was skipped — including one added long after the
+/// `$skip` was written, which is the guarantee `$emit: []` cannot make.
+///
+/// Otherwise applies the effective `$filter` (the target's own filter, or the
 /// inherited `filter` from its parent if it has none), then writes the
 /// list/id outputs selected by `$emit` (see [`resolve_emit_flags`]). For
 /// each sub-path, expands `${name}` template keys into one child target per
@@ -446,6 +451,10 @@ fn materialize_node(
     sources: &DataSource,
     context: &SerializerContext,
 ) -> Result<Vec<String>> {
+    if target.map_node(|n| n.skip.as_ref()) == Some(&true) {
+        return Ok(vec![]);
+    }
+
     let effective_filter = target.map_node(|n| n.filter.as_ref()).or(filter);
 
     let data = target.build_endpoint_data(&effective_filter, sources)?;

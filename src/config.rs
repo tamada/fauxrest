@@ -250,9 +250,26 @@ pub struct ApiNode {
     #[serde(rename = "$omit")]
     pub omit: Option<Vec<String>>,
 
+    /// `$skip`: leaves this endpoint and everything below it ungenerated.
+    ///
+    /// Unlike `$emit`, which decides only what the node it appears on emits,
+    /// this covers the whole subtree: a skipped node is not descended into at
+    /// all, so no sub-path added under it later can publish through it. That
+    /// is the difference worth having — `$emit: []` on a parent leaves a
+    /// sub-path free to emit the same records one level down.
+    ///
+    /// Named for what it does to the build rather than for a property of the
+    /// data: nothing is generated, which is not the same as generating
+    /// something and protecting it. Static hosting offers no access control.
+    #[serde(rename = "$skip")]
+    pub skip: Option<bool>,
+
     /// `$emit`: selects which physical outputs (list and/or per-id files)
     /// are produced for this node. `None` means "emit everything" (the
     /// default); an empty list means "emit nothing".
+    ///
+    /// This applies to the node itself; its sub-paths still expand. Use
+    /// `$skip` to leave a subtree ungenerated.
     #[serde(rename = "$emit")]
     pub emit: Option<Vec<EmitTarget>>,
 

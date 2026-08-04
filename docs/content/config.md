@@ -121,7 +121,8 @@ In `file` layout, smart fallback avoids file-directory collisions by emitting
 
 In overlay config, keys starting with `$` are directives.
 
-- `$emit`: emit endpoint at a path.
+- `$emit`: select which endpoints this node emits.
+- `$skip`: leave this node and everything below it ungenerated.
 - `$filter`: filter collection records.
 - `$pick`: allowlist keys.
 - `$omit`: denylist keys.
