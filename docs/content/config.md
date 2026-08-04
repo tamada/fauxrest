@@ -119,7 +119,12 @@ In `file` layout, smart fallback avoids file-directory collisions by emitting
 
 ## Overlay Directives
 
-In overlay config, keys starting with `$` are directives.
+In overlay config, keys starting with `$` are directives. A `$`-prefixed key
+that is not one of them is rejected when the configuration loads, naming the
+key — a misspelled `$fliter` used to be read as a route and generated as
+`/users/$fliter`, while the filter it was meant to be never ran. Template
+sub-paths such as `${year}` are the one exception, and keys without a `$` are
+the routing tree.
 
 - `$emit`: select which endpoints this node emits.
 - `$skip`: leave this node and everything below it ungenerated.

@@ -54,6 +54,15 @@ can see them before upgrading.
 
 ### Fixed
 
+- A misspelled directive is rejected instead of becoming an endpoint named
+  after the typo. `ApiNode` collected every unrecognized key into its routing
+  tree, so `{"users": {"$fliter": {}}}` generated `/users/$fliter` with exit
+  code 0 and nothing on stderr — and the `$filter` it was meant to be never
+  ran, leaving the endpoint holding every record it should have narrowed. A
+  `$`-prefixed key that is not a directive now fails to load, naming the key
+  and listing the valid ones. `${name}` template sub-paths are unaffected, and
+  a directive given twice is reported rather than letting the later one win in
+  silence. ([#34])
 - A build that fails partway no longer leaves what it had already written in
   the serializer destination. Output was written endpoint by endpoint, so a
   later failure left a tree that was neither a complete build nor an absent
@@ -186,6 +195,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#7]: https://github.com/tamada/fauxrest/issues/7
 [#23]: https://github.com/tamada/fauxrest/issues/23
 [#32]: https://github.com/tamada/fauxrest/issues/32
+[#34]: https://github.com/tamada/fauxrest/issues/34
 [#10]: https://github.com/tamada/fauxrest/pull/10
 [#11]: https://github.com/tamada/fauxrest/pull/11
 [#12]: https://github.com/tamada/fauxrest/pull/12
