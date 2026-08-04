@@ -269,17 +269,6 @@ pub struct ApiNode {
     /// All other (non-`$`-prefixed) keys, forming the nested routing tree.
     #[serde(flatten)]
     pub sub_paths: HashMap<String, ApiNode>,
-    // #[serde(rename = "$private")]
-    // pub private: Option<bool>,
-    // #[serde(rename = "$emit_list")]
-    // pub emit_list: Option<bool>,
-
-    // #[serde(rename = "$emit_id")]
-    // pub emit_id: Option<bool>,
-
-    // // Backward-compatible alias of $emit_id.
-    // #[serde(rename = "$emit_items")]
-    // pub emit_items: Option<bool>,
 }
 
 /// The value of a `$derive` directive: either a bare field-name shorthand or
@@ -941,15 +930,9 @@ mod tests {
         assert_eq!(entries[2].from, "degrees");
         assert_eq!(entries[3].from, "skills");
 
-        // Verify parsing of secret/$private
+        // A node withholding itself now says so with an empty $emit.
         let secret = config.api.get("secret").expect("Missing secret node");
         assert_eq!(secret.emit, Some(vec![]));
-        // assert_eq!(secret.private, Some(true));
-
-        // Verify optional parsing of $emit_items
-        // assert_eq!(profile.emit_items, None);
-        // assert_eq!(profile.emit_list, None);
-        // assert_eq!(profile.emit_id, None);
     }
 
     /// Checks that a full `$derive` object (`{ "field": ..., "pattern": ... }`)
