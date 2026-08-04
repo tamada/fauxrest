@@ -44,6 +44,13 @@ can see them before upgrading.
 
 ### Fixed
 
+- The serializer configuration example in the documentation loads. `$config`
+  was shown as an object with a `serializers` key, which is rejected with
+  `invalid type: map, expected a sequence` — it is a list of entries. The
+  `sqlite` entry in the same example also omitted the required `layout`, and
+  named its `dest` `api.db` although `dest` is a directory for every
+  serializer. ([#27])
+
 - A build that fails partway no longer leaves what it had already written in
   the serializer destination. Output was written endpoint by endpoint, so a
   later failure left a tree that was neither a complete build nor an absent
@@ -175,6 +182,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#6]: https://github.com/tamada/fauxrest/issues/6
 [#7]: https://github.com/tamada/fauxrest/issues/7
 [#23]: https://github.com/tamada/fauxrest/issues/23
+[#27]: https://github.com/tamada/fauxrest/issues/27
 [#10]: https://github.com/tamada/fauxrest/pull/10
 [#11]: https://github.com/tamada/fauxrest/pull/11
 [#12]: https://github.com/tamada/fauxrest/pull/12
