@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?logo=spdx)](LICENSE)
 [![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-c45508?logo=rust)](https://www.rust-lang.org/)
 
-[![crates.io](https://img.shields.io/badge/crate.io-fauxrest-green)](https://crates.io/crates/fauxrest)
+[![crates.io](https://img.shields.io/crates/v/fauxrest?logo=rust)](https://crates.io/crates/fauxrest)
 [![Coverage Status](https://coveralls.io/repos/github/tamada/fauxrest/badge.svg?branch=releases/v0.0.4)](https://coveralls.io/github/tamada/fauxrest?branch=main)
 [![Docker](https://img.shields.io/badge/Container-quay.io/tama5/fauxrest:latest-2496ED?logo=docker)](https://quay.io/repository/tama5/fauxrest)
 
@@ -34,7 +34,7 @@ To install `fauxrest` into your local environment, type the following command.
 
 ```sh
 # install fauxrest
-brew install tamada/tap/faurest
+brew install tamada/tap/fauxrest
 ```
 
 ### 📦 Cargo
@@ -53,7 +53,7 @@ Fauxrest also supports container images distributed on [Quay.io](https://quay.io
 The following example uses `docker` command, however, you can replace it to your favorit container runner such as [podman](https://podman.io), [finch](https://github.com/runfinch/finch), [apple/container](https://github.com/apple/container), and/or [WSL Container](https://learn.microsoft.com/windows/wsl/wsl-container).
 
 ```sh
-docker run -it --rm -v $PWD:/opt quay.io/tama5/faurest:latest 
+docker run -it --rm -v $PWD:/opt quay.io/tama5/fauxrest:latest 
 ```
 
 Options and arguments should follow the above command.
