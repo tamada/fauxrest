@@ -71,6 +71,12 @@ can see them before upgrading.
   `/profile` produced an empty table — the payload was dropped with nothing on
   stderr to say so. Anything that is not an array is now stored as a single
   row. ([#28])
+- `--help` and `--version` print to stdout and exit 0. Both were reported by
+  `clap` as errors, and every `clap::Error` was treated as a failure, so they
+  went to stderr with status 1 — `fauxrest --help | less` showed nothing, and a
+  script guarding on `fauxrest --version` saw it fail. Usage mistakes now exit
+  2, the convention for them, leaving 1 to mean a build that started and
+  failed. ([#38])
 - The serializer configuration example in the documentation loads. `$config`
   was shown as an object with a `serializers` key, which is rejected with
   `invalid type: map, expected a sequence` — it is a list of entries. The
@@ -221,6 +227,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#28]: https://github.com/tamada/fauxrest/issues/28
 [#32]: https://github.com/tamada/fauxrest/issues/32
 [#34]: https://github.com/tamada/fauxrest/issues/34
+[#38]: https://github.com/tamada/fauxrest/issues/38
 [#10]: https://github.com/tamada/fauxrest/pull/10
 [#11]: https://github.com/tamada/fauxrest/pull/11
 [#12]: https://github.com/tamada/fauxrest/pull/12

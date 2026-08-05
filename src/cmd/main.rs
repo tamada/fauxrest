@@ -5,7 +5,7 @@
 //! built-in default), and runs the build via [`fauxrest::run`].
 
 use clap::{Parser, ValueEnum};
-use fauxrest::{Config, Error, Layout, Result};
+use fauxrest::{Config, Layout, Result};
 use std::path::{Path, PathBuf};
 
 /// Command-line arguments for the `fauxrest` binary.
@@ -261,12 +261,17 @@ fn perform_build(args: Args) -> Result<()> {
 /// Binary entry point: parses CLI arguments, runs [`perform_build`], and on
 /// error prints the error to stderr and exits the process with status 1.
 fn main() -> Result<()> {
-    let r = match Args::try_parse() {
-        Ok(args) => perform_build(args),
-        Err(e) => Err(Error::Clap(e)),
+    let args = match Args::try_parse() {
+        Ok(args) => args,
+        // `clap` reports `--help` and `--version` as errors as well as genuine
+        // usage mistakes. Treating them all as failures sent help and version
+        // to stderr with status 1, so `fauxrest --help | less` showed nothing.
+        // `exit` tells them apart: help and version to stdout with status 0,
+        // usage errors to stderr with status 2.
+        Err(e) => e.exit(),
     };
-    if let Err(e) = r {
-        eprint!("{}", e);
+    if let Err(e) = perform_build(args) {
+        eprintln!("{}", e);
         std::process::exit(1);
     }
     Ok(())
