@@ -63,6 +63,15 @@ pub struct Args {
     )]
     serializer: Option<String>,
 
+    /// If `true`, write the whole API as one `api.[ext]` instead of a file
+    /// per endpoint.
+    #[clap(
+        long,
+        default_value_t = false,
+        help = "If set, write the whole API as one api.[ext] file"
+    )]
+    bundle: bool,
+
     /// If `true`, minify the serialized output.
     #[clap(long, default_value_t = false, help = "If true, minify the output")]
     minify: bool,
@@ -179,6 +188,9 @@ impl Args {
             if let Some(layout) = &self.layout {
                 serializer.layout = layout.clone();
             }
+            if self.bundle {
+                serializer.bundle = true;
+            }
             if self.minify {
                 serializer.minify = true;
             } else if self.no_minify {
@@ -194,17 +206,19 @@ impl Args {
     }
 
     /// Builds a single [`fauxrest::SerializerConfig`] from the command line
-    /// options (`--serializer`/`--layout`/`--dest`/`--minify`/`--overwrite`),
+    /// options
+    /// (`--serializer`/`--layout`/`--dest`/`--bundle`/`--minify`/`--overwrite`),
     /// falling back to the built-in defaults (`json`, [`Layout::Index`],
     /// `dist`) for any option that was not given.
     fn serializer_config(&self) -> fauxrest::SerializerConfig {
         fauxrest::SerializerConfig {
-            layout: self.layout.clone().unwrap_or(Layout::Index),
+            layout: self.layout.clone().unwrap_or_default(),
             serializer: self
                 .serializer
                 .clone()
                 .unwrap_or_else(|| String::from("json")),
             dest: self.dest.clone().unwrap_or_else(|| PathBuf::from("dist")),
+            bundle: self.bundle,
             minify: self.minify,
             overwrite: self.overwrite,
         }

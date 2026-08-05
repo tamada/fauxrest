@@ -396,6 +396,15 @@ fn run_serializer(
     }
     endpoints.sort();
     endpoints.dedup();
+
+    // Nothing has reached disk yet when bundling; every payload collected
+    // above is encoded into one file here, still inside the staging directory.
+    if let Some(bundle) = context.finish_bundle() {
+        let (path, bytes) = bundle?;
+        fs::create_dir_all(path.parent().unwrap()).map_err(Error::Io)?;
+        fs::write(path, bytes).map_err(Error::Io)?;
+    }
+
     Ok(endpoints)
 }
 
@@ -956,6 +965,11 @@ fn scalar_to_string(value: &Value) -> String {
 /// endpoint `name` (per [`SerializerContext::full_path`]), creating any
 /// necessary parent directories first.
 fn write_data2(name: &str, data: &Value, context: &SerializerContext) -> Result<()> {
+    // When bundling, the payload is held until every endpoint has been
+    // materialized and written once; see `SerializerContext::collect`.
+    if context.collect(name, data) {
+        return Ok(());
+    }
     let is_coll = data.is_array();
     let full_path = context.full_path(name, is_coll);
 

@@ -967,6 +967,7 @@ fn test_run_succeeds_when_dest_is_not_empty_with_overwrite() {
             serializer: "json".into(),
             layout: Layout::Index,
             dest: dist_dir.clone(),
+            bundle: false,
             minify: false,
             overwrite: true,
         }],
@@ -998,6 +999,7 @@ fn test_json_minify_flag_compacts_output() {
             serializer: "json".into(),
             layout: Layout::Index,
             dest: pretty_dir.clone(),
+            bundle: false,
             minify: false,
             overwrite: false,
         }],
@@ -1009,6 +1011,7 @@ fn test_json_minify_flag_compacts_output() {
             serializer: "json".into(),
             layout: Layout::Index,
             dest: minify_dir.clone(),
+            bundle: false,
             minify: true,
             overwrite: false,
         }],
@@ -1045,6 +1048,7 @@ fn test_typescript_minify_flag_compacts_embedded_json() {
             serializer: "typescript".into(),
             layout: Layout::Index,
             dest: pretty_dir.clone(),
+            bundle: false,
             minify: false,
             overwrite: false,
         }],
@@ -1056,6 +1060,7 @@ fn test_typescript_minify_flag_compacts_embedded_json() {
             serializer: "typescript".into(),
             layout: Layout::Index,
             dest: minify_dir.clone(),
+            bundle: false,
             minify: true,
             overwrite: false,
         }],
@@ -1839,4 +1844,170 @@ fn test_skip_false_emits_normally() {
         assert_file(&dest_dir, "staff/index.json");
         assert_file(&dest_dir, "staff/1/index.json");
     }
+}
+
+/// Writes `profile.json` (an object) and `users.json` (a collection), then
+/// runs `serializer` into its own destination, bundling when `bundle` is set.
+fn bundle_fixture(tmp: &Path, serializer: &str, bundle: bool) -> PathBuf {
+    let data_dir = tmp.join("data");
+    let dest_dir = tmp.join(format!("dist-{}-{}", serializer, bundle));
+    let config_file = tmp.join(format!("{}-{}.json", serializer, bundle));
+
+    if !data_dir.exists() {
+        fs::create_dir(&data_dir).unwrap();
+        fs::write(
+            data_dir.join("profile.json"),
+            r#"{"name": "Alice", "role": "dev"}"#,
+        )
+        .unwrap();
+        fs::write(
+            data_dir.join("users.json"),
+            r#"[{"id": 1, "name": "a"}, {"id": 2, "name": "b"}]"#,
+        )
+        .unwrap();
+    }
+
+    // `layout` is deliberately omitted: it defaults to `index`, and bundling
+    // is a separate setting rather than a fourth layout.
+    fs::write(
+        &config_file,
+        format!(
+            r#"{{"$config": [{{"serializer": "{}", "bundle": {}, "minify": true, "dest": "{}"}}]}}"#,
+            serializer,
+            bundle,
+            dest_dir.display()
+        ),
+    )
+    .unwrap();
+
+    let config: Config = Config::load_from_file(&config_file).unwrap();
+    fauxrest::run(config, data_dir).expect("build should succeed");
+    dest_dir
+}
+
+/// `bundle` writes one file per serializer instead of one per endpoint, and
+/// every endpoint is reachable inside it under its path.
+#[test]
+fn test_bundle_writes_one_file_keyed_by_endpoint() {
+    let tmp = tempfile::tempdir().unwrap();
+    let dest = bundle_fixture(tmp.path(), "json", true);
+
+    assert!(
+        !dest.join("users").exists() && !dest.join("profile").exists(),
+        "bundling must not also write per-endpoint files"
+    );
+
+    let bundle = read_json(&dest, "api.json");
+    let endpoints = bundle.as_object().expect("bundle should be an object");
+    let mut paths: Vec<&String> = endpoints.keys().collect();
+    paths.sort();
+    assert_eq!(paths, ["/profile", "/users", "/users/1", "/users/2"]);
+    assert_eq!(
+        endpoints["/profile"],
+        serde_json::json!({"name": "Alice", "role": "dev"})
+    );
+    assert_eq!(
+        endpoints["/users"],
+        serde_json::json!([{"id": 1, "name": "a"}, {"id": 2, "name": "b"}])
+    );
+}
+
+/// The bundle holds the same endpoints an ordinary build writes, so setting
+/// `bundle` changes the packaging and nothing else.
+#[test]
+fn test_bundle_carries_the_same_endpoints_as_a_per_endpoint_build() {
+    let tmp = tempfile::tempdir().unwrap();
+    let bundled = bundle_fixture(tmp.path(), "json", true);
+    let per_endpoint = bundle_fixture(tmp.path(), "json", false);
+
+    let bundle = read_json(&bundled, "api.json");
+    for (path, payload) in bundle.as_object().unwrap() {
+        let rel = format!("{}/index.json", path.trim_start_matches('/'));
+        assert_eq!(
+            &read_json(&per_endpoint, &rel),
+            payload,
+            "{} differs between the two builds",
+            path
+        );
+    }
+}
+
+/// The point of bundling for `sqlite`: one database that can be queried by
+/// endpoint path, rather than a directory of single-endpoint databases.
+#[test]
+fn test_sqlite_bundle_is_one_database_keyed_by_path() {
+    let tmp = tempfile::tempdir().unwrap();
+    let dest = bundle_fixture(tmp.path(), "sqlite", true);
+
+    assert_file(&dest, "api.db");
+    assert!(
+        !dest.join("users").exists(),
+        "bundling must not also write per-endpoint databases"
+    );
+
+    let conn = rusqlite::Connection::open(dest.join("api.db")).unwrap();
+    let mut stmt = conn
+        .prepare("SELECT path, value FROM endpoints ORDER BY path")
+        .unwrap();
+    let rows: Vec<(String, String)> = stmt
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
+        .unwrap()
+        .map(|r| r.unwrap())
+        .collect();
+
+    let paths: Vec<&str> = rows.iter().map(|(p, _)| p.as_str()).collect();
+    assert_eq!(paths, ["/profile", "/users", "/users/1", "/users/2"]);
+
+    let profile = &rows.iter().find(|(p, _)| p == "/profile").unwrap().1;
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(profile).unwrap(),
+        serde_json::json!({"name": "Alice", "role": "dev"})
+    );
+}
+
+/// A `sqlite` endpoint that is not a collection used to produce an empty
+/// table, silently dropping every object endpoint from the output.
+#[test]
+fn test_sqlite_stores_object_endpoints() {
+    let tmp = tempfile::tempdir().unwrap();
+    let dest = bundle_fixture(tmp.path(), "sqlite", false);
+
+    let conn = rusqlite::Connection::open(dest.join("profile/index.db")).unwrap();
+    let stored: String = conn
+        .query_row("SELECT value FROM data", [], |r| r.get(0))
+        .expect("an object endpoint must be stored, not dropped");
+    assert_eq!(
+        serde_json::from_str::<serde_json::Value>(&stored).unwrap(),
+        serde_json::json!({"name": "Alice", "role": "dev"})
+    );
+}
+
+/// `layout` may be omitted; it defaults to `index`, which is the layout every
+/// static host resolves without configuration. Together with `bundle`
+/// defaulting to false, a serializer entry needs only a serializer and a
+/// destination.
+#[test]
+fn test_layout_defaults_to_index() {
+    let tmp = tempfile::tempdir().unwrap();
+    let data_dir = tmp.path().join("data");
+    let dest_dir = tmp.path().join("dist");
+    let config_file = tmp.path().join("fauxrest.json");
+
+    fs::create_dir(&data_dir).unwrap();
+    fs::write(data_dir.join("users.json"), r#"[{"id": 1, "name": "a"}]"#).unwrap();
+    fs::write(
+        &config_file,
+        format!(
+            r#"{{"$config": [{{"serializer": "json", "dest": "{}"}}]}}"#,
+            dest_dir.display()
+        ),
+    )
+    .unwrap();
+
+    let config: Config = Config::load_from_file(&config_file).expect("layout should be optional");
+    assert!(matches!(config.serializers[0].layout, Layout::Index));
+    assert!(!config.serializers[0].bundle);
+
+    assert!(fauxrest::run(config, data_dir).is_ok());
+    assert_file(&dest_dir, "users/index.json");
 }

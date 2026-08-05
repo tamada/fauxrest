@@ -10,10 +10,10 @@ date: "2026-06-30"
 ```sh
 A CLI tool for generating static JSON APIs from local data files
 
-Usage: fauxrest [OPTIONS] <DATA_DIR>
+Usage: fauxrest [OPTIONS] [DATA_DIR]
 
 Arguments:
-  <DATA_DIR>  Path to the input data directory
+  [DATA_DIR]  Path to the input data directory [default: data]
 
 Options:
   -L, --level <LEVEL>            Specify the log level [default: warn] [possible values: error, warn, info, debug, trace]
@@ -21,10 +21,12 @@ Options:
   -l, --layout <LAYOUT>          Layout to use for the output [possible values: index, file, extension]
   -d, --dest <DEST_DIR>          Path to the output directory [default: dist]
   -s, --serializer <SERIALIZER>  Serializer to use for the output. [available: json, typescript, sql] [default: json]
+      --bundle                   If set, write the whole API as one api.[ext] file
       --minify                   If true, minify the output
       --no-minify                If set, disable minification (overrides config)
       --overwrite                If true, overwrite existing files in the destination directory
       --copy-static              Copy all non-JSON static files from the data directory into each destination (allow all). $static exclude globs still take precedence.
+      --gencomp                  Generate completion files
   -h, --help                     Print help (see more with '--help')
   -V, --version                  Print version
 ```

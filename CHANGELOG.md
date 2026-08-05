@@ -12,6 +12,18 @@ can see them before upgrading.
 
 ### Added
 
+- A serializer entry takes `"bundle": true` (or `--bundle`) to write the whole
+  API as one `api.[ext]` keyed by endpoint path, instead of a file per
+  endpoint. For `sqlite` it is the difference between a directory of
+  single-endpoint databases and one database with an `endpoints(path, value)`
+  table that can be queried across the whole API, which is most of the reason
+  to choose SQLite at all. `json` and `typescript` emit one object keyed by
+  path. It is a setting of its own rather than a fourth `layout`, because
+  `layout` answers what an endpoint's file is *called* and this answers how
+  many files there are. ([#28])
+- `layout` may be omitted, defaulting to `index`. With `bundle` defaulting to
+  false, a serializer entry now names only what it changes:
+  `{"serializer": "json", "dest": "./dist"}`. ([#28])
 - `$skip: true` leaves an endpoint and everything beneath it ungenerated. A
   skipped node is never descended into, so no sub-path can publish through it —
   including one added later by someone who did not notice the `$skip`, and
@@ -54,6 +66,11 @@ can see them before upgrading.
 
 ### Fixed
 
+- `sqlite` stores endpoints that are not collections. `populate_db` filled its
+  `data` table only from a JSON array, so an object endpoint such as
+  `/profile` produced an empty table — the payload was dropped with nothing on
+  stderr to say so. Anything that is not an array is now stored as a single
+  row. ([#28])
 - The serializer configuration example in the documentation loads. `$config`
   was shown as an object with a `serializers` key, which is rejected with
   `invalid type: map, expected a sequence` — it is a list of entries. The
@@ -69,7 +86,6 @@ can see them before upgrading.
   and listing the valid ones. `${name}` template sub-paths are unaffected, and
   a directive given twice is reported rather than letting the later one win in
   silence. ([#34])
-
 - A build that fails partway no longer leaves what it had already written in
   the serializer destination. Output was written endpoint by endpoint, so a
   later failure left a tree that was neither a complete build nor an absent
@@ -202,6 +218,7 @@ Initial release. Compiles JSON datasets into static API endpoints, with the
 [#7]: https://github.com/tamada/fauxrest/issues/7
 [#23]: https://github.com/tamada/fauxrest/issues/23
 [#27]: https://github.com/tamada/fauxrest/issues/27
+[#28]: https://github.com/tamada/fauxrest/issues/28
 [#32]: https://github.com/tamada/fauxrest/issues/32
 [#34]: https://github.com/tamada/fauxrest/issues/34
 [#10]: https://github.com/tamada/fauxrest/pull/10
