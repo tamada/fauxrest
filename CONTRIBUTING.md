@@ -12,6 +12,14 @@ cover issue reporting, pull request expectations, and the
 
 This document covers only what is specific to `fauxrest`.
 
+## Your First Contribution
+
+Issues labelled
+[`good first issue`](https://github.com/tamada/fauxrest/labels/good%20first%20issue)
+are suitable for a first contribution. Comment on the issue to say you are
+working on it, then create a branch for your change. Run `just pre-push`
+before opening a pull request.
+
 ## Development Setup
 
 Requirements:
